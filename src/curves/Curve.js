@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -16,7 +16,7 @@ var Vector2 = require('../math/Vector2');
  * Based on the three.js Curve classes created by [zz85](http://www.lab4games.net/zz85/blog)
  *
  * @class Curve
- * @memberOf Phaser.Curves
+ * @memberof Phaser.Curves
  * @constructor
  * @since 3.0.0
  *
@@ -61,7 +61,7 @@ var Curve = new Class({
          * An array of cached arc length values.
          *
          * @name Phaser.Curves.Curve#cacheArcLengths
-         * @type {array}
+         * @type {number[]}
          * @default []
          * @since 3.0.0
          */
@@ -110,12 +110,14 @@ var Curve = new Class({
 
     /**
      * Draws this curve on the given Graphics object.
-     * 
+     *
      * The curve is drawn using `Graphics.strokePoints` so will be drawn at whatever the present Graphics stroke color is.
      * The Graphics object is not cleared before the draw, so the curve will appear on-top of anything else already rendered to it.
      *
      * @method Phaser.Curves.Curve#draw
      * @since 3.0.0
+     *
+     * @generic {Phaser.GameObjects.Graphics} G - [graphics,$return]
      *
      * @param {Phaser.GameObjects.Graphics} graphics - The Graphics instance onto which this curve will be drawn.
      * @param {integer} [pointsTotal=32] - The resolution of the curve. The higher the value the smoother it will render, at the cost of rendering performance.
@@ -129,7 +131,7 @@ var Curve = new Class({
         //  So you can chain graphics calls
         return graphics.strokePoints(this.getPoints(pointsTotal));
     },
-
+    
     /**
      * Returns a Rectangle where the position and dimensions match the bounds of this Curve.
      *
@@ -139,10 +141,10 @@ var Curve = new Class({
      * @method Phaser.Curves.Curve#getBounds
      * @since 3.0.0
      *
-     * @param {Phaser.Geom.Rectangle} out - The Rectangle to store the bounds in. If falsey a new object will be created.
+     * @param {Phaser.Geom.Rectangle} [out] - The Rectangle to store the bounds in. If falsey a new object will be created.
      * @param {integer} [accuracy=16] - The accuracy of the bounds calculations.
      *
-     * @return {Phaser.Geom.Rectangle} A Rectangle containing the bounds values of this Curve.
+     * @return {Phaser.Geom.Rectangle} A Rectangle object holding the bounds of this curve. If `out` was given it will be this object.
      */
     getBounds: function (out, accuracy)
     {
@@ -190,9 +192,9 @@ var Curve = new Class({
      * @method Phaser.Curves.Curve#getEndPoint
      * @since 3.0.0
      *
-     * @param {Phaser.Math.Vector2} out - [description]
+     * @param {Phaser.Math.Vector2} [out] - Optional Vector object to store the result in.
      *
-     * @return {Phaser.Math.Vector2} [description]
+     * @return {Phaser.Math.Vector2} Vector2 containing the coordinates of the curves end point.
      */
     getEndPoint: function (out)
     {
@@ -274,7 +276,9 @@ var Curve = new Class({
      * @method Phaser.Curves.Curve#getPointAt
      * @since 3.0.0
      *
-     * @param {float} u - [description]
+     * @generic {Phaser.Math.Vector2} O - [out,$return]
+     *
+     * @param {number} u - [description]
      * @param {Phaser.Math.Vector2} [out] - [description]
      *
      * @return {Phaser.Math.Vector2} [description]
@@ -317,6 +321,8 @@ var Curve = new Class({
      *
      * @method Phaser.Curves.Curve#getRandomPoint
      * @since 3.0.0
+     *
+     * @generic {Phaser.Math.Vector2} O - [out,$return]
      *
      * @param {Phaser.Math.Vector2} [out] - [description]
      *
@@ -363,6 +369,8 @@ var Curve = new Class({
      * @method Phaser.Curves.Curve#getStartPoint
      * @since 3.0.0
      *
+     * @generic {Phaser.Math.Vector2} O - [out,$return]
+     *
      * @param {Phaser.Math.Vector2} [out] - [description]
      *
      * @return {Phaser.Math.Vector2} [description]
@@ -385,10 +393,12 @@ var Curve = new Class({
      * @method Phaser.Curves.Curve#getTangent
      * @since 3.0.0
      *
+     * @generic {Phaser.Math.Vector2} O - [out,$return]
+     *
      * @param {number} t - [description]
      * @param {Phaser.Math.Vector2} [out] - [description]
      *
-     * @return {Phaser.Math.Vector2} [description]
+     * @return {Phaser.Math.Vector2} Vector approximating the tangent line at the point t (delta +/- 0.0001)
      */
     getTangent: function (t, out)
     {
@@ -422,7 +432,9 @@ var Curve = new Class({
      * @method Phaser.Curves.Curve#getTangentAt
      * @since 3.0.0
      *
-     * @param {float} u - [description]
+     * @generic {Phaser.Math.Vector2} O - [out,$return]
+     *
+     * @param {number} u - [description]
      * @param {Phaser.Math.Vector2} [out] - [description]
      *
      * @return {Phaser.Math.Vector2} [description]
@@ -444,7 +456,7 @@ var Curve = new Class({
      * @param {integer} distance - [description]
      * @param {integer} [divisions] - [description]
      *
-     * @return {float} [description]
+     * @return {number} [description]
      */
     getTFromDistance: function (distance, divisions)
     {
@@ -464,7 +476,7 @@ var Curve = new Class({
      * @method Phaser.Curves.Curve#getUtoTmapping
      * @since 3.0.0
      *
-     * @param {float} u - [description]
+     * @param {number} u - [description]
      * @param {integer} distance - [description]
      * @param {integer} [divisions] - [description]
      *

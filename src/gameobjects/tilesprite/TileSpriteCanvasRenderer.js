@@ -1,10 +1,8 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
-
-var GameObject = require('../GameObject');
 
 /**
  * Renders this Game Object with the Canvas Renderer to the given Camera.
@@ -15,54 +13,17 @@ var GameObject = require('../GameObject');
  * @since 3.0.0
  * @private
  *
- * @param {Phaser.Renderer.CanvasRenderer} renderer - A reference to the current active Canvas renderer.
+ * @param {Phaser.Renderer.Canvas.CanvasRenderer} renderer - A reference to the current active Canvas renderer.
  * @param {Phaser.GameObjects.TileSprite} src - The Game Object being rendered in this call.
  * @param {number} interpolationPercentage - Reserved for future use and custom pipelines.
  * @param {Phaser.Cameras.Scene2D.Camera} camera - The Camera that is rendering the Game Object.
+ * @param {Phaser.GameObjects.Components.TransformMatrix} parentMatrix - This transform matrix is defined if the game object is nested
  */
-var TileSpriteCanvasRenderer = function (renderer, src, interpolationPercentage, camera)
+var TileSpriteCanvasRenderer = function (renderer, src, interpolationPercentage, camera, parentMatrix)
 {
-    if (GameObject.RENDER_MASK !== src.renderFlags || (src.cameraFilter > 0 && (src.cameraFilter & camera._id)))
-    {
-        return;
-    }
+    src.updateCanvas();
 
-    var ctx = renderer.currentContext;
-    var frame = src.frame;
-
-    //  Blend Mode
-
-    if (renderer.currentBlendMode !== src.blendMode)
-    {
-        renderer.currentBlendMode = src.blendMode;
-        ctx.globalCompositeOperation = renderer.blendModes[src.blendMode];
-    }
-
-    //  Alpha
-
-    if (renderer.currentAlpha !== src.alpha)
-    {
-        renderer.currentAlpha = src.alpha;
-        ctx.globalAlpha = src.alpha;
-    }
-
-    //  Smoothing
-
-    if (renderer.currentScaleMode !== src.scaleMode)
-    {
-        renderer.currentScaleMode = src.scaleMode;
-    }
-
-    var dx = frame.x - (src.originX * src.width);
-    var dy = frame.y - (src.originY * src.height);
-
-    ctx.save();
-    ctx.translate(dx, dy);
-    ctx.translate(src.x - camera.scrollX * src.scrollFactorX, src.y - camera.scrollY * src.scrollFactorY);
-    ctx.fillStyle = src.canvasPattern;
-    ctx.translate(-this.tilePositionX, -this.tilePositionY);
-    ctx.fillRect(this.tilePositionX, this.tilePositionY, src.width, src.height);
-    ctx.restore();
+    renderer.batchSprite(src, src.frame, camera, parentMatrix);
 };
 
 module.exports = TileSpriteCanvasRenderer;

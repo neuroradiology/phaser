@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -10,6 +10,8 @@
 
 var GameObjects = {
 
+    Events: require('./events'),
+
     DisplayList: require('./DisplayList'),
     GameObjectCreator: require('./GameObjectCreator'),
     GameObjectFactory: require('./GameObjectFactory'),
@@ -17,46 +19,83 @@ var GameObjects = {
 
     Components: require('./components'),
 
+    BuildGameObject: require('./BuildGameObject'),
+    BuildGameObjectAnimation: require('./BuildGameObjectAnimation'),
+    GameObject: require('./GameObject'),
     BitmapText: require('./bitmaptext/static/BitmapText'),
     Blitter: require('./blitter/Blitter'),
+    Container: require('./container/Container'),
     DynamicBitmapText: require('./bitmaptext/dynamic/DynamicBitmapText'),
+    Extern: require('./extern/Extern.js'),
     Graphics: require('./graphics/Graphics.js'),
     Group: require('./group/Group'),
     Image: require('./image/Image'),
-    Particles: require('./particles/ParticleEmitterManager'),
+    Particles: require('./particles'),
     PathFollower: require('./pathfollower/PathFollower'),
-    Sprite3D: require('./sprite3d/Sprite3D'),
+    RenderTexture: require('./rendertexture/RenderTexture'),
+    RetroFont: require('./bitmaptext/RetroFont'),
     Sprite: require('./sprite/Sprite'),
     Text: require('./text/static/Text'),
     TileSprite: require('./tilesprite/TileSprite'),
     Zone: require('./zone/Zone'),
 
+    //  Shapes
+
+    Shape: require('./shape/Shape'),
+    Arc: require('./shape/arc/Arc'),
+    Curve: require('./shape/curve/Curve'),
+    Ellipse: require('./shape/ellipse/Ellipse'),
+    Grid: require('./shape/grid/Grid'),
+    IsoBox: require('./shape/isobox/IsoBox'),
+    IsoTriangle: require('./shape/isotriangle/IsoTriangle'),
+    Line: require('./shape/line/Line'),
+    Polygon: require('./shape/polygon/Polygon'),
+    Rectangle: require('./shape/rectangle/Rectangle'),
+    Star: require('./shape/star/Star'),
+    Triangle: require('./shape/triangle/Triangle'),
+
     //  Game Object Factories
 
     Factories: {
         Blitter: require('./blitter/BlitterFactory'),
+        Container: require('./container/ContainerFactory'),
         DynamicBitmapText: require('./bitmaptext/dynamic/DynamicBitmapTextFactory'),
+        Extern: require('./extern/ExternFactory'),
         Graphics: require('./graphics/GraphicsFactory'),
         Group: require('./group/GroupFactory'),
         Image: require('./image/ImageFactory'),
         Particles: require('./particles/ParticleManagerFactory'),
         PathFollower: require('./pathfollower/PathFollowerFactory'),
-        Sprite3D: require('./sprite3d/Sprite3DFactory'),
+        RenderTexture: require('./rendertexture/RenderTextureFactory'),
         Sprite: require('./sprite/SpriteFactory'),
         StaticBitmapText: require('./bitmaptext/static/BitmapTextFactory'),
         Text: require('./text/static/TextFactory'),
         TileSprite: require('./tilesprite/TileSpriteFactory'),
-        Zone: require('./zone/ZoneFactory')
+        Zone: require('./zone/ZoneFactory'),
+
+        //  Shapes
+        Arc: require('./shape/arc/ArcFactory'),
+        Curve: require('./shape/curve/CurveFactory'),
+        Ellipse: require('./shape/ellipse/EllipseFactory'),
+        Grid: require('./shape/grid/GridFactory'),
+        IsoBox: require('./shape/isobox/IsoBoxFactory'),
+        IsoTriangle: require('./shape/isotriangle/IsoTriangleFactory'),
+        Line: require('./shape/line/LineFactory'),
+        Polygon: require('./shape/polygon/PolygonFactory'),
+        Rectangle: require('./shape/rectangle/RectangleFactory'),
+        Star: require('./shape/star/StarFactory'),
+        Triangle: require('./shape/triangle/TriangleFactory')
     },
 
     Creators: {
         Blitter: require('./blitter/BlitterCreator'),
+        Container: require('./container/ContainerCreator'),
         DynamicBitmapText: require('./bitmaptext/dynamic/DynamicBitmapTextCreator'),
         Graphics: require('./graphics/GraphicsCreator'),
         Group: require('./group/GroupCreator'),
         Image: require('./image/ImageCreator'),
         Particles: require('./particles/ParticleManagerCreator'),
-        Sprite3D: require('./sprite3d/Sprite3DCreator'),
+        RenderTexture: require('./rendertexture/RenderTextureCreator'),
         Sprite: require('./sprite/SpriteCreator'),
         StaticBitmapText: require('./bitmaptext/static/BitmapTextCreator'),
         Text: require('./text/static/TextCreator'),
@@ -66,7 +105,13 @@ var GameObjects = {
 
 };
 
-if (WEBGL_RENDERER)
+if (typeof EXPERIMENTAL)
+{
+    GameObjects.DOMElement = require('./domelement/DOMElement');
+    GameObjects.Factories.DOMElement = require('./domelement/DOMElementFactory');
+}
+
+if (typeof WEBGL_RENDERER)
 {
     //  WebGL only Game Objects
     GameObjects.Mesh = require('./mesh/Mesh');

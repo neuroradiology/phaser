@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -16,7 +16,7 @@ var Zone = require('./Zone');
  * @method Phaser.GameObjects.GameObjectCreator#zone
  * @since 3.0.0
  *
- * @param {object} config - [description]
+ * @param {object} config - The configuration object this Game Object will use to create itself.
  *
  * @return {Phaser.GameObjects.Zone} The Game Object that was created.
  */

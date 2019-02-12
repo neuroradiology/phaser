@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -12,8 +12,8 @@ var Contains = require('./Contains');
  * @function Phaser.Geom.Ellipse.ContainsRect
  * @since 3.0.0
  *
- * @param {Phaser.Geom.Ellipse} ellipse - [description]
- * @param {Phaser.Geom.Rectangle|object} rect - The Rectangle object to check if it's within the Ellipse or not.
+ * @param {Phaser.Geom.Ellipse} ellipse - The Ellipse to check.
+ * @param {(Phaser.Geom.Rectangle|object)} rect - The Rectangle object to check if it's within the Ellipse or not.
  *
  * @return {boolean} True if all of the Rectangle coordinates are within the ellipse, otherwise false.
  */

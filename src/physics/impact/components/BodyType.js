@@ -1,15 +1,16 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var TYPE = require('../TYPE');
 
 /**
- * [description]
+ * The Impact Body Type component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.BodyType
+ * @namespace Phaser.Physics.Impact.Components.BodyType
  * @since 3.0.0
  */
 var BodyType = {
@@ -20,7 +21,7 @@ var BodyType = {
      * @method Phaser.Physics.Impact.Components.BodyType#getBodyType
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {number} [description]
      */
     getBodyType: function ()
     {
@@ -33,7 +34,7 @@ var BodyType = {
      * @method Phaser.Physics.Impact.Components.BodyType#setTypeNone
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setTypeNone: function ()
     {
@@ -48,7 +49,7 @@ var BodyType = {
      * @method Phaser.Physics.Impact.Components.BodyType#setTypeA
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setTypeA: function ()
     {
@@ -63,7 +64,7 @@ var BodyType = {
      * @method Phaser.Physics.Impact.Components.BodyType#setTypeB
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setTypeB: function ()
     {

@@ -1,13 +1,14 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * The Impact Gravity component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.Gravity
+ * @namespace Phaser.Physics.Impact.Components.Gravity
  * @since 3.0.0
  */
 var Gravity = {
@@ -18,9 +19,9 @@ var Gravity = {
      * @method Phaser.Physics.Impact.Components.Gravity#setGravity
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {number} value - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setGravity: function (value)
     {
@@ -33,7 +34,7 @@ var Gravity = {
      * [description]
      *
      * @name Phaser.Physics.Impact.Components.Gravity#gravity
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     gravity: {

@@ -1,15 +1,16 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var TYPE = require('../TYPE');
 
 /**
- * [description]
+ * The Impact Check Against component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.CheckAgainst
+ * @namespace Phaser.Physics.Impact.Components.CheckAgainst
  * @since 3.0.0
  */
 var CheckAgainst = {
@@ -20,7 +21,7 @@ var CheckAgainst = {
      * @method Phaser.Physics.Impact.Components.CheckAgainst#setAvsB
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setAvsB: function ()
     {
@@ -35,7 +36,7 @@ var CheckAgainst = {
      * @method Phaser.Physics.Impact.Components.CheckAgainst#setBvsA
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setBvsA: function ()
     {
@@ -50,7 +51,7 @@ var CheckAgainst = {
      * @method Phaser.Physics.Impact.Components.CheckAgainst#setCheckAgainstNone
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCheckAgainstNone: function ()
     {
@@ -65,7 +66,7 @@ var CheckAgainst = {
      * @method Phaser.Physics.Impact.Components.CheckAgainst#setCheckAgainstA
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCheckAgainstA: function ()
     {
@@ -80,7 +81,7 @@ var CheckAgainst = {
      * @method Phaser.Physics.Impact.Components.CheckAgainst#setCheckAgainstB
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCheckAgainstB: function ()
     {
@@ -93,7 +94,7 @@ var CheckAgainst = {
      * [description]
      *
      * @name Phaser.Physics.Impact.Components.CheckAgainst#checkAgainst
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     checkAgainst: {

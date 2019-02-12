@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -11,12 +11,37 @@ var TYPE = require('./TYPE');
 var UpdateMotion = require('./UpdateMotion');
 
 /**
+ * @callback BodyUpdateCallback
+ *
+ * @param {Phaser.Physics.Impact.Body} body - [description]
+ */
+
+/**
+ * @typedef {object} JSONImpactBody
+ * @todo Replace object types
+ *
+ * @property {string} name - [description]
+ * @property {object} size - [description]
+ * @property {object} pos - The entity's position in the game world.
+ * @property {object} vel - Current velocity in pixels per second.
+ * @property {object} accel - Current acceleration to be added to the entity's velocity per second. E.g. an entity with a `vel.x` of 0 and `accel.x` of 10 will have a `vel.x` of 100 ten seconds later.
+ * @property {object} friction - Deceleration to be subtracted from the entity's velocity per second. Only applies if `accel` is 0.
+ * @property {object} maxVel - The maximum velocity a body can move.
+ * @property {number} gravityFactor - [description]
+ * @property {number} bounciness - [description]
+ * @property {number} minBounceVelocity - [description]
+ * @property {Phaser.Physics.Impact.TYPE} type - [description]
+ * @property {Phaser.Physics.Impact.TYPE} checkAgainst - [description]
+ * @property {Phaser.Physics.Impact.COLLIDES} collides - [description]
+ */
+
+/**
  * @classdesc
  * An Impact.js compatible physics body.
  * This re-creates the properties you'd get on an Entity and the math needed to update them.
  *
  * @class Body
- * @memberOf Phaser.Physics.Impact
+ * @memberof Phaser.Physics.Impact
  * @constructor
  * @since 3.0.0
  *
@@ -68,7 +93,7 @@ var Body = new Class({
          * The ImpactBody, ImpactSprite or ImpactImage object that owns this Body, if any.
          *
          * @name Phaser.Physics.Impact.Body#parent
-         * @type {Phaser.Physics.Impact.ImpactBody|Phaser.Physics.Impact.ImpactImage|Phaser.Physics.Impact.ImpactSprite|null}
+         * @type {?(Phaser.Physics.Impact.ImpactBody|Phaser.Physics.Impact.ImpactImage|Phaser.Physics.Impact.ImpactSprite)}
          * @since 3.0.0
          */
         this.parent;
@@ -289,11 +314,11 @@ var Body = new Class({
          * [description]
          *
          * @name Phaser.Physics.Impact.Body#updateCallback
-         * @type {function}
+         * @type {?BodyUpdateCallback}
          * @since 3.0.0
          */
         this.updateCallback;
-    
+
         /**
          * min 44 deg, max 136 deg
          *
@@ -331,7 +356,7 @@ var Body = new Class({
         this.accelGround = 0;
         this.accelAir = 0;
         this.jumpSpeed = 0;
-    
+
         this.type = TYPE.NONE;
         this.checkAgainst = TYPE.NONE;
         this.collides = COLLIDES.NEVER;
@@ -343,7 +368,7 @@ var Body = new Class({
      * @method Phaser.Physics.Impact.Body#update
      * @since 3.0.0
      *
-     * @param {number} delta - [description]
+     * @param {number} delta - The delta time in ms since the last frame. This is a smoothed and capped value based on the FPS rate.
      */
     update: function (delta)
     {
@@ -353,10 +378,10 @@ var Body = new Class({
         this.last.y = pos.y;
 
         this.vel.y += this.world.gravity * delta * this.gravityFactor;
-        
+
         this.vel.x = GetVelocity(delta, this.vel.x, this.accel.x, this.friction.x, this.maxVel.x);
         this.vel.y = GetVelocity(delta, this.vel.y, this.accel.y, this.friction.y, this.maxVel.y);
-        
+
         var mx = this.vel.x * delta;
         var my = this.vel.y * delta;
 
@@ -436,7 +461,7 @@ var Body = new Class({
     },
 
     /**
-     * [description]
+     * Determines whether the body collides with the `other` one or not.
      *
      * @method Phaser.Physics.Impact.Body#touches
      * @since 3.0.0
@@ -456,15 +481,15 @@ var Body = new Class({
     },
 
     /**
-     * [description]
+     * Reset the size and position of the physics body.
      *
      * @method Phaser.Physics.Impact.Body#resetSize
      * @since 3.0.0
      *
-     * @param {number} x - [description]
-     * @param {number} y - [description]
-     * @param {number} width - [description]
-     * @param {number} height - [description]
+     * @param {number} x - The x coordinate to position the body.
+     * @param {number} y - The y coordinate to position the body.
+     * @param {number} width - The width of the body.
+     * @param {number} height - The height of the body.
      *
      * @return {Phaser.Physics.Impact.Body} This Body object.
      */
@@ -479,12 +504,12 @@ var Body = new Class({
     },
 
     /**
-     * [description]
+     * Export this body object to JSON.
      *
      * @method Phaser.Physics.Impact.Body#toJSON
      * @since 3.0.0
      *
-     * @return {object} [description]
+     * @return {JSONImpactBody} JSON representation of this body object.
      */
     toJSON: function ()
     {
@@ -516,7 +541,7 @@ var Body = new Class({
      *
      * @param {object} config - [description]
      */
-    fromJSON: function (config)
+    fromJSON: function ()
     {
     },
 
@@ -526,9 +551,9 @@ var Body = new Class({
      * @method Phaser.Physics.Impact.Body#check
      * @since 3.0.0
      *
-     * @param {[type]} other - [description]
+     * @param {Phaser.Physics.Impact.Body} other - [description]
      */
-    check: function (other)
+    check: function ()
     {
     },
 
@@ -539,7 +564,7 @@ var Body = new Class({
      * @since 3.0.0
      *
      * @param {Phaser.Physics.Impact.Body} other - [description]
-     * @param {[type]} axis - [description]
+     * @param {string} axis - [description]
      */
     collideWith: function (other, axis)
     {
@@ -555,11 +580,11 @@ var Body = new Class({
      * @method Phaser.Physics.Impact.Body#handleMovementTrace
      * @since 3.0.0
      *
-     * @param {[type]} res - [description]
+     * @param {number} res - [description]
      *
      * @return {boolean} [description]
      */
-    handleMovementTrace: function (res)
+    handleMovementTrace: function ()
     {
         return true;
     },
@@ -572,6 +597,8 @@ var Body = new Class({
      */
     destroy: function ()
     {
+        this.world.remove(this);
+
         this.enabled = false;
 
         this.world = null;

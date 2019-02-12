@@ -1,30 +1,34 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var Class = require('../../utils/Class');
+var DegToRad = require('../../math/DegToRad');
+var DistanceBetween = require('../../math/distance/DistanceBetween');
+var DistanceSquared = require('../../math/distance/DistanceSquared');
 var Factory = require('./Factory');
 var GetFastValue = require('../../utils/object/GetFastValue');
 var Merge = require('../../utils/object/Merge');
-var PluginManager = require('../../boot/PluginManager');
+var PluginCache = require('../../plugins/PluginCache');
+var SceneEvents = require('../../scene/events');
+var Vector2 = require('../../math/Vector2');
 var World = require('./World');
-var DistanceBetween = require('../../math/distance/DistanceBetween');
-var DegToRad = require('../../math/DegToRad');
-
-//  All methods in this class are available under `this.physics` in a Scene.
 
 /**
  * @classdesc
- * [description]
+ * The Arcade Physics Plugin belongs to a Scene and sets up and manages the Scene's physics simulation.
+ * It also holds some useful methods for moving and rotating Arcade Physics Bodies.
+ *
+ * You can access it from within a Scene using `this.physics`.
  *
  * @class ArcadePhysics
- * @memberOf Phaser.Physics.Arcade
+ * @memberof Phaser.Physics.Arcade
  * @constructor
  * @since 3.0.0
  *
- * @param {Phaser.Scene} scene - [description]
+ * @param {Phaser.Scene} scene - The Scene that this Plugin belongs to.
  */
 var ArcadePhysics = new Class({
 
@@ -33,7 +37,7 @@ var ArcadePhysics = new Class({
     function ArcadePhysics (scene)
     {
         /**
-         * [description]
+         * The Scene that this Plugin belongs to.
          *
          * @name Phaser.Physics.Arcade.ArcadePhysics#scene
          * @type {Phaser.Scene}
@@ -42,7 +46,7 @@ var ArcadePhysics = new Class({
         this.scene = scene;
 
         /**
-         * [description]
+         * The Scene's Systems.
          *
          * @name Phaser.Physics.Arcade.ArcadePhysics#systems
          * @type {Phaser.Scenes.Systems}
@@ -50,13 +54,8 @@ var ArcadePhysics = new Class({
          */
         this.systems = scene.sys;
 
-        if (!scene.sys.settings.isBooted)
-        {
-            scene.sys.events.once('boot', this.boot, this);
-        }
-
         /**
-         * [description]
+         * A configuration object. Union of the `physics.arcade.*` properties of the GameConfig and SceneConfig objects.
          *
          * @name Phaser.Physics.Arcade.ArcadePhysics#config
          * @type {object}
@@ -65,7 +64,7 @@ var ArcadePhysics = new Class({
         this.config = this.getConfig();
 
         /**
-         * [description]
+         * The physics simulation.
          *
          * @name Phaser.Physics.Arcade.ArcadePhysics#world
          * @type {Phaser.Physics.Arcade.World}
@@ -74,22 +73,65 @@ var ArcadePhysics = new Class({
         this.world;
 
         /**
-         * [description]
+         * An object holding the Arcade Physics factory methods.
          *
          * @name Phaser.Physics.Arcade.ArcadePhysics#add
          * @type {Phaser.Physics.Arcade.Factory}
          * @since 3.0.0
          */
         this.add;
+
+        scene.sys.events.once(SceneEvents.BOOT, this.boot, this);
+        scene.sys.events.on(SceneEvents.START, this.start, this);
     },
 
     /**
-     * [description]
+     * This method is called automatically, only once, when the Scene is first created.
+     * Do not invoke it directly.
+     *
+     * @method Phaser.Physics.Arcade.ArcadePhysics#boot
+     * @private
+     * @since 3.5.1
+     */
+    boot: function ()
+    {
+        this.world = new World(this.scene, this.config);
+        this.add = new Factory(this.world);
+
+        this.systems.events.once(SceneEvents.DESTROY, this.destroy, this);
+    },
+
+    /**
+     * This method is called automatically by the Scene when it is starting up.
+     * It is responsible for creating local systems, properties and listening for Scene events.
+     * Do not invoke it directly.
+     *
+     * @method Phaser.Physics.Arcade.ArcadePhysics#start
+     * @private
+     * @since 3.5.0
+     */
+    start: function ()
+    {
+        if (!this.world)
+        {
+            this.world = new World(this.scene, this.config);
+            this.add = new Factory(this.world);
+        }
+
+        var eventEmitter = this.systems.events;
+
+        eventEmitter.on(SceneEvents.UPDATE, this.world.update, this.world);
+        eventEmitter.on(SceneEvents.POST_UPDATE, this.world.postUpdate, this.world);
+        eventEmitter.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+    },
+
+    /**
+     * Creates the physics configuration for the current Scene.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#getConfig
      * @since 3.0.0
      *
-     * @return {object} [description]
+     * @return {object} The physics configuration.
      */
     getConfig: function ()
     {
@@ -105,50 +147,20 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * [description]
-     *
-     * @method Phaser.Physics.Arcade.ArcadePhysics#boot
-     * @since 3.0.0
-     */
-    boot: function ()
-    {
-        this.world = new World(this.scene, this.config);
-        this.add = new Factory(this.world);
-
-        var eventEmitter = this.systems.events;
-
-        eventEmitter.on('update', this.world.update, this.world);
-        eventEmitter.on('postupdate', this.world.postUpdate, this.world);
-        eventEmitter.on('shutdown', this.shutdown, this);
-        eventEmitter.on('destroy', this.destroy, this);
-    },
-
-    /**
-     * Checks for overlaps between two Game Objects. The objects can be any Game Object that have an Arcade Physics Body.
-     *
-     * Unlike {@link #collide} the objects are NOT automatically separated or have any physics applied, they merely test for overlap results.
-     *
-     * Both the first and second parameter can be arrays of objects, of differing types.
-     * If two arrays are passed, the contents of the first parameter will be tested against all contents of the 2nd parameter.
-     *
-     * ##### Tilemaps
-     *
-     * Any overlapping tiles, including blank/null tiles, will give a positive result. Tiles marked via {@link Phaser.Tilemap#setCollision} (and similar methods) have no special status, and callbacks added via {@link Phaser.Tilemap#setTileIndexCallback} or {@link Phaser.Tilemap#setTileLocationCallback} are not invoked. So calling this method without any callbacks isn't very useful.
-     *
-     * If you're interested only in whether an object overlaps a certain tile or class of tiles, filter the tiles with `processCallback` and then use the result returned by this method. Blank/null tiles can be excluded by their {@link Phaser.Tile#index index} (-1).
-     *
-     * If you want to take action on certain overlaps, examine the tiles in `collideCallback` and then handle as you like.
+     * Tests if Game Objects overlap. See {@link Phaser.Physics.Arcade.World#overlap}
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#overlap
      * @since 3.0.0
      *
-     * @param {Phaser.GameObjects.GameObject|array} object1 - The first object or array of objects to check. Can be any Game Object that has an Arcade Physics Body.
-     * @param {Phaser.GameObjects.GameObject|array} object2 - The second object or array of objects to check. Can be any Game Object that has an Arcade Physics Body.
-     * @param {function} [overlapCallback=null] - An optional callback function that is called if the objects overlap. The two objects will be passed to this function in the same order in which you specified them, unless you are checking Group vs. Sprite, in which case Sprite will always be the first parameter.
-     * @param {function} [processCallback=null] - A callback function that lets you perform additional checks against the two objects if they overlap. If this is set then `overlapCallback` will only be called if this callback returns `true`.
-     * @param {object} [callbackContext] - The context in which to run the callbacks.
+     * @param {ArcadeColliderType} object1 - The first object or array of objects to check.
+     * @param {ArcadeColliderType} [object2] - The second object or array of objects to check, or `undefined`.
+     * @param {ArcadePhysicsCallback} [collideCallback] - An optional callback function that is called if the objects collide.
+     * @param {ArcadePhysicsCallback} [processCallback] - An optional callback function that lets you perform additional checks against the two objects if they overlap. If this is set then `collideCallback` will only be called if this callback returns `true`.
+     * @param {*} [callbackContext] - The context in which to run the callbacks.
      *
-     * @return {boolean} True if an overlap occurred otherwise false.
+     * @return {boolean} True if at least one Game Object overlaps another.
+     *
+     * @see Phaser.Physics.Arcade.World#overlap
      */
     overlap: function (object1, object2, overlapCallback, processCallback, callbackContext)
     {
@@ -160,18 +172,20 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * [description]
+     * Tests if Game Objects overlap and separates them (if possible). See {@link Phaser.Physics.Arcade.World#collide}.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#collide
      * @since 3.0.0
      *
-     * @param {Phaser.GameObjects.GameObject|array} object1 - The first object or array of objects to check. Can be any Game Object that has an Arcade Physics Body.
-     * @param {Phaser.GameObjects.GameObject|array} object2 - The second object or array of objects to check. Can be any Game Object that has an Arcade Physics Body.
-     * @param {function} [collideCallback=null] - An optional callback function that is called if the objects collide. The two objects will be passed to this function in the same order in which you specified them, unless you are checking Group vs. Sprite, in which case Sprite will always be the first parameter.
-     * @param {function} [processCallback=null] - A callback function that lets you perform additional checks against the two objects if they collide. If this is set then `collideCallback` will only be called if this callback returns `true`.
-     * @param {object} [callbackContext] - The context in which to run the callbacks.
+     * @param {ArcadeColliderType} object1 - The first object or array of objects to check.
+     * @param {ArcadeColliderType} [object2] - The second object or array of objects to check, or `undefined`.
+     * @param {ArcadePhysicsCallback} [collideCallback] - An optional callback function that is called if the objects collide.
+     * @param {ArcadePhysicsCallback} [processCallback] - An optional callback function that lets you perform additional checks against the two objects if they collide. If this is set then `collideCallback` will only be called if this callback returns `true`.
+     * @param {*} [callbackContext] - The context in which to run the callbacks.
      *
-     * @return {boolean} True if a collision occurred otherwise false.
+     * @return {boolean} True if any overlapping Game Objects were separated, otherwise false.
+     *
+     * @see Phaser.Physics.Arcade.World#collide
      */
     collide: function (object1, object2, collideCallback, processCallback, callbackContext)
     {
@@ -183,12 +197,12 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * [description]
+     * Pauses the simulation.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#pause
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Physics.Arcade.World} The simulation.
      */
     pause: function ()
     {
@@ -196,12 +210,12 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * [description]
+     * Resumes the simulation (if paused).
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#resume
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Physics.Arcade.World} The simulation.
      */
     resume: function ()
     {
@@ -209,10 +223,10 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * Sets the acceleration.x/y property on the game object so it will move towards the x/y coordinates at the given speed (in pixels per second sq.)
-     * 
+     * Sets the acceleration.x/y property on the game object so it will move towards the x/y coordinates at the given rate (in pixels per second squared)
+     *
      * You must give a maximum speed value, beyond which the game object won't go any faster.
-     * 
+     *
      * Note: The game object does not continuously track the target. If the target changes location during transit the game object will not modify its course.
      * Note: The game object doesn't stop moving once it reaches the destination coordinates.
      *
@@ -222,7 +236,7 @@ var ArcadePhysics = new Class({
      * @param {Phaser.GameObjects.GameObject} gameObject - Any Game Object with an Arcade Physics body.
      * @param {number} x - The x coordinate to accelerate towards.
      * @param {number} y - The y coordinate to accelerate towards.
-     * @param {number} [speed=60] - The speed it will accelerate in pixels per second.
+     * @param {number} [speed=60] - The acceleration (change in speed) in pixels per second squared.
      * @param {number} [xSpeedMax=500] - The maximum x velocity the game object can reach.
      * @param {number} [ySpeedMax=500] - The maximum y velocity the game object can reach.
      *
@@ -245,10 +259,10 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * Sets the acceleration.x/y property on the game object so it will move towards the x/y coordinates at the given speed (in pixels per second sq.)
-     * 
+     * Sets the acceleration.x/y property on the game object so it will move towards the x/y coordinates at the given rate (in pixels per second squared)
+     *
      * You must give a maximum speed value, beyond which the game object won't go any faster.
-     * 
+     *
      * Note: The game object does not continuously track the target. If the target changes location during transit the game object will not modify its course.
      * Note: The game object doesn't stop moving once it reaches the destination coordinates.
      *
@@ -257,7 +271,7 @@ var ArcadePhysics = new Class({
      *
      * @param {Phaser.GameObjects.GameObject} gameObject - Any Game Object with an Arcade Physics body.
      * @param {Phaser.GameObjects.GameObject} destination - The Game Object to move towards. Can be any object but must have visible x/y properties.
-     * @param {number} [speed=60] - The speed it will accelerate in pixels per second.
+     * @param {number} [speed=60] - The acceleration (change in speed) in pixels per second squared.
      * @param {number} [xSpeedMax=500] - The maximum x velocity the game object can reach.
      * @param {number} [ySpeedMax=500] - The maximum y velocity the game object can reach.
      *
@@ -269,7 +283,7 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * From a set of points or display objects, find the one closest to a source point or object.
+     * Finds the Body closest to a source point or object.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#closest
      * @since 3.0.0
@@ -280,7 +294,7 @@ var ArcadePhysics = new Class({
      */
     closest: function (source)
     {
-        var bodies = this.tree.all();
+        var bodies = this.world.tree.all();
 
         var min = Number.MAX_VALUE;
         var closest = null;
@@ -290,7 +304,7 @@ var ArcadePhysics = new Class({
         for (var i = bodies.length - 1; i >= 0; i--)
         {
             var target = bodies[i];
-            var distance = DistanceBetween(x, y, target.x, target.y);
+            var distance = DistanceSquared(x, y, target.x, target.y);
 
             if (distance < min)
             {
@@ -303,7 +317,7 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * From a set of points or display objects, find the one farthest from a source point or object.
+     * Finds the Body farthest from a source point or object.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#furthest
      * @since 3.0.0
@@ -314,7 +328,7 @@ var ArcadePhysics = new Class({
      */
     furthest: function (source)
     {
-        var bodies = this.tree.all();
+        var bodies = this.world.tree.all();
 
         var max = -1;
         var farthest = null;
@@ -324,7 +338,7 @@ var ArcadePhysics = new Class({
         for (var i = bodies.length - 1; i >= 0; i--)
         {
             var target = bodies[i];
-            var distance = DistanceBetween(x, y, target.x, target.y);
+            var distance = DistanceSquared(x, y, target.x, target.y);
 
             if (distance > max)
             {
@@ -397,69 +411,94 @@ var ArcadePhysics = new Class({
     },
 
     /**
-     * Given the angle (in degrees) and speed calculate the velocity and return it as a Point object, or set it to the given point object.
-     * One way to use this is: velocityFromAngle(angle, 200, sprite.velocity) which will set the values directly to the sprites velocity and not create a new Point object.
+     * Given the angle (in degrees) and speed calculate the velocity and return it as a vector, or set it to the given vector object.
+     * One way to use this is: velocityFromAngle(angle, 200, sprite.body.velocity) which will set the values directly to the sprite's velocity and not create a new vector object.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#velocityFromAngle
      * @since 3.0.0
      *
      * @param {number} angle - The angle in degrees calculated in clockwise positive direction (down = 90 degrees positive, right = 0 degrees positive, up = 90 degrees negative)
-     * @param {number} [speed=60] - The speed it will move, in pixels per second sq.
-     * @param {Phaser.Math.Vector2} vec2 - The Vector2 in which the x and y properties will be set to the calculated velocity.
+     * @param {number} [speed=60] - The speed it will move, in pixels per second squared.
+     * @param {Phaser.Math.Vector2} [vec2] - The Vector2 in which the x and y properties will be set to the calculated velocity.
      *
      * @return {Phaser.Math.Vector2} The Vector2 that stores the velocity.
      */
     velocityFromAngle: function (angle, speed, vec2)
     {
         if (speed === undefined) { speed = 60; }
+        if (vec2 === undefined) { vec2 = new Vector2(); }
 
         return vec2.setToPolar(DegToRad(angle), speed);
     },
 
     /**
-     * Given the rotation (in radians) and speed calculate the velocity and return it as a Point object, or set it to the given point object.
-     * One way to use this is: velocityFromRotation(rotation, 200, sprite.velocity) which will set the values directly to the sprites velocity and not create a new Point object.
+     * Given the rotation (in radians) and speed calculate the velocity and return it as a vector, or set it to the given vector object.
+     * One way to use this is: velocityFromRotation(rotation, 200, sprite.body.velocity) which will set the values directly to the sprite's velocity and not create a new vector object.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#velocityFromRotation
      * @since 3.0.0
      *
      * @param {number} rotation - The angle in radians.
-     * @param {number} [speed=60] - The speed it will move, in pixels per second sq.
-     * @param {Phaser.Math.Vector2} vec2 - The Vector2 in which the x and y properties will be set to the calculated velocity.
+     * @param {number} [speed=60] - The speed it will move, in pixels per second squared
+     * @param {Phaser.Math.Vector2} [vec2] - The Vector2 in which the x and y properties will be set to the calculated velocity.
      *
      * @return {Phaser.Math.Vector2} The Vector2 that stores the velocity.
      */
     velocityFromRotation: function (rotation, speed, vec2)
     {
         if (speed === undefined) { speed = 60; }
+        if (vec2 === undefined) { vec2 = new Vector2(); }
 
         return vec2.setToPolar(rotation, speed);
     },
 
     /**
-     * [description]
+     * The Scene that owns this plugin is shutting down.
+     * We need to kill and reset all internal properties as well as stop listening to Scene events.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#shutdown
      * @since 3.0.0
      */
     shutdown: function ()
     {
-        this.world.shutdown();
+        if (!this.world)
+        {
+            //  Already destroyed
+            return;
+        }
+
+        var eventEmitter = this.systems.events;
+
+        eventEmitter.off(SceneEvents.UPDATE, this.world.update, this.world);
+        eventEmitter.off(SceneEvents.POST_UPDATE, this.world.postUpdate, this.world);
+        eventEmitter.off(SceneEvents.SHUTDOWN, this.shutdown, this);
+
+        this.add.destroy();
+        this.world.destroy();
+
+        this.add = null;
+        this.world = null;
     },
 
     /**
-     * [description]
+     * The Scene that owns this plugin is being destroyed.
+     * We need to shutdown and then kill off all external references.
      *
      * @method Phaser.Physics.Arcade.ArcadePhysics#destroy
      * @since 3.0.0
      */
     destroy: function ()
     {
-        this.world.destroy();
+        this.shutdown();
+
+        this.scene.sys.events.off(SceneEvents.START, this.start, this);
+
+        this.scene = null;
+        this.systems = null;
     }
 
 });
 
-PluginManager.register('ArcadePhysics', ArcadePhysics, 'arcadePhysics');
+PluginCache.register('ArcadePhysics', ArcadePhysics, 'arcadePhysics');
 
 module.exports = ArcadePhysics;

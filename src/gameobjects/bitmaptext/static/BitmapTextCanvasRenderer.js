@@ -1,10 +1,10 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
-var GameObject = require('../../GameObject');
+var SetTransform = require('../../../renderer/canvas/utils/SetTransform');
 
 /**
  * Renders this Game Object with the Canvas Renderer to the given Camera.
@@ -15,33 +15,33 @@ var GameObject = require('../../GameObject');
  * @since 3.0.0
  * @private
  *
- * @param {Phaser.Renderer.CanvasRenderer} renderer - A reference to the current active Canvas renderer.
+ * @param {Phaser.Renderer.Canvas.CanvasRenderer} renderer - A reference to the current active Canvas renderer.
  * @param {Phaser.GameObjects.BitmapText} src - The Game Object being rendered in this call.
  * @param {number} interpolationPercentage - Reserved for future use and custom pipelines.
  * @param {Phaser.Cameras.Scene2D.Camera} camera - The Camera that is rendering the Game Object.
+ * @param {Phaser.GameObjects.Components.TransformMatrix} parentMatrix - This transform matrix is defined if the game object is nested
  */
-var BitmapTextCanvasRenderer = function (renderer, src, interpolationPercentage, camera)
+var BitmapTextCanvasRenderer = function (renderer, src, interpolationPercentage, camera, parentMatrix)
 {
-    var text = src.text;
+    var text = src._text;
     var textLength = text.length;
 
-    if (GameObject.RENDER_MASK !== src.renderFlags || textLength === 0 || (src.cameraFilter > 0 && (src.cameraFilter & camera._id)))
+    var ctx = renderer.currentContext;
+
+    if (textLength === 0 || !SetTransform(renderer, ctx, src, camera, parentMatrix))
     {
         return;
     }
     
     var textureFrame = src.frame;
 
-    var cameraScrollX = camera.scrollX * src.scrollFactorX;
-    var cameraScrollY = camera.scrollY * src.scrollFactorY;
-
     var chars = src.fontData.chars;
     var lineHeight = src.fontData.lineHeight;
+    var letterSpacing = src._letterSpacing;
 
     var xAdvance = 0;
     var yAdvance = 0;
 
-    var indexCount = 0;
     var charCode = 0;
 
     var glyph = null;
@@ -56,52 +56,56 @@ var BitmapTextCanvasRenderer = function (renderer, src, interpolationPercentage,
     var lastGlyph = null;
     var lastCharCode = 0;
 
-    var ctx = renderer.currentContext;
     var image = src.frame.source.image;
 
     var textureX = textureFrame.cutX;
     var textureY = textureFrame.cutY;
 
-    var rotation = 0;
-    var scale = (src.fontSize / src.fontData.size);
+    var scale = (src._fontSize / src.fontData.size);
 
-    //  Blend Mode
-    if (renderer.currentBlendMode !== src.blendMode)
+    var align = src._align;
+    var currentLine = 0;
+    var lineOffsetX = 0;
+
+    //  Update the bounds - skipped internally if not dirty
+    src.getTextBounds(false);
+
+    var lineData = src._bounds.lines;
+
+    if (align === 1)
     {
-        renderer.currentBlendMode = src.blendMode;
-        ctx.globalCompositeOperation = renderer.blendModes[src.blendMode];
+        lineOffsetX = (lineData.longest - lineData.lengths[0]) / 2;
+    }
+    else if (align === 2)
+    {
+        lineOffsetX = (lineData.longest - lineData.lengths[0]);
     }
 
-    //  Alpha
-    if (renderer.currentAlpha !== src.alpha)
+    ctx.translate(-src.displayOriginX, -src.displayOriginY);
+
+    var roundPixels = camera.roundPixels;
+
+    for (var i = 0; i < textLength; i++)
     {
-        renderer.currentAlpha = src.alpha;
-        ctx.globalAlpha = src.alpha;
-    }
-
-    //  Smoothing
-    if (renderer.currentScaleMode !== src.scaleMode)
-    {
-        renderer.currentScaleMode = src.scaleMode;
-    }
-
-    ctx.save();
-    ctx.translate((src.x - cameraScrollX) + src.frame.x, (src.y - cameraScrollY) + src.frame.y);
-    ctx.rotate(src.rotation);
-    ctx.scale(src.scaleX, src.scaleY);
-
-    // ctx.fillStyle = 'rgba(255,0,255,0.5)';
-
-    for (var index = 0; index < textLength; ++index)
-    {
-        charCode = text.charCodeAt(index);
+        charCode = text.charCodeAt(i);
 
         if (charCode === 10)
         {
+            currentLine++;
+
+            if (align === 1)
+            {
+                lineOffsetX = (lineData.longest - lineData.lengths[currentLine]) / 2;
+            }
+            else if (align === 2)
+            {
+                lineOffsetX = (lineData.longest - lineData.lengths[currentLine]);
+            }
+
             xAdvance = 0;
-            indexCount = 0;
             yAdvance += lineHeight;
             lastGlyph = null;
+
             continue;
         }
 
@@ -118,7 +122,7 @@ var BitmapTextCanvasRenderer = function (renderer, src, interpolationPercentage,
         glyphW = glyph.width;
         glyphH = glyph.height;
 
-        x = indexCount + glyph.xOffset + xAdvance;
+        x = glyph.xOffset + xAdvance;
         y = glyph.yOffset + yAdvance;
 
         if (lastGlyph !== null)
@@ -130,8 +134,9 @@ var BitmapTextCanvasRenderer = function (renderer, src, interpolationPercentage,
         x *= scale;
         y *= scale;
 
-        xAdvance += glyph.xAdvance;
-        indexCount += 1;
+        x += lineOffsetX;
+
+        xAdvance += glyph.xAdvance + letterSpacing;
         lastGlyph = glyph;
         lastCharCode = charCode;
 
@@ -141,11 +146,20 @@ var BitmapTextCanvasRenderer = function (renderer, src, interpolationPercentage,
             continue;
         }
 
+        if (roundPixels)
+        {
+            x = Math.round(x);
+            y = Math.round(y);
+        }
+
         ctx.save();
+
         ctx.translate(x, y);
+
         ctx.scale(scale, scale);
-        // ctx.fillRect(0, 0, glyphW, glyphH);
+
         ctx.drawImage(image, glyphX, glyphY, glyphW, glyphH, 0, 0, glyphW, glyphH);
+
         ctx.restore();
     }
 

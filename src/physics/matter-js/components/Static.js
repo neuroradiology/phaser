@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -9,7 +9,7 @@ var Body = require('../lib/body/Body');
 /**
  * [description]
  *
- * @name Phaser.Physics.Matter.Components.Static
+ * @namespace Phaser.Physics.Matter.Components.Static
  * @since 3.0.0
  */
 var Static = {
@@ -20,9 +20,9 @@ var Static = {
      * @method Phaser.Physics.Matter.Components.Static#setStatic
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {boolean} value - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setStatic: function (value)
     {
@@ -37,7 +37,7 @@ var Static = {
      * @method Phaser.Physics.Matter.Components.Static#isStatic
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {boolean} [description]
      */
     isStatic: function ()
     {

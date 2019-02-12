@@ -1,9 +1,10 @@
 'use strict';
 
 const webpack = require('webpack');
-const WebpackShellPlugin = require('webpack-shell-plugin');
+const exec = require('child_process').exec;
 
 module.exports = {
+    mode: 'development',
 
     context: `${__dirname}/src/`,
 
@@ -17,33 +18,32 @@ module.exports = {
         library: 'Phaser',
         libraryTarget: 'umd',
         sourceMapFilename: '[file].map',
-        devtoolModuleFilenameTemplate: "webpack:///[resource-path]", // string
-        devtoolFallbackModuleFilenameTemplate: "webpack:///[resource-path]?[hash]", // string
-        umdNamedDefine: true,
+        devtoolModuleFilenameTemplate: 'webpack:///[resource-path]', // string
+        devtoolFallbackModuleFilenameTemplate: 'webpack:///[resource-path]?[hash]', // string
+        umdNamedDefine: true
     },
 
-    module: {
-        rules: [
-          {
-            test: [ /\.vert$/, /\.frag$/ ],
-            use: 'raw-loader'
-          }
-        ]
-    },
+    performance: { hints: false },
 
     plugins: [
-
         new webpack.DefinePlugin({
-            'CANVAS_RENDERER': JSON.stringify(true),
-            'WEBGL_RENDERER': JSON.stringify(true)
+            "typeof CANVAS_RENDERER": JSON.stringify(true),
+            "typeof WEBGL_RENDERER": JSON.stringify(true),
+            "typeof EXPERIMENTAL": JSON.stringify(true),
+            "typeof PLUGIN_CAMERA3D": JSON.stringify(false),
+            "typeof PLUGIN_FBINSTANT": JSON.stringify(false)
         }),
-
-        new WebpackShellPlugin({
-            onBuildEnd: 'node copy-to-examples.js'
-        })
-
+        {
+            apply: (compiler) => {
+                compiler.hooks.afterEmit.tap('AfterEmitPlugin', (compilation) => {
+                    exec('node scripts/copy-to-examples.js', (err, stdout, stderr) => {
+                        if (stdout) process.stdout.write(stdout);
+                        if (stderr) process.stderr.write(stderr);
+                    });
+                });
+            }
+        }
     ],
 
     devtool: 'source-map'
-
 };

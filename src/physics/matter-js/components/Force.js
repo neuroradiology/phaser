@@ -1,29 +1,30 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var Body = require('../lib/body/Body');
 
 /**
- * [description]
+ * A component to apply force to Matter.js bodies.
  *
- * @name Phaser.Physics.Matter.Components.Force
+ * @namespace Phaser.Physics.Matter.Components.Force
  * @since 3.0.0
  */
 var Force = {
 
     //  force = vec2 / point
+
     /**
-     * [description]
+     * Applies a force to a body.
      *
      * @method Phaser.Physics.Matter.Components.Force#applyForce
      * @since 3.0.0
      *
-     * @param {[type]} force - [description]
+     * @param {Phaser.Math.Vector2} force - A Vector that specifies the force to apply.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     applyForce: function (force)
     {
@@ -35,15 +36,15 @@ var Force = {
     },
 
     /**
-     * [description]
+     * Applies a force to a body from a given position.
      *
      * @method Phaser.Physics.Matter.Components.Force#applyForceFrom
      * @since 3.0.0
      *
-     * @param {[type]} position - [description]
-     * @param {[type]} force - [description]
+     * @param {Phaser.Math.Vector2} position - The position in which the force comes from.
+     * @param {Phaser.Math.Vector2} force - A Vector that specifies the force to apply.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     applyForceFrom: function (position, force)
     {
@@ -53,14 +54,14 @@ var Force = {
     },
 
     /**
-     * [description]
+     * Apply thrust to the forward position of the body.
      *
      * @method Phaser.Physics.Matter.Components.Force#thrust
      * @since 3.0.0
      *
-     * @param {[type]} speed - [description]
+     * @param {number} speed - A speed value to be applied to a directional force.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     thrust: function (speed)
     {
@@ -74,14 +75,14 @@ var Force = {
     },
 
     /**
-     * [description]
+     * Apply thrust to the left position of the body.
      *
      * @method Phaser.Physics.Matter.Components.Force#thrustLeft
      * @since 3.0.0
      *
-     * @param {[type]} speed - [description]
+     * @param {number} speed - A speed value to be applied to a directional force.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     thrustLeft: function (speed)
     {
@@ -95,14 +96,14 @@ var Force = {
     },
 
     /**
-     * [description]
+     * Apply thrust to the right position of the body.
      *
      * @method Phaser.Physics.Matter.Components.Force#thrustRight
      * @since 3.0.0
      *
-     * @param {[type]} speed - [description]
+     * @param {number} speed - A speed value to be applied to a directional force.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     thrustRight: function (speed)
     {
@@ -116,14 +117,14 @@ var Force = {
     },
 
     /**
-     * [description]
+     * Apply thrust to the back position of the body.
      *
      * @method Phaser.Physics.Matter.Components.Force#thrustBack
      * @since 3.0.0
      *
-     * @param {[type]} speed - [description]
+     * @param {number} speed - A speed value to be applied to a directional force.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     thrustBack: function (speed)
     {

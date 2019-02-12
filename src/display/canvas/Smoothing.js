@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -18,10 +18,10 @@ var Smoothing = function ()
      *
      * @function Phaser.Display.Canvas.Smoothing.getPrefix
      * @since 3.0.0
-     * 
-     * @param {[type]} context - [description]
-     * 
-     * @return {string} [description]
+     *
+     * @param {(CanvasRenderingContext2D|WebGLRenderingContext)} context - The canvas context to check.
+     *
+     * @return {string} The name of the property on the context which controls image smoothing (either `imageSmoothingEnabled` or a vendor-prefixed version thereof), or `null` if not supported.
      */
     var getPrefix = function (context)
     {
@@ -49,10 +49,10 @@ var Smoothing = function ()
      *
      * @function Phaser.Display.Canvas.Smoothing.enable
      * @since 3.0.0
-     * 
-     * @param {[type]} context - [description]
-     * 
-     * @return {[type]} [description]
+     *
+     * @param {(CanvasRenderingContext2D|WebGLRenderingContext)} context - The context on which to enable smoothing.
+     *
+     * @return {(CanvasRenderingContext2D|WebGLRenderingContext)} The provided context.
      */
     var enable = function (context)
     {
@@ -78,10 +78,10 @@ var Smoothing = function ()
      *
      * @function Phaser.Display.Canvas.Smoothing.disable
      * @since 3.0.0
-     * 
-     * @param {[type]} context - [description]
-     * 
-     * @return {[type]} [description]
+     *
+     * @param {(CanvasRenderingContext2D|WebGLRenderingContext)} context - The context on which to disable smoothing.
+     *
+     * @return {(CanvasRenderingContext2D|WebGLRenderingContext)} The provided context.
      */
     var disable = function (context)
     {
@@ -104,10 +104,10 @@ var Smoothing = function ()
      *
      * @function Phaser.Display.Canvas.Smoothing.isEnabled
      * @since 3.0.0
-     * 
-     * @param {[type]} context - [description]
-     * 
-     * @return {boolean} [description]
+     *
+     * @param {(CanvasRenderingContext2D|WebGLRenderingContext)} context - The context to check.
+     *
+     * @return {?boolean} `true` if smoothing is enabled on the context, otherwise `false`. `null` if not supported.
      */
     var isEnabled = function (context)
     {

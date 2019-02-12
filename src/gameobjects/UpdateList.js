@@ -1,22 +1,27 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var Class = require('../utils/Class');
-var PluginManager = require('../boot/PluginManager');
+var PluginCache = require('../plugins/PluginCache');
+var SceneEvents = require('../scene/events');
 
 /**
  * @classdesc
- * [description]
+ * The Update List plugin.
+ *
+ * Update Lists belong to a Scene and maintain the list Game Objects to be updated every frame.
+ *
+ * Some or all of these Game Objects may also be part of the Scene's [Display List]{@link Phaser.GameObjects.DisplayList}, for Rendering.
  *
  * @class UpdateList
- * @memberOf Phaser.GameObjects
+ * @memberof Phaser.GameObjects
  * @constructor
  * @since 3.0.0
  *
- * @param {Phaser.Scene} scene - [description]
+ * @param {Phaser.Scene} scene - The Scene that the Update List belongs to.
  */
 var UpdateList = new Class({
 
@@ -25,7 +30,7 @@ var UpdateList = new Class({
     function UpdateList (scene)
     {
         /**
-         * [description]
+         * The Scene that the Update List belongs to.
          *
          * @name Phaser.GameObjects.UpdateList#scene
          * @type {Phaser.Scene}
@@ -34,7 +39,7 @@ var UpdateList = new Class({
         this.scene = scene;
 
         /**
-         * [description]
+         * The Scene's Systems.
          *
          * @name Phaser.GameObjects.UpdateList#systems
          * @type {Phaser.Scenes.Systems}
@@ -42,13 +47,8 @@ var UpdateList = new Class({
          */
         this.systems = scene.sys;
 
-        if (!scene.sys.settings.isBooted)
-        {
-            scene.sys.events.once('boot', this.boot, this);
-        }
-
         /**
-         * [description]
+         * The list of Game Objects.
          *
          * @name Phaser.GameObjects.UpdateList#_list
          * @type {array}
@@ -59,7 +59,7 @@ var UpdateList = new Class({
         this._list = [];
 
         /**
-         * [description]
+         * Game Objects that are pending insertion into the list.
          *
          * @name Phaser.GameObjects.UpdateList#_pendingInsertion
          * @type {array}
@@ -70,7 +70,7 @@ var UpdateList = new Class({
         this._pendingInsertion = [];
 
         /**
-         * [description]
+         * Game Objects that are pending removal from the list.
          *
          * @name Phaser.GameObjects.UpdateList#_pendingRemoval
          * @type {array}
@@ -79,33 +79,51 @@ var UpdateList = new Class({
          * @since 3.0.0
          */
         this._pendingRemoval = [];
+
+        scene.sys.events.once(SceneEvents.BOOT, this.boot, this);
+        scene.sys.events.on(SceneEvents.START, this.start, this);
     },
 
     /**
-     * [description]
+     * This method is called automatically, only once, when the Scene is first created.
+     * Do not invoke it directly.
      *
      * @method Phaser.GameObjects.UpdateList#boot
-     * @since 3.0.0
+     * @private
+     * @since 3.5.1
      */
     boot: function ()
     {
-        var eventEmitter = this.systems.events;
-
-        eventEmitter.on('preupdate', this.preUpdate, this);
-        eventEmitter.on('update', this.update, this);
-        eventEmitter.on('shutdown', this.shutdown, this);
-        eventEmitter.on('destroy', this.destroy, this);
+        this.systems.events.once(SceneEvents.DESTROY, this.destroy, this);
     },
 
     /**
-     * [description]
+     * This method is called automatically by the Scene when it is starting up.
+     * It is responsible for creating local systems, properties and listening for Scene events.
+     * Do not invoke it directly.
+     *
+     * @method Phaser.GameObjects.UpdateList#start
+     * @private
+     * @since 3.5.0
+     */
+    start: function ()
+    {
+        var eventEmitter = this.systems.events;
+
+        eventEmitter.on(SceneEvents.PRE_UPDATE, this.preUpdate, this);
+        eventEmitter.on(SceneEvents.UPDATE, this.update, this);
+        eventEmitter.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+    },
+
+    /**
+     * Add a Game Object to the Update List.
      *
      * @method Phaser.GameObjects.UpdateList#add
      * @since 3.0.0
      *
-     * @param {Phaser.GameObjects.GameObject} child - [description]
+     * @param {Phaser.GameObjects.GameObject} child - The Game Object to add.
      *
-     * @return {Phaser.GameObjects.GameObject} [description]
+     * @return {Phaser.GameObjects.GameObject} The added Game Object.
      */
     add: function (child)
     {
@@ -120,15 +138,14 @@ var UpdateList = new Class({
     },
 
     /**
-     * [description]
+     * The pre-update step.
+     *
+     * Handles Game Objects that are pending insertion to and removal from the list.
      *
      * @method Phaser.GameObjects.UpdateList#preUpdate
      * @since 3.0.0
-     *
-     * @param {number} time - [description]
-     * @param {number} delta - [description]
      */
-    preUpdate: function (time, delta)
+    preUpdate: function ()
     {
         var toRemove = this._pendingRemoval.length;
         var toInsert = this._pendingInsertion.length;
@@ -153,9 +170,6 @@ var UpdateList = new Class({
             {
                 this._list.splice(index, 1);
             }
-
-            //  Pool them?
-            // gameObject.destroy();
         }
 
         //  Move pending to active
@@ -167,13 +181,15 @@ var UpdateList = new Class({
     },
 
     /**
-     * [description]
+     * The update step.
+     *
+     * Pre-updates every active Game Object in the list.
      *
      * @method Phaser.GameObjects.UpdateList#update
      * @since 3.0.0
      *
-     * @param {number} time - [description]
-     * @param {number} delta - [description]
+     * @param {number} time - The current timestamp.
+     * @param {number} delta - The delta time elapsed since the last frame.
      */
     update: function (time, delta)
     {
@@ -189,14 +205,14 @@ var UpdateList = new Class({
     },
 
     /**
-     * [description]
+     * Remove a Game Object from the list.
      *
      * @method Phaser.GameObjects.UpdateList#remove
      * @since 3.0.0
      *
-     * @param {Phaser.GameObjects.GameObject} child - [description]
+     * @param {Phaser.GameObjects.GameObject} child - The Game Object to remove from the list.
      *
-     * @return {Phaser.GameObjects.GameObject} [description]
+     * @return {Phaser.GameObjects.GameObject} The removed Game Object.
      */
     remove: function (child)
     {
@@ -206,17 +222,17 @@ var UpdateList = new Class({
         {
             this._list.splice(index, 1);
         }
-        
+
         return child;
     },
 
     /**
-     * [description]
+     * Remove all Game Objects from the list.
      *
      * @method Phaser.GameObjects.UpdateList#removeAll
      * @since 3.0.0
      *
-     * @return {Phaser.GameObjects.UpdateList} The UpdateList object.
+     * @return {Phaser.GameObjects.UpdateList} This UpdateList.
      */
     removeAll: function ()
     {
@@ -231,22 +247,49 @@ var UpdateList = new Class({
     },
 
     /**
-     * [description]
+     * The Scene that owns this plugin is shutting down.
+     * We need to kill and reset all internal properties as well as stop listening to Scene events.
      *
      * @method Phaser.GameObjects.UpdateList#shutdown
      * @since 3.0.0
      */
     shutdown: function ()
     {
-        this.removeAll();
+        var i = this._list.length;
+
+        while (i--)
+        {
+            this._list[i].destroy(true);
+        }
+
+        i = this._pendingRemoval.length;
+
+        while (i--)
+        {
+            this._pendingRemoval[i].destroy(true);
+        }
+
+        i = this._pendingInsertion.length;
+
+        while (i--)
+        {
+            this._pendingInsertion[i].destroy(true);
+        }
 
         this._list.length = 0;
         this._pendingRemoval.length = 0;
         this._pendingInsertion.length = 0;
+
+        var eventEmitter = this.systems.events;
+
+        eventEmitter.off(SceneEvents.PRE_UPDATE, this.preUpdate, this);
+        eventEmitter.off(SceneEvents.UPDATE, this.update, this);
+        eventEmitter.off(SceneEvents.SHUTDOWN, this.shutdown, this);
     },
 
     /**
-     * [description]
+     * The Scene that owns this plugin is being destroyed.
+     * We need to shutdown and then kill off all external references.
      *
      * @method Phaser.GameObjects.UpdateList#destroy
      * @since 3.0.0
@@ -255,13 +298,31 @@ var UpdateList = new Class({
     {
         this.shutdown();
 
-        this.scene = undefined;
-        this.systems = undefined;
+        this.scene.sys.events.off(SceneEvents.START, this.start, this);
+
+        this.scene = null;
+        this.systems = null;
+    },
+
+    /**
+     * The length of the list.
+     *
+     * @name Phaser.GameObjects.UpdateList#length
+     * @type {integer}
+     * @readonly
+     * @since 3.10.0
+     */
+    length: {
+
+        get: function ()
+        {
+            return this._list.length;
+        }
 
     }
 
 });
 
-PluginManager.register('UpdateList', UpdateList, 'updateList');
+PluginCache.register('UpdateList', UpdateList, 'updateList');
 
 module.exports = UpdateList;

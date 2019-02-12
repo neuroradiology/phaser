@@ -1,13 +1,13 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
  * [description]
  *
- * @name Phaser.Physics.Matter.Components.Sensor
+ * @namespace Phaser.Physics.Matter.Components.Sensor
  * @since 3.0.0
  */
 var Sensor = {
@@ -18,9 +18,9 @@ var Sensor = {
      * @method Phaser.Physics.Matter.Components.Sensor#setSensor
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {boolean} value - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setSensor: function (value)
     {
@@ -35,7 +35,7 @@ var Sensor = {
      * @method Phaser.Physics.Matter.Components.Sensor#isSensor
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {boolean} [description]
      */
     isSensor: function ()
     {

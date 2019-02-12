@@ -1,11 +1,13 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @author       Pavle Goloskokovic <pgoloskokovic@gmail.com> (http://prunegames.com)
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
-var Class = require('../../utils/Class');
 var BaseSound = require('../BaseSound');
+var Class = require('../../utils/Class');
+var Events = require('../events');
 
 /**
  * @classdesc
@@ -13,14 +15,13 @@ var BaseSound = require('../BaseSound');
  *
  * @class HTML5AudioSound
  * @extends Phaser.Sound.BaseSound
- * @memberOf Phaser.Sound
+ * @memberof Phaser.Sound
  * @constructor
- * @author Pavle Goloskokovic <pgoloskokovic@gmail.com> (http://prunegames.com)
  * @since 3.0.0
- * 
+ *
  * @param {Phaser.Sound.HTML5AudioSoundManager} manager - Reference to the current sound manager instance.
  * @param {string} key - Asset key for the sound.
- * @param {ISoundConfig} [config={}] - An optional config object containing default sound settings.
+ * @param {SoundConfig} [config={}] - An optional config object containing default sound settings.
  */
 var HTML5AudioSound = new Class({
 
@@ -30,7 +31,7 @@ var HTML5AudioSound = new Class({
 
     function HTML5AudioSound (manager, key, config)
     {
-        if (config === void 0) { config = {}; }
+        if (config === undefined) { config = {}; }
 
         /**
          * An array containing all HTML5 Audio tags that could be used for individual
@@ -46,7 +47,8 @@ var HTML5AudioSound = new Class({
 
         if (!this.tags)
         {
-            console.error('No audio loaded in cache with key: \'' + key + '\'!');
+            // eslint-disable-next-line no-console
+            console.warn('Audio cache entry missing: ' + key);
             return;
         }
 
@@ -99,11 +101,12 @@ var HTML5AudioSound = new Class({
      * you can set 'seek' setting of the config object, provided to this call, to that value.
      *
      * @method Phaser.Sound.HTML5AudioSound#play
+     * @fires Phaser.Sound.Events#PLAY
      * @since 3.0.0
-     * 
+     *
      * @param {string} [markerName=''] - If you want to play a marker then provide the marker name here, otherwise omit it to play the full sound.
-     * @param {ISoundConfig} [config] - Optional sound config object to be applied to this marker or entire sound if no marker name is provided. It gets memorized for future plays of current section of the sound.
-     * 
+     * @param {SoundConfig} [config] - Optional sound config object to be applied to this marker or entire sound if no marker name is provided. It gets memorized for future plays of current section of the sound.
+     *
      * @return {boolean} Whether the sound started playing successfully.
      */
     play: function (markerName, config)
@@ -124,11 +127,7 @@ var HTML5AudioSound = new Class({
             return false;
         }
 
-        /**
-         * @event Phaser.Sound.HTML5AudioSound#play
-         * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-         */
-        this.emit('play', this);
+        this.emit(Events.PLAY, this);
 
         return true;
     },
@@ -137,8 +136,9 @@ var HTML5AudioSound = new Class({
      * Pauses the sound.
      *
      * @method Phaser.Sound.HTML5AudioSound#pause
+     * @fires Phaser.Sound.Events#PAUSE
      * @since 3.0.0
-     * 
+     *
      * @return {boolean} Whether the sound was paused successfully.
      */
     pause: function ()
@@ -159,15 +159,11 @@ var HTML5AudioSound = new Class({
         }
 
         //  \/\/\/ isPlaying = false, isPaused = true \/\/\/
-        this.currentConfig.seek = this.audio.currentTime
-            - (this.currentMarker ? this.currentMarker.start : 0);
+        this.currentConfig.seek = this.audio.currentTime - (this.currentMarker ? this.currentMarker.start : 0);
+
         this.stopAndReleaseAudioTag();
 
-        /**
-         * @event Phaser.Sound.HTML5AudioSound#pause
-         * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-         */
-        this.emit('pause', this);
+        this.emit(Events.PAUSE, this);
 
         return true;
     },
@@ -176,8 +172,9 @@ var HTML5AudioSound = new Class({
      * Resumes the sound.
      *
      * @method Phaser.Sound.HTML5AudioSound#resume
+     * @fires Phaser.Sound.Events#RESUME
      * @since 3.0.0
-     * 
+     *
      * @return {boolean} Whether the sound was resumed successfully.
      */
     resume: function ()
@@ -203,11 +200,7 @@ var HTML5AudioSound = new Class({
             return false;
         }
 
-        /**
-         * @event Phaser.Sound.HTML5AudioSound#resume
-         * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-         */
-        this.emit('resume', this);
+        this.emit(Events.RESUME, this);
 
         return true;
     },
@@ -216,8 +209,9 @@ var HTML5AudioSound = new Class({
      * Stop playing this sound.
      *
      * @method Phaser.Sound.HTML5AudioSound#stop
+     * @fires Phaser.Sound.Events#STOP
      * @since 3.0.0
-     * 
+     *
      * @return {boolean} Whether the sound was stopped successfully.
      */
     stop: function ()
@@ -235,11 +229,7 @@ var HTML5AudioSound = new Class({
         //  \/\/\/ isPlaying = false, isPaused = false \/\/\/
         this.stopAndReleaseAudioTag();
 
-        /**
-         * @event Phaser.Sound.HTML5AudioSound#stop
-         * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-         */
-        this.emit('stop', this);
+        this.emit(Events.STOP, this);
 
         return true;
     },
@@ -250,7 +240,7 @@ var HTML5AudioSound = new Class({
      * @method Phaser.Sound.HTML5AudioSound#pickAndPlayAudioTag
      * @private
      * @since 3.0.0
-     * 
+     *
      * @return {boolean} Whether the sound was assigned an audio tag successfully.
      */
     pickAndPlayAudioTag: function ()
@@ -264,6 +254,7 @@ var HTML5AudioSound = new Class({
         var seek = this.currentConfig.seek;
         var delay = this.currentConfig.delay;
         var offset = (this.currentMarker ? this.currentMarker.start : 0) + seek;
+
         this.previousTime = offset;
         this.audio.currentTime = offset;
         this.applyConfig();
@@ -302,7 +293,7 @@ var HTML5AudioSound = new Class({
      * @method Phaser.Sound.HTML5AudioSound#pickAudioTag
      * @private
      * @since 3.0.0
-     * 
+     *
      * @return {boolean} Whether the sound was assigned an audio tag successfully.
      */
     pickAudioTag: function ()
@@ -311,6 +302,7 @@ var HTML5AudioSound = new Class({
         {
             return true;
         }
+
         for (var i = 0; i < this.tags.length; i++)
         {
             var audio = this.tags[i];
@@ -351,6 +343,7 @@ var HTML5AudioSound = new Class({
         var selectedSound = otherSounds[0];
 
         this.audio = selectedSound.audio;
+
         selectedSound.reset();
         selectedSound.audio = null;
         selectedSound.startTime = 0;
@@ -373,7 +366,11 @@ var HTML5AudioSound = new Class({
 
         if (playPromise)
         {
-            playPromise.catch(function (reason) { });
+            // eslint-disable-next-line no-unused-vars
+            playPromise.catch(function (reason)
+            {
+                console.warn(reason);
+            });
         }
     },
 
@@ -418,9 +415,11 @@ var HTML5AudioSound = new Class({
     {
         this.isPlaying = false;
         this.isPaused = true;
-        this.currentConfig.seek = this.audio.currentTime -
-            (this.currentMarker ? this.currentMarker.start : 0);
+
+        this.currentConfig.seek = this.audio.currentTime - (this.currentMarker ? this.currentMarker.start : 0);
+
         this.currentConfig.delay = Math.max(0, (this.startTime - window.performance.now()) / 1000);
+
         this.stopAndReleaseAudioTag();
     },
 
@@ -443,12 +442,15 @@ var HTML5AudioSound = new Class({
      * Update method called automatically by sound manager on every game step.
      *
      * @method Phaser.Sound.HTML5AudioSound#update
+     * @fires Phaser.Sound.Events#COMPLETE
+     * @fires Phaser.Sound.Events#LOOPED
      * @protected
      * @since 3.0.0
-     * 
+     *
      * @param {number} time - The current timestamp as generated by the Request Animation Frame or SetTimeout.
      * @param {number} delta - The delta time elapsed since the last frame.
      */
+    // eslint-disable-next-line no-unused-vars
     update: function (time, delta)
     {
         if (!this.isPlaying)
@@ -466,6 +468,7 @@ var HTML5AudioSound = new Class({
                 this.previousTime = this.audio.currentTime;
                 this.playCatchPromise();
             }
+
             return;
         }
 
@@ -473,6 +476,7 @@ var HTML5AudioSound = new Class({
         var startTime = this.currentMarker ? this.currentMarker.start : 0;
         var endTime = startTime + this.duration;
         var currentTime = this.audio.currentTime;
+
         if (this.currentConfig.loop)
         {
             if (currentTime >= endTime - this.manager.loopEndOffset)
@@ -485,27 +489,23 @@ var HTML5AudioSound = new Class({
                 this.audio.currentTime += startTime;
                 currentTime = this.audio.currentTime;
             }
+
             if (currentTime < this.previousTime)
             {
-                /**
-                 * @event Phaser.Sound.HTML5AudioSound#looped
-                 * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-                 */
-                this.emit('looped', this);
+                this.emit(Events.LOOPED, this);
             }
         }
         else if (currentTime >= endTime)
         {
             this.reset();
+
             this.stopAndReleaseAudioTag();
 
-            /**
-             * @event Phaser.Sound.HTML5AudioSound#ended
-             * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-             */
-            this.emit('ended', this);
+            this.emit(Events.COMPLETE, this);
+
             return;
         }
+
         this.previousTime = currentTime;
     },
 
@@ -519,7 +519,9 @@ var HTML5AudioSound = new Class({
     destroy: function ()
     {
         BaseSound.prototype.destroy.call(this);
+
         this.tags = null;
+
         if (this.audio)
         {
             this.stopAndReleaseAudioTag();
@@ -529,11 +531,11 @@ var HTML5AudioSound = new Class({
     /**
      * Method used internally to determine mute setting of the sound.
      *
-     * @method Phaser.Sound.HTML5AudioSound#setMute
+     * @method Phaser.Sound.HTML5AudioSound#updateMute
      * @private
      * @since 3.0.0
      */
-    setMute: function ()
+    updateMute: function ()
     {
         if (this.audio)
         {
@@ -544,11 +546,11 @@ var HTML5AudioSound = new Class({
     /**
      * Method used internally to calculate total volume of the sound.
      *
-     * @method Phaser.Sound.HTML5AudioSound#setVolume
+     * @method Phaser.Sound.HTML5AudioSound#updateVolume
      * @private
      * @since 3.0.0
      */
-    setVolume: function ()
+    updateVolume: function ()
     {
         if (this.audio)
         {
@@ -559,224 +561,359 @@ var HTML5AudioSound = new Class({
     /**
      * Method used internally to calculate total playback rate of the sound.
      *
-     * @method Phaser.Sound.HTML5AudioSound#setRate
+     * @method Phaser.Sound.HTML5AudioSound#calculateRate
      * @protected
      * @since 3.0.0
      */
-    setRate: function ()
+    calculateRate: function ()
     {
-        BaseSound.prototype.setRate.call(this);
+        BaseSound.prototype.calculateRate.call(this);
+
         if (this.audio)
         {
             this.audio.playbackRate = this.totalRate;
         }
-    }
-});
-
-/**
- * Mute setting.
- *
- * @name Phaser.Sound.HTML5AudioSound#mute
- * @type {boolean}
- */
-Object.defineProperty(HTML5AudioSound.prototype, 'mute', {
-
-    get: function ()
-    {
-        return this.currentConfig.mute;
     },
 
-    set: function (value)
-    {
-        this.currentConfig.mute = value;
-        if (this.manager.isLocked(this, 'mute', value))
+    /**
+     * Boolean indicating whether the sound is muted or not.
+     * Gets or sets the muted state of this sound.
+     * 
+     * @name Phaser.Sound.HTML5AudioSound#mute
+     * @type {boolean}
+     * @default false
+     * @fires Phaser.Sound.Events#MUTE
+     * @since 3.0.0
+     */
+    mute: {
+
+        get: function ()
         {
-            return;
-        }
-        this.setMute();
+            return this.currentConfig.mute;
+        },
 
-        /**
-         * @event Phaser.Sound.HTML5AudioSound#mute
-         * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-         * @param {boolean} value - An updated value of Phaser.Sound.HTML5AudioSound#mute property.
-         */
-        this.emit('mute', this, value);
-    }
-
-});
-
-/**
- * Volume setting.
- *
- * @name Phaser.Sound.HTML5AudioSound#volume
- * @type {number}
- */
-Object.defineProperty(HTML5AudioSound.prototype, 'volume', {
-
-    get: function ()
-    {
-        return this.currentConfig.volume;
-    },
-
-    set: function (value)
-    {
-        this.currentConfig.volume = value;
-        if (this.manager.isLocked(this, 'volume', value))
+        set: function (value)
         {
-            return;
-        }
-        this.setVolume();
+            this.currentConfig.mute = value;
 
-        /**
-         * @event Phaser.Sound.HTML5AudioSound#volume
-         * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-         * @param {number} value - An updated value of Phaser.Sound.HTML5AudioSound#volume property.
-         */
-        this.emit('volume', this, value);
-    }
+            if (this.manager.isLocked(this, 'mute', value))
+            {
+                return;
+            }
 
-});
+            this.updateMute();
 
-/**
- * Playback rate.
- *
- * @name Phaser.Sound.HTML5AudioSound#rate
- * @type {number}
- */
-Object.defineProperty(HTML5AudioSound.prototype, 'rate', {
-
-    get: function ()
-    {
-        return Object.getOwnPropertyDescriptor(BaseSound.prototype, 'rate').get.call(this);
-    },
-
-    set: function (value)
-    {
-        this.currentConfig.rate = value;
-        if (this.manager.isLocked(this, 'rate', value))
-        {
-            return;
-        }
-        Object.getOwnPropertyDescriptor(BaseSound.prototype, 'rate').set.call(this, value);
-    }
-
-});
-
-/**
- * Detuning of sound.
- *
- * @name Phaser.Sound.HTML5AudioSound#detune
- * @type {number}
- */
-Object.defineProperty(HTML5AudioSound.prototype, 'detune', {
-
-    get: function ()
-    {
-        return Object.getOwnPropertyDescriptor(BaseSound.prototype, 'detune').get.call(this);
-    },
-
-    set: function (value)
-    {
-        this.currentConfig.detune = value;
-        if (this.manager.isLocked(this, 'detune', value))
-        {
-            return;
-        }
-        Object.getOwnPropertyDescriptor(BaseSound.prototype, 'detune').set.call(this, value);
-    }
-
-});
-
-/**
- * Current position of playing sound.
- *
- * @name Phaser.Sound.HTML5AudioSound#seek
- * @type {number}
- */
-Object.defineProperty(HTML5AudioSound.prototype, 'seek', {
-
-    get: function ()
-    {
-        if (this.isPlaying)
-        {
-            return this.audio.currentTime -
-                (this.currentMarker ? this.currentMarker.start : 0);
-        }
-        else if (this.isPaused)
-        {
-            return this.currentConfig.seek;
-        }
-        else
-        {
-            return 0;
+            this.emit(Events.MUTE, this, value);
         }
     },
 
-    set: function (value)
+    /**
+     * Sets the muted state of this Sound.
+     *
+     * @method Phaser.Sound.HTML5AudioSound#setMute
+     * @fires Phaser.Sound.Events#MUTE
+     * @since 3.4.0
+     *
+     * @param {boolean} value - `true` to mute this sound, `false` to unmute it.
+     *
+     * @return {Phaser.Sound.HTML5AudioSound} This Sound instance.
+     */
+    setMute: function (value)
     {
-        if (this.manager.isLocked(this, 'seek', value))
+        this.mute = value;
+
+        return this;
+    },
+
+    /**
+     * Gets or sets the volume of this sound, a value between 0 (silence) and 1 (full volume).
+     * 
+     * @name Phaser.Sound.HTML5AudioSound#volume
+     * @type {number}
+     * @default 1
+     * @fires Phaser.Sound.Events#VOLUME
+     * @since 3.0.0
+     */
+    volume: {
+
+        get: function ()
         {
-            return;
+            return this.currentConfig.volume;
+        },
+
+        set: function (value)
+        {
+            this.currentConfig.volume = value;
+
+            if (this.manager.isLocked(this, 'volume', value))
+            {
+                return;
+            }
+
+            this.updateVolume();
+
+            this.emit(Events.VOLUME, this, value);
         }
-        if (this.startTime > 0)
+    },
+
+    /**
+     * Sets the volume of this Sound.
+     *
+     * @method Phaser.Sound.HTML5AudioSound#setVolume
+     * @fires Phaser.Sound.Events#VOLUME
+     * @since 3.4.0
+     *
+     * @param {number} value - The volume of the sound.
+     *
+     * @return {Phaser.Sound.HTML5AudioSound} This Sound instance.
+     */
+    setVolume: function (value)
+    {
+        this.volume = value;
+
+        return this;
+    },
+
+    /**
+     * Rate at which this Sound will be played.
+     * Value of 1.0 plays the audio at full speed, 0.5 plays the audio at half speed
+     * and 2.0 doubles the audios playback speed.
+     *
+     * @name Phaser.Sound.HTML5AudioSound#rate
+     * @type {number}
+     * @default 1
+     * @fires Phaser.Sound.Events#RATE
+     * @since 3.0.0
+     */
+    rate: {
+
+        get: function ()
         {
-            return;
+            return this.currentConfig.rate;
+        },
+
+        set: function (value)
+        {
+            this.currentConfig.rate = value;
+
+            if (this.manager.isLocked(this, Events.RATE, value))
+            {
+                return;
+            }
+            else
+            {
+                this.calculateRate();
+
+                this.emit(Events.RATE, this, value);
+            }
         }
-        if (this.isPlaying || this.isPaused)
+
+    },
+
+    /**
+     * Sets the playback rate of this Sound.
+     * 
+     * For example, a value of 1.0 plays the audio at full speed, 0.5 plays the audio at half speed
+     * and 2.0 doubles the audios playback speed.
+     *
+     * @method Phaser.Sound.HTML5AudioSound#setRate
+     * @fires Phaser.Sound.Events#RATE
+     * @since 3.3.0
+     *
+     * @param {number} value - The playback rate at of this Sound.
+     *
+     * @return {Phaser.Sound.HTML5AudioSound} This Sound.
+     */
+    setRate: function (value)
+    {
+        this.rate = value;
+
+        return this;
+    },
+
+    /**
+     * The detune value of this Sound, given in [cents](https://en.wikipedia.org/wiki/Cent_%28music%29).
+     * The range of the value is -1200 to 1200, but we recommend setting it to [50](https://en.wikipedia.org/wiki/50_Cent).
+     *
+     * @name Phaser.Sound.HTML5AudioSound#detune
+     * @type {number}
+     * @default 0
+     * @fires Phaser.Sound.Events#DETUNE
+     * @since 3.0.0
+     */
+    detune: {
+
+        get: function ()
         {
-            value = Math.min(Math.max(0, value), this.duration);
+            return this.currentConfig.detune;
+        },
+
+        set: function (value)
+        {
+            this.currentConfig.detune = value;
+
+            if (this.manager.isLocked(this, Events.DETUNE, value))
+            {
+                return;
+            }
+            else
+            {
+                this.calculateRate();
+
+                this.emit(Events.DETUNE, this, value);
+            }
+        }
+
+    },
+
+    /**
+     * Sets the detune value of this Sound, given in [cents](https://en.wikipedia.org/wiki/Cent_%28music%29).
+     * The range of the value is -1200 to 1200, but we recommend setting it to [50](https://en.wikipedia.org/wiki/50_Cent).
+     *
+     * @method Phaser.Sound.HTML5AudioSound#setDetune
+     * @fires Phaser.Sound.Events#DETUNE
+     * @since 3.3.0
+     *
+     * @param {number} value - The range of the value is -1200 to 1200, but we recommend setting it to [50](https://en.wikipedia.org/wiki/50_Cent).
+     *
+     * @return {Phaser.Sound.HTML5AudioSound} This Sound.
+     */
+    setDetune: function (value)
+    {
+        this.detune = value;
+
+        return this;
+    },
+
+    /**
+     * Property representing the position of playback for this sound, in seconds.
+     * Setting it to a specific value moves current playback to that position.
+     * The value given is clamped to the range 0 to current marker duration.
+     * Setting seek of a stopped sound has no effect.
+     * 
+     * @name Phaser.Sound.HTML5AudioSound#seek
+     * @type {number}
+     * @fires Phaser.Sound.Events#SEEK
+     * @since 3.0.0
+     */
+    seek: {
+
+        get: function ()
+        {
             if (this.isPlaying)
             {
-                this.previousTime = value;
-                this.audio.currentTime = value;
+                return this.audio.currentTime - (this.currentMarker ? this.currentMarker.start : 0);
             }
             else if (this.isPaused)
             {
-                this.currentConfig.seek = value;
+                return this.currentConfig.seek;
+            }
+            else
+            {
+                return 0;
+            }
+        },
+
+        set: function (value)
+        {
+            if (this.manager.isLocked(this, 'seek', value))
+            {
+                return;
             }
 
-            /**
-             * @event Phaser.Sound.HTML5AudioSound#seek
-             * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-             * @param {number} value - An updated value of Phaser.Sound.HTML5AudioSound#seek property.
-             */
-            this.emit('seek', this, value);
+            if (this.startTime > 0)
+            {
+                return;
+            }
+
+            if (this.isPlaying || this.isPaused)
+            {
+                value = Math.min(Math.max(0, value), this.duration);
+
+                if (this.isPlaying)
+                {
+                    this.previousTime = value;
+                    this.audio.currentTime = value;
+                }
+                else if (this.isPaused)
+                {
+                    this.currentConfig.seek = value;
+                }
+
+                this.emit(Events.SEEK, this, value);
+            }
         }
-    }
-});
-
-/**
- * Property indicating whether or not
- * the sound or current sound marker will loop.
- *
- * @name Phaser.Sound.HTML5AudioSound#loop
- * @type {boolean}
- */
-Object.defineProperty(HTML5AudioSound.prototype, 'loop', {
-
-    get: function ()
-    {
-        return this.currentConfig.loop;
     },
 
-    set: function (value)
+    /**
+     * Seeks to a specific point in this sound.
+     *
+     * @method Phaser.Sound.HTML5AudioSound#setSeek
+     * @fires Phaser.Sound.Events#SEEK
+     * @since 3.4.0
+     *
+     * @param {number} value - The point in the sound to seek to.
+     *
+     * @return {Phaser.Sound.HTML5AudioSound} This Sound instance.
+     */
+    setSeek: function (value)
     {
-        this.currentConfig.loop = value;
-        if (this.manager.isLocked(this, 'loop', value))
+        this.seek = value;
+
+        return this;
+    },
+
+    /**
+     * Flag indicating whether or not the sound or current sound marker will loop.
+     * 
+     * @name Phaser.Sound.HTML5AudioSound#loop
+     * @type {boolean}
+     * @default false
+     * @fires Phaser.Sound.Events#LOOP
+     * @since 3.0.0
+     */
+    loop: {
+
+        get: function ()
         {
-            return;
-        }
-        if (this.audio)
+            return this.currentConfig.loop;
+        },
+
+        set: function (value)
         {
-            this.audio.loop = value;
+            this.currentConfig.loop = value;
+
+            if (this.manager.isLocked(this, 'loop', value))
+            {
+                return;
+            }
+
+            if (this.audio)
+            {
+                this.audio.loop = value;
+            }
+
+            this.emit(Events.LOOP, this, value);
         }
 
-        /**
-         * @event Phaser.Sound.HTML5AudioSound#loop
-         * @param {Phaser.Sound.HTML5AudioSound} sound - Reference to the sound that emitted event.
-         * @param {boolean} value - An updated value of Phaser.Sound.HTML5AudioSound#loop property.
-         */
-        this.emit('loop', this, value);
+    },
+
+    /**
+     * Sets the loop state of this Sound.
+     *
+     * @method Phaser.Sound.HTML5AudioSound#setLoop
+     * @fires Phaser.Sound.Events#LOOP
+     * @since 3.4.0
+     *
+     * @param {boolean} value - `true` to loop this sound, `false` to not loop it.
+     *
+     * @return {Phaser.Sound.HTML5AudioSound} This Sound instance.
+     */
+    setLoop: function (value)
+    {
+        this.loop = value;
+
+        return this;
     }
 
 });

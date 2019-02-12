@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -22,7 +22,7 @@ var Sprite = require('../../gameobjects/sprite/Sprite');
  *
  * @class ImpactSprite
  * @extends Phaser.GameObjects.Sprite
- * @memberOf Phaser.Physics.Impact
+ * @memberof Phaser.Physics.Impact
  * @constructor
  * @since 3.0.0
  *
@@ -39,7 +39,6 @@ var Sprite = require('../../gameobjects/sprite/Sprite');
  * @extends Phaser.Physics.Impact.Components.SetGameObject
  * @extends Phaser.Physics.Impact.Components.Velocity
  * @extends Phaser.GameObjects.Components.Alpha
- * @extends Phaser.GameObjects.Components.Animation
  * @extends Phaser.GameObjects.Components.BlendMode
  * @extends Phaser.GameObjects.Components.Depth
  * @extends Phaser.GameObjects.Components.Flip
@@ -58,7 +57,7 @@ var Sprite = require('../../gameobjects/sprite/Sprite');
  * @param {number} x - The horizontal position of this Game Object in the world.
  * @param {number} y - The vertical position of this Game Object in the world.
  * @param {string} texture - The key of the Texture this Game Object will use to render with, as stored in the Texture Manager.
- * @param {string|integer} [frame] - An optional frame from the Texture this Game Object is rendering with.
+ * @param {(string|integer)} [frame] - An optional frame from the Texture this Game Object is rendering with.
  */
 var ImpactSprite = new Class({
 

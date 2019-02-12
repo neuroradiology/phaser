@@ -1,13 +1,14 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * The Impact Debug component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.Debug
+ * @namespace Phaser.Physics.Impact.Components.Debug
  * @since 3.0.0
  */
 var Debug = {
@@ -18,11 +19,11 @@ var Debug = {
      * @method Phaser.Physics.Impact.Components.Debug#setDebug
      * @since 3.0.0
      *
-     * @param {[type]} showBody - [description]
-     * @param {[type]} showVelocity - [description]
-     * @param {[type]} bodyColor - [description]
+     * @param {boolean} showBody - [description]
+     * @param {boolean} showVelocity - [description]
+     * @param {number} bodyColor - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setDebug: function (showBody, showVelocity, bodyColor)
     {
@@ -39,9 +40,9 @@ var Debug = {
      * @method Phaser.Physics.Impact.Components.Debug#setDebugBodyColor
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {number} value - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setDebugBodyColor: function (value)
     {
@@ -54,7 +55,7 @@ var Debug = {
      * [description]
      *
      * @name Phaser.Physics.Impact.Components.Debug#debugShowBody
-     * @type {[type]}
+     * @type {boolean}
      * @since 3.0.0
      */
     debugShowBody: {
@@ -75,7 +76,7 @@ var Debug = {
      * [description]
      *
      * @name Phaser.Physics.Impact.Components.Debug#debugShowVelocity
-     * @type {[type]}
+     * @type {boolean}
      * @since 3.0.0
      */
     debugShowVelocity: {
@@ -96,7 +97,7 @@ var Debug = {
      * [description]
      *
      * @name Phaser.Physics.Impact.Components.Debug#debugBodyColor
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     debugBodyColor: {

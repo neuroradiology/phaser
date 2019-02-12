@@ -1,10 +1,10 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
-//  Adapted from [gl-matrix](https://github.com/toji/gl-matrix) by toji 
+//  Adapted from [gl-matrix](https://github.com/toji/gl-matrix) by toji
 //  and [vecmath](https://github.com/mattdesl/vecmath) by mattdesl
 
 var Class = require('../utils/Class');
@@ -13,14 +13,14 @@ var EPSILON = 0.000001;
 
 /**
  * @classdesc
- * [description]
+ * A four-dimensional matrix.
  *
  * @class Matrix4
- * @memberOf Phaser.Math
+ * @memberof Phaser.Math
  * @constructor
  * @since 3.0.0
  *
- * @param {Phaser.Math.Matrix4} [m] - [description]
+ * @param {Phaser.Math.Matrix4} [m] - Optional Matrix4 to copy values from.
  */
 var Matrix4 = new Class({
 
@@ -29,7 +29,7 @@ var Matrix4 = new Class({
     function Matrix4 (m)
     {
         /**
-         * [description]
+         * The matrix values.
          *
          * @name Phaser.Math.Matrix4#val
          * @type {Float32Array}
@@ -50,27 +50,29 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Make a clone of this Matrix4.
      *
      * @method Phaser.Math.Matrix4#clone
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} A clone of this Matrix4.
      */
     clone: function ()
     {
         return new Matrix4(this);
     },
 
+    //  TODO - Should work with basic values
+
     /**
-     * [description]
+     * This method is an alias for `Matrix4.copy`.
      *
      * @method Phaser.Math.Matrix4#set
      * @since 3.0.0
      *
-     * @param {[type]} src - [description]
+     * @param {Phaser.Math.Matrix4} src - The Matrix to set the values of this Matrix's from.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     set: function (src)
     {
@@ -78,14 +80,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Copy the values of a given Matrix into this Matrix.
      *
      * @method Phaser.Math.Matrix4#copy
      * @since 3.0.0
      *
-     * @param {[type]} src - [description]
+     * @param {Phaser.Math.Matrix4} src - The Matrix to copy the values from.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     copy: function (src)
     {
@@ -113,14 +115,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Set the values of this Matrix from the given array.
      *
      * @method Phaser.Math.Matrix4#fromArray
      * @since 3.0.0
      *
-     * @param {[type]} a - [description]
+     * @param {array} a - The array to copy the values from.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     fromArray: function (a)
     {
@@ -147,12 +149,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Reset this Matrix.
+     *
+     * Sets all values to `0`.
      *
      * @method Phaser.Math.Matrix4#zero
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     zero: function ()
     {
@@ -179,16 +183,16 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Set the `x`, `y` and `z` values of this Matrix.
      *
      * @method Phaser.Math.Matrix4#xyz
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
-     * @param {[type]} z - [description]
+     * @param {number} x - The x value.
+     * @param {number} y - The y value.
+     * @param {number} z - The z value.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     xyz: function (x, y, z)
     {
@@ -204,16 +208,16 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Set the scaling values of this Matrix.
      *
      * @method Phaser.Math.Matrix4#scaling
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
-     * @param {[type]} z - [description]
+     * @param {number} x - The x scaling value.
+     * @param {number} y - The y scaling value.
+     * @param {number} z - The z scaling value.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     scaling: function (x, y, z)
     {
@@ -230,12 +234,12 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Reset this Matrix to an identity (default) matrix.
      *
      * @method Phaser.Math.Matrix4#identity
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     identity: function ()
     {
@@ -262,12 +266,12 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Transpose this Matrix.
      *
      * @method Phaser.Math.Matrix4#transpose
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     transpose: function ()
     {
@@ -297,12 +301,12 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Invert this Matrix.
      *
      * @method Phaser.Math.Matrix4#invert
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     invert: function ()
     {
@@ -343,7 +347,6 @@ var Matrix4 = new Class({
         var b10 = a21 * a33 - a23 * a31;
         var b11 = a22 * a33 - a23 * a32;
 
-
         // Calculate the determinant
         var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 
@@ -375,12 +378,12 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Calculate the adjoint, or adjugate, of this Matrix.
      *
      * @method Phaser.Math.Matrix4#adjoint
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     adjoint: function ()
     {
@@ -427,12 +430,12 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Calculate the determinant of this Matrix.
      *
      * @method Phaser.Math.Matrix4#determinant
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {number} The determinant of this Matrix.
      */
     determinant: function ()
     {
@@ -476,14 +479,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Multiply this Matrix by the given Matrix.
      *
      * @method Phaser.Math.Matrix4#multiply
      * @since 3.0.0
      *
-     * @param {[type]} src - [description]
+     * @param {Phaser.Math.Matrix4} src - The Matrix to multiply this Matrix by.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     multiply: function (src)
     {
@@ -561,9 +564,9 @@ var Matrix4 = new Class({
      * @method Phaser.Math.Matrix4#multiplyLocal
      * @since 3.0.0
      *
-     * @param {[type]} src - [description]
+     * @param {Phaser.Math.Matrix4} src - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     multiplyLocal: function (src)
     {
@@ -595,14 +598,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Translate this Matrix using the given Vector.
      *
      * @method Phaser.Math.Matrix4#translate
      * @since 3.0.0
      *
-     * @param {[type]} v - [description]
+     * @param {(Phaser.Math.Vector3|Phaser.Math.Vector4)} v - The Vector to translate this Matrix with.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     translate: function (v)
     {
@@ -620,14 +623,40 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Translate this Matrix using the given values.
+     *
+     * @method Phaser.Math.Matrix4#translateXYZ
+     * @since 3.16.0
+     *
+     * @param {number} x - The x component.
+     * @param {number} y - The y component.
+     * @param {number} z - The z component.
+     *
+     * @return {Phaser.Math.Matrix4} This Matrix4.
+     */
+    translateXYZ: function (x, y, z)
+    {
+        var a = this.val;
+
+        a[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
+        a[13] = a[1] * x + a[5] * y + a[9] * z + a[13];
+        a[14] = a[2] * x + a[6] * y + a[10] * z + a[14];
+        a[15] = a[3] * x + a[7] * y + a[11] * z + a[15];
+
+        return this;
+    },
+
+    /**
+     * Apply a scale transformation to this Matrix.
+     *
+     * Uses the `x`, `y` and `z` components of the given Vector to scale the Matrix.
      *
      * @method Phaser.Math.Matrix4#scale
      * @since 3.0.0
      *
-     * @param {[type]} v - [description]
+     * @param {(Phaser.Math.Vector3|Phaser.Math.Vector4)} v - The Vector to scale this Matrix with.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     scale: function (v)
     {
@@ -654,17 +683,50 @@ var Matrix4 = new Class({
         return this;
     },
 
-    //  Axis = vec3, angle = radians
     /**
-     * [description]
+     * Apply a scale transformation to this Matrix.
+     *
+     * @method Phaser.Math.Matrix4#scaleXYZ
+     * @since 3.16.0
+     *
+     * @param {number} x - The x component.
+     * @param {number} y - The y component.
+     * @param {number} z - The z component.
+     *
+     * @return {Phaser.Math.Matrix4} This Matrix4.
+     */
+    scaleXYZ: function (x, y, z)
+    {
+        var a = this.val;
+
+        a[0] = a[0] * x;
+        a[1] = a[1] * x;
+        a[2] = a[2] * x;
+        a[3] = a[3] * x;
+
+        a[4] = a[4] * y;
+        a[5] = a[5] * y;
+        a[6] = a[6] * y;
+        a[7] = a[7] * y;
+
+        a[8] = a[8] * z;
+        a[9] = a[9] * z;
+        a[10] = a[10] * z;
+        a[11] = a[11] * z;
+
+        return this;
+    },
+
+    /**
+     * Derive a rotation matrix around the given axis.
      *
      * @method Phaser.Math.Matrix4#makeRotationAxis
      * @since 3.0.0
      *
-     * @param {[type]} axis - [description]
-     * @param {[type]} angle - [description]
+     * @param {(Phaser.Math.Vector3|Phaser.Math.Vector4)} axis - The rotation axis.
+     * @param {number} angle - The rotation angle in radians.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     makeRotationAxis: function (axis, angle)
     {
@@ -679,27 +741,26 @@ var Matrix4 = new Class({
         var tx = t * x;
         var ty = t * y;
 
-        this.set(
+        this.fromArray([
             tx * x + c, tx * y - s * z, tx * z + s * y, 0,
             tx * y + s * z, ty * y + c, ty * z - s * x, 0,
             tx * z - s * y, ty * z + s * x, t * z * z + c, 0,
             0, 0, 0, 1
-        );
+        ]);
 
         return this;
     },
 
-    //  aka rotationAxis
     /**
-     * [description]
+     * Apply a rotation transformation to this Matrix.
      *
      * @method Phaser.Math.Matrix4#rotate
      * @since 3.0.0
      *
-     * @param {[type]} rad - [description]
-     * @param {[type]} axis - [description]
+     * @param {number} rad - The angle in radians to rotate by.
+     * @param {Phaser.Math.Vector3} axis - The axis to rotate upon.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     rotate: function (rad, axis)
     {
@@ -713,7 +774,7 @@ var Matrix4 = new Class({
         {
             return null;
         }
-        
+
         len = 1 / len;
         x *= len;
         y *= len;
@@ -769,14 +830,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Rotate this matrix on its X axis.
      *
      * @method Phaser.Math.Matrix4#rotateX
      * @since 3.0.0
      *
-     * @param {[type]} rad - [description]
+     * @param {number} rad - The angle in radians to rotate by.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     rotateX: function (rad)
     {
@@ -808,14 +869,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Rotate this matrix on its Y axis.
      *
      * @method Phaser.Math.Matrix4#rotateY
      * @since 3.0.0
      *
-     * @param {[type]} rad - [description]
+     * @param {number} rad - The angle to rotate by, in radians.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     rotateY: function (rad)
     {
@@ -847,14 +908,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Rotate this matrix on its Z axis.
      *
      * @method Phaser.Math.Matrix4#rotateZ
      * @since 3.0.0
      *
-     * @param {[type]} rad - [description]
+     * @param {number} rad - The angle to rotate by, in radians.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     rotateZ: function (rad)
     {
@@ -886,15 +947,15 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Set the values of this Matrix from the given rotation Quaternion and translation Vector.
      *
      * @method Phaser.Math.Matrix4#fromRotationTranslation
      * @since 3.0.0
      *
-     * @param {[type]} q - [description]
-     * @param {[type]} v - [description]
+     * @param {Phaser.Math.Quaternion} q - The Quaternion to set rotation from.
+     * @param {Phaser.Math.Vector3} v - The Vector to set translation from.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     fromRotationTranslation: function (q, v)
     {
@@ -946,14 +1007,14 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Set the values of this Matrix from the given Quaternion.
      *
      * @method Phaser.Math.Matrix4#fromQuat
      * @since 3.0.0
      *
-     * @param {[type]} q - [description]
+     * @param {Phaser.Math.Quaternion} q - The Quaternion to set the values of this Matrix from.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     fromQuat: function (q)
     {
@@ -1004,30 +1065,19 @@ var Matrix4 = new Class({
     },
 
     /**
-     * Generates a frustum matrix with the given bounds
-     *
-     * @param {Number} left Left bound of the frustum
-     * @param {Number} right Right bound of the frustum
-     * @param {Number} bottom Bottom bound of the frustum
-     * @param {Number} top Top bound of the frustum
-     * @param {Number} near Near bound of the frustum
-     * @param {Number} far Far bound of the frustum
-     * @returns {Matrix4} this for chaining
-     */
-    /**
-     * [description]
+     * Generate a frustum matrix with the given bounds.
      *
      * @method Phaser.Math.Matrix4#frustum
      * @since 3.0.0
      *
-     * @param {[type]} left - [description]
-     * @param {[type]} right - [description]
-     * @param {[type]} bottom - [description]
-     * @param {[type]} top - [description]
-     * @param {[type]} near - [description]
-     * @param {[type]} far - [description]
+     * @param {number} left - The left bound of the frustum.
+     * @param {number} right - The right bound of the frustum.
+     * @param {number} bottom - The bottom bound of the frustum.
+     * @param {number} top - The top bound of the frustum.
+     * @param {number} near - The near bound of the frustum.
+     * @param {number} far - The far bound of the frustum.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     frustum: function (left, right, bottom, top, near, far)
     {
@@ -1061,27 +1111,17 @@ var Matrix4 = new Class({
     },
 
     /**
-     * Generates a perspective projection matrix with the given bounds.
-     * perspective fov lh
-     *
-     * @param {number} fovy Vertical field of view in radians
-     * @param {number} aspect Aspect ratio. typically viewport width/height
-     * @param {number} near Near bound of the frustum
-     * @param {number} far Far bound of the frustum
-     * @returns {Matrix4} this for chaining
-     */
-    /**
-     * [description]
+     * Generate a perspective projection matrix with the given bounds.
      *
      * @method Phaser.Math.Matrix4#perspective
      * @since 3.0.0
      *
-     * @param {[type]} fovy - [description]
-     * @param {[type]} aspect - [description]
-     * @param {[type]} near - [description]
-     * @param {[type]} far - [description]
+     * @param {number} fovy - Vertical field of view in radians
+     * @param {number} aspect - Aspect ratio. Typically viewport width  /height.
+     * @param {number} near - Near bound of the frustum.
+     * @param {number} far - Far bound of the frustum.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     perspective: function (fovy, aspect, near, far)
     {
@@ -1113,17 +1153,17 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Generate a perspective projection matrix with the given bounds.
      *
      * @method Phaser.Math.Matrix4#perspectiveLH
      * @since 3.0.0
      *
-     * @param {[type]} width - [description]
-     * @param {[type]} height - [description]
-     * @param {[type]} near - [description]
-     * @param {[type]} far - [description]
+     * @param {number} width - The width of the frustum.
+     * @param {number} height - The height of the frustum.
+     * @param {number} near - Near bound of the frustum.
+     * @param {number} far - Far bound of the frustum.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     perspectiveLH: function (width, height, near, far)
     {
@@ -1153,30 +1193,19 @@ var Matrix4 = new Class({
     },
 
     /**
-     * Generates a orthogonal projection matrix with the given bounds
-     *
-     * @param {number} left Left bound of the frustum
-     * @param {number} right Right bound of the frustum
-     * @param {number} bottom Bottom bound of the frustum
-     * @param {number} top Top bound of the frustum
-     * @param {number} near Near bound of the frustum
-     * @param {number} far Far bound of the frustum
-     * @returns {Matrix4} this for chaining
-     */
-    /**
-     * [description]
+     * Generate an orthogonal projection matrix with the given bounds.
      *
      * @method Phaser.Math.Matrix4#ortho
      * @since 3.0.0
      *
-     * @param {[type]} left - [description]
-     * @param {[type]} right - [description]
-     * @param {[type]} bottom - [description]
-     * @param {[type]} top - [description]
-     * @param {[type]} near - [description]
-     * @param {[type]} far - [description]
+     * @param {number} left - The left bound of the frustum.
+     * @param {number} right - The right bound of the frustum.
+     * @param {number} bottom - The bottom bound of the frustum.
+     * @param {number} top - The top bound of the frustum.
+     * @param {number} near - The near bound of the frustum.
+     * @param {number} far - The far bound of the frustum.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     ortho: function (left, right, bottom, top, near, far)
     {
@@ -1214,24 +1243,16 @@ var Matrix4 = new Class({
     },
 
     /**
-     * Generates a look-at matrix with the given eye position, focal point, and up axis
-     *
-     * @param {Vector3} eye Position of the viewer
-     * @param {Vector3} center Point the viewer is looking at
-     * @param {Vector3} up vec3 pointing up
-     * @returns {Matrix4} this for chaining
-     */
-    /**
-     * [description]
+     * Generate a look-at matrix with the given eye position, focal point, and up axis.
      *
      * @method Phaser.Math.Matrix4#lookAt
      * @since 3.0.0
      *
-     * @param {[type]} eye - [description]
-     * @param {[type]} center - [description]
-     * @param {[type]} up - [description]
+     * @param {Phaser.Math.Vector3} eye - Position of the viewer
+     * @param {Phaser.Math.Vector3} center - Point the viewer is looking at
+     * @param {Phaser.Math.Vector3} up - vec3 pointing up.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     lookAt: function (eye, center, up)
     {
@@ -1330,16 +1351,16 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Set the values of this matrix from the given `yaw`, `pitch` and `roll` values.
      *
      * @method Phaser.Math.Matrix4#yawPitchRoll
      * @since 3.0.0
      *
-     * @param {[type]} yaw - [description]
-     * @param {[type]} pitch - [description]
-     * @param {[type]} roll - [description]
+     * @param {number} yaw - [description]
+     * @param {number} pitch - [description]
+     * @param {number} roll - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     yawPitchRoll: function (yaw, pitch, roll)
     {
@@ -1391,18 +1412,18 @@ var Matrix4 = new Class({
     },
 
     /**
-     * [description]
+     * Generate a world matrix from the given rotation, position, scale, view matrix and projection matrix.
      *
      * @method Phaser.Math.Matrix4#setWorldMatrix
      * @since 3.0.0
      *
-     * @param {[type]} rotation - [description]
-     * @param {[type]} position - [description]
-     * @param {[type]} scale - [description]
-     * @param {[type]} viewMatrix - [description]
-     * @param {[type]} projectionMatrix - [description]
+     * @param {Phaser.Math.Vector3} rotation - The rotation of the world matrix.
+     * @param {Phaser.Math.Vector3} position - The position of the world matrix.
+     * @param {Phaser.Math.Vector3} scale - The scale of the world matrix.
+     * @param {Phaser.Math.Matrix4} [viewMatrix] - The view matrix.
+     * @param {Phaser.Math.Matrix4} [projectionMatrix] - The projection matrix.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.Math.Matrix4} This Matrix4.
      */
     setWorldMatrix: function (rotation, position, scale, viewMatrix, projectionMatrix)
     {

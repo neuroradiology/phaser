@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -8,7 +8,7 @@
  * Provides methods used for visually flipping a Game Object.
  * Should be applied as a mixin and not used directly.
  * 
- * @name Phaser.GameObjects.Components.Flip
+ * @namespace Phaser.GameObjects.Components.Flip
  * @since 3.0.0
  */
 
@@ -44,7 +44,7 @@ var Flip = {
      * @method Phaser.GameObjects.Components.Flip#toggleFlipX
      * @since 3.0.0
      * 
-     * @return {Phaser.GameObjects.GameObject} This Game Object instance.
+     * @return {this} This Game Object instance.
      */
     toggleFlipX: function ()
     {
@@ -59,7 +59,7 @@ var Flip = {
      * @method Phaser.GameObjects.Components.Flip#toggleFlipY
      * @since 3.0.0
      * 
-     * @return {Phaser.GameObjects.GameObject} This Game Object instance.
+     * @return {this} This Game Object instance.
      */
     toggleFlipY: function ()
     {
@@ -76,7 +76,7 @@ var Flip = {
      *
      * @param {boolean} value - The flipped state. `false` for no flip, or `true` to be flipped.
      * 
-     * @return {Phaser.GameObjects.GameObject} This Game Object instance.
+     * @return {this} This Game Object instance.
      */
     setFlipX: function (value)
     {
@@ -93,7 +93,7 @@ var Flip = {
      *
      * @param {boolean} value - The flipped state. `false` for no flip, or `true` to be flipped.
      * 
-     * @return {Phaser.GameObjects.GameObject} This Game Object instance.
+     * @return {this} This Game Object instance.
      */
     setFlipY: function (value)
     {
@@ -111,7 +111,7 @@ var Flip = {
      * @param {boolean} x - The horizontal flipped state. `false` for no flip, or `true` to be flipped.
      * @param {boolean} y - The horizontal flipped state. `false` for no flip, or `true` to be flipped.
      * 
-     * @return {Phaser.GameObjects.GameObject} This Game Object instance.
+     * @return {this} This Game Object instance.
      */
     setFlip: function (x, y)
     {
@@ -127,7 +127,7 @@ var Flip = {
      * @method Phaser.GameObjects.Components.Flip#resetFlip
      * @since 3.0.0
      *
-     * @return {Phaser.GameObjects.GameObject} This Game Object instance.
+     * @return {this} This Game Object instance.
      */
     resetFlip: function ()
     {

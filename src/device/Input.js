@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -13,10 +13,9 @@ var Browser = require('./Browser');
  * They are then referenced by internal game systems and are available for you to access
  * via `this.sys.game.device.input` from within any Scene.
  * 
- * @name Phaser.Device.Input
+ * @typedef {object} Phaser.Device.Input
  * @since 3.0.0
- *
- * @type {object}
+ * 
  * @property {?string} wheelType - The newest type of Wheel/Scroll event supported: 'wheel', 'mousewheel', 'DOMMouseScroll'
  * @property {boolean} gamepads - Is navigator.getGamepads available?
  * @property {boolean} mspointer - Is mspointer available?

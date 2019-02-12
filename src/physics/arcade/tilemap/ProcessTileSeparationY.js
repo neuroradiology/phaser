@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -17,10 +17,12 @@ var ProcessTileSeparationY = function (body, y)
 {
     if (y < 0)
     {
+        body.blocked.none = false;
         body.blocked.up = true;
     }
     else if (y > 0)
     {
+        body.blocked.none = false;
         body.blocked.down = true;
     }
 

@@ -1,13 +1,14 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * The Impact Offset component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.Offset
+ * @namespace Phaser.Physics.Impact.Components.Offset
  * @since 3.0.0
  */
 var Offset = {
@@ -18,12 +19,12 @@ var Offset = {
      * @method Phaser.Physics.Impact.Components.Offset#setOffset
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
-     * @param {[type]} width - [description]
-     * @param {[type]} height - [description]
+     * @param {number} x - [description]
+     * @param {number} y - [description]
+     * @param {number} [width] - [description]
+     * @param {number} [height] - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setOffset: function (x, y, width, height)
     {

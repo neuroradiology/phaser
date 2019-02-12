@@ -1,14 +1,40 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
+/**
+ * Read an integer value from an XML Node.
+ *
+ * @function getValue
+ * @since 3.0.0
+ * @private
+ *
+ * @param {Node} node - The XML Node.
+ * @param {string} attribute - The attribute to read.
+ *
+ * @return {integer} The parsed value.
+ */
 function getValue (node, attribute)
 {
     return parseInt(node.getAttribute(attribute), 10);
 }
 
+/**
+ * Parse an XML font to Bitmap Font data for the Bitmap Font cache.
+ *
+ * @function ParseXMLBitmapFont
+ * @since 3.0.0
+ * @private
+ *
+ * @param {XMLDocument} xml - The XML Document to parse the font from.
+ * @param {integer} [xSpacing=0] - The x-axis spacing to add between each letter.
+ * @param {integer} [ySpacing=0] - The y-axis spacing to add to the line height.
+ * @param {Phaser.Textures.Frame} [frame] - The texture frame to take into account while parsing.
+ *
+ * @return {BitmapFontData} The parsed Bitmap Font data.
+ */
 var ParseXMLBitmapFont = function (xml, xSpacing, ySpacing, frame)
 {
     if (xSpacing === undefined) { xSpacing = 0; }
@@ -25,10 +51,6 @@ var ParseXMLBitmapFont = function (xml, xSpacing, ySpacing, frame)
 
     var letters = xml.getElementsByTagName('char');
 
-    var x = 0;
-    var y = 0;
-    var cx = 0;
-    var cy = 0;
     var adjustForTrim = (frame !== undefined && frame.trimmed);
 
     if (adjustForTrim)
@@ -36,8 +58,6 @@ var ParseXMLBitmapFont = function (xml, xSpacing, ySpacing, frame)
         var top = frame.height;
         var left = frame.width;
     }
-
-    var diff = 0;
 
     for (var i = 0; i < letters.length; i++)
     {
@@ -53,18 +73,6 @@ var ParseXMLBitmapFont = function (xml, xSpacing, ySpacing, frame)
 
         if (adjustForTrim)
         {
-            // if (gx + gw > frame.width)
-            // {
-            //     diff = frame.width - (gx + gw);
-                // gw -= diff;
-            // }
-
-            // if (gy + gh > frame.height)
-            // {
-            //     diff = frame.height - (gy + gh);
-                // gh -= diff;
-            // }
-
             if (gx < left)
             {
                 left = gx;

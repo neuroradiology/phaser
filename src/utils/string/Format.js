@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -20,12 +20,10 @@
  */
 var Format = function (string, values)
 {
-    string.replace(/%([0-9]+)/g, function (s, n)
+    return string.replace(/%([0-9]+)/g, function (s, n)
     {
         return values[Number(n) - 1];
     });
-
-    return string;
 };
 
 module.exports = Format;

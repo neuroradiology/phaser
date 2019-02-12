@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -9,11 +9,10 @@
  * These values are read-only and populated during the boot sequence of the game.
  * They are then referenced by internal game systems and are available for you to access
  * via `this.sys.game.device.os` from within any Scene.
- * 
- * @name Phaser.Device.OS
+ *
+ * @typedef {object} Phaser.Device.OS
  * @since 3.0.0
  *
- * @type {object}
  * @property {boolean} android - Is running on android?
  * @property {boolean} chromeOS - Is running on chromeOS?
  * @property {boolean} cocoonJS - Is the game running under CocoonJS?
@@ -72,23 +71,28 @@ function init ()
     {
         OS.windows = true;
     }
-    else if (/Mac OS/.test(ua))
+    else if (/Mac OS/.test(ua) && !(/like Mac OS/.test(ua)))
     {
         OS.macOS = true;
-    }
-    else if (/Linux/.test(ua))
-    {
-        OS.linux = true;
     }
     else if (/Android/.test(ua))
     {
         OS.android = true;
     }
+    else if (/Linux/.test(ua))
+    {
+        OS.linux = true;
+    }
     else if (/iP[ao]d|iPhone/i.test(ua))
     {
         OS.iOS = true;
+
         (navigator.appVersion).match(/OS (\d+)/);
+
         OS.iOSVersion = parseInt(RegExp.$1, 10);
+
+        OS.iPhone = ua.toLowerCase().indexOf('iphone') !== -1;
+        OS.iPad = ua.toLowerCase().indexOf('ipad') !== -1;
     }
     else if (/Kindle/.test(ua) || (/\bKF[A-Z][A-Z]+/).test(ua) || (/Silk.*Mobile Safari/).test(ua))
     {
@@ -129,24 +133,24 @@ function init ()
     {
         OS.webApp = true;
     }
-    
+
     if (window.cordova !== undefined)
     {
         OS.cordova = true;
     }
-    
-    if ((typeof process !== 'undefined') && (typeof process.versions.node !== 'undefined'))
+
+    if (typeof process !== 'undefined' && process.versions && process.versions.node)
     {
         OS.node = true;
     }
-    
+
     if (OS.node && typeof process.versions === 'object')
     {
         OS.nodeWebkit = !!process.versions['node-webkit'];
-        
+
         OS.electron = !!process.versions.electron;
     }
-    
+
     if (navigator.isCocoonJS)
     {
         OS.cocoonJS = true;
@@ -170,9 +174,6 @@ function init ()
     {
         OS.crosswalk = true;
     }
-
-    OS.iPhone = ua.toLowerCase().indexOf('iphone') !== -1;
-    OS.iPad = ua.toLowerCase().indexOf('ipad') !== -1;
 
     OS.pixelRatio = window['devicePixelRatio'] || 1;
 

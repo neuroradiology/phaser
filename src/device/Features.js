@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -14,10 +14,9 @@ var CanvasPool = require('../display/canvas/CanvasPool');
  * They are then referenced by internal game systems and are available for you to access
  * via `this.sys.game.device.features` from within any Scene.
  * 
- * @name Phaser.Device.Features
+ * @typedef {object} Phaser.Device.Features
  * @since 3.0.0
  * 
- * @type {object}
  * @property {?boolean} canvasBitBltShift - True if canvas supports a 'copy' bitblt onto itself when the source and destination regions overlap.
  * @property {boolean} canvas - Is canvas available?
  * @property {boolean} file - Is file available?
@@ -117,11 +116,8 @@ function init ()
                 //  Can't be done on a webgl context
                 var image = ctx2D.createImageData(1, 1);
 
-                /**
-                * Test to see if ImageData uses CanvasPixelArray or Uint8ClampedArray.
-                *
-                * @author Matt DesLauriers (@mattdesl)
-                */
+                //  Test to see if ImageData uses CanvasPixelArray or Uint8ClampedArray.
+                //  @author Matt DesLauriers (@mattdesl)
                 isUint8 = image.data instanceof Uint8ClampedArray;
 
                 CanvasPool.remove(canvas);

@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -12,10 +12,9 @@ var OS = require('./OS');
  * They are then referenced by internal game systems and are available for you to access
  * via `this.sys.game.device.browser` from within any Scene.
  * 
- * @name Phaser.Device.Browser
+ * @typedef {object} Phaser.Device.Browser
  * @since 3.0.0
- *
- * @type {object}
+ * 
  * @property {boolean} chrome - Set to true if running in Chrome.
  * @property {boolean} edge - Set to true if running in Microsoft Edge browser.
  * @property {boolean} firefox - Set to true if running in Firefox.

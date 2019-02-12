@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -12,12 +12,12 @@ var DefaultDefs = require('./DefaultDefs');
  * [description]
  *
  * @class CollisionMap
- * @memberOf Phaser.Physics.Impact
+ * @memberof Phaser.Physics.Impact
  * @constructor
  * @since 3.0.0
  *
  * @param {integer} [tilesize=32] - [description]
- * @param {array} data - [description]
+ * @param {array} [data] - [description]
  */
 var CollisionMap = new Class({
 

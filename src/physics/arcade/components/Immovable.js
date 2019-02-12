@@ -1,26 +1,26 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * Provides methods used for setting the immovable properties of an Arcade Physics Body.
  *
- * @name Phaser.Physics.Arcade.Components.Immovable
+ * @namespace Phaser.Physics.Arcade.Components.Immovable
  * @since 3.0.0
  */
 var Immovable = {
 
     /**
-     * [description]
+     * Sets Whether this Body can be moved by collisions with another Body.
      *
      * @method Phaser.Physics.Arcade.Components.Immovable#setImmovable
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {boolean} [value=true] - Sets if this body can be moved by collisions with another Body.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setImmovable: function (value)
     {

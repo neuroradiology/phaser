@@ -1,26 +1,27 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * The Impact Bounce component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.Bounce
+ * @namespace Phaser.Physics.Impact.Components.Bounce
  * @since 3.0.0
  */
 var Bounce = {
 
     /**
-     * [description]
+     * Sets the impact physics bounce, or restitution, value.
      *
      * @method Phaser.Physics.Impact.Components.Bounce#setBounce
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {number} value - A value between 0 (no rebound) and 1 (full rebound)
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setBounce: function (value)
     {
@@ -30,14 +31,14 @@ var Bounce = {
     },
 
     /**
-     * [description]
+     * Sets the minimum velocity the body is allowed to be moving to be considered for rebound.
      *
      * @method Phaser.Physics.Impact.Components.Bounce#setMinBounceVelocity
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {number} value - The minimum allowed velocity.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setMinBounceVelocity: function (value)
     {
@@ -47,10 +48,11 @@ var Bounce = {
     },
 
     /**
-     * [description]
+     * The bounce, or restitution, value of this body.
+     * A value between 0 (no rebound) and 1 (full rebound)
      *
      * @name Phaser.Physics.Impact.Components.Bounce#bounce
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     bounce: {

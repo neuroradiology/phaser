@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -24,6 +24,8 @@ AlignInMap[ALIGN_CONST.TOP_RIGHT] = require('./TopRight');
  *
  * @function Phaser.Display.Align.In.QuickSet
  * @since 3.0.0
+ *
+ * @generic {Phaser.GameObjects.GameObject} G - [child,$return]
  *
  * @param {Phaser.GameObjects.GameObject} child - The Game Object that will be positioned.
  * @param {Phaser.GameObjects.GameObject} alignIn - The Game Object to base the alignment position on.

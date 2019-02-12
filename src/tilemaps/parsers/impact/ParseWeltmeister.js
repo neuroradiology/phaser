@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -8,6 +8,10 @@ var Formats = require('../../Formats');
 var MapData = require('../../mapdata/MapData');
 var ParseTileLayers = require('./ParseTileLayers');
 var ParseTilesets = require('./ParseTilesets');
+
+/**
+ * @namespace Phaser.Tilemaps.Parsers.Impact
+ */
 
 /**
  * Parses a Weltmeister JSON object into a new MapData object.
@@ -24,7 +28,7 @@ var ParseTilesets = require('./ParseTilesets');
  * consumption. However if your map is small or you need to update the tiles dynamically, then leave
  * the default value set.
  *
- * @return {object|null} [description]
+ * @return {?object} [description]
  */
 var ParseWeltmeister = function (name, json, insertNull)
 {

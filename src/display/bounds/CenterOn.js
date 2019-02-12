@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -12,6 +12,8 @@ var SetCenterY = require('./SetCenterY');
  *
  * @function Phaser.Display.Bounds.CenterOn
  * @since 3.0.0
+ *
+ * @generic {Phaser.GameObjects.GameObject} G - [gameObject,$return]
  *
  * @param {Phaser.GameObjects.GameObject} gameObject - The Game Object that will be re-positioned.
  * @param {number} x - The horizontal coordinate to position the Game Object on.

@@ -1,15 +1,24 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var COLLIDES = require('../COLLIDES');
 
 /**
- * [description]
+ * @callback CollideCallback
  *
- * @name Phaser.Physics.Impact.Components.Collides
+ * @param {Phaser.Physics.Impact.Body} body - [description]
+ * @param {Phaser.Physics.Impact.Body} other - [description]
+ * @param {string} axis - [description]
+ */
+
+/**
+ * The Impact Collides component.
+ * Should be applied as a mixin.
+ *
+ * @namespace Phaser.Physics.Impact.Components.Collides
  * @since 3.0.0
  */
 var Collides = {
@@ -23,10 +32,10 @@ var Collides = {
      * @method Phaser.Physics.Impact.Components.Collides#setCollideCallback
      * @since 3.0.0
      *
-     * @param {[type]} callback - [description]
-     * @param {[type]} scope - [description]
+     * @param {CollideCallback} callback - [description]
+     * @param {*} scope - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCollideCallback: function (callback, scope)
     {
@@ -46,7 +55,7 @@ var Collides = {
      * @method Phaser.Physics.Impact.Components.Collides#setCollidesNever
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCollidesNever: function ()
     {
@@ -58,12 +67,12 @@ var Collides = {
     /**
      * [description]
      *
-     * @method Phaser.Physics.Impact.Components.Collides#setLite
-     * @since 3.0.0
+     * @method Phaser.Physics.Impact.Components.Collides#setLiteCollision
+     * @since 3.6.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
-    setLite: function ()
+    setLiteCollision: function ()
     {
         this.body.collides = COLLIDES.LITE;
 
@@ -73,12 +82,12 @@ var Collides = {
     /**
      * [description]
      *
-     * @method Phaser.Physics.Impact.Components.Collides#setPassive
-     * @since 3.0.0
+     * @method Phaser.Physics.Impact.Components.Collides#setPassiveCollision
+     * @since 3.6.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
-    setPassive: function ()
+    setPassiveCollision: function ()
     {
         this.body.collides = COLLIDES.PASSIVE;
 
@@ -88,12 +97,12 @@ var Collides = {
     /**
      * [description]
      *
-     * @method Phaser.Physics.Impact.Components.Collides#setActive
-     * @since 3.0.0
+     * @method Phaser.Physics.Impact.Components.Collides#setActiveCollision
+     * @since 3.6.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
-    setActive: function ()
+    setActiveCollision: function ()
     {
         this.body.collides = COLLIDES.ACTIVE;
 
@@ -103,12 +112,12 @@ var Collides = {
     /**
      * [description]
      *
-     * @method Phaser.Physics.Impact.Components.Collides#setFixed
-     * @since 3.0.0
+     * @method Phaser.Physics.Impact.Components.Collides#setFixedCollision
+     * @since 3.6.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
-    setFixed: function ()
+    setFixedCollision: function ()
     {
         this.body.collides = COLLIDES.FIXED;
 
@@ -119,7 +128,7 @@ var Collides = {
      * [description]
      *
      * @name Phaser.Physics.Impact.Components.Collides#collides
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     collides: {

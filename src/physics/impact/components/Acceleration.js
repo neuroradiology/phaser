@@ -1,26 +1,27 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * The Impact Acceleration component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.Acceleration
+ * @namespace Phaser.Physics.Impact.Components.Acceleration
  * @since 3.0.0
  */
 var Acceleration = {
 
     /**
-     * [description]
+     * Sets the horizontal acceleration of this body.
      *
      * @method Phaser.Physics.Impact.Components.Acceleration#setAccelerationX
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
+     * @param {number} x - The amount of acceleration to apply.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setAccelerationX: function (x)
     {
@@ -30,14 +31,14 @@ var Acceleration = {
     },
 
     /**
-     * [description]
+     * Sets the vertical acceleration of this body.
      *
      * @method Phaser.Physics.Impact.Components.Acceleration#setAccelerationY
      * @since 3.0.0
      *
-     * @param {[type]} y - [description]
+     * @param {number} y - The amount of acceleration to apply.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setAccelerationY: function (y)
     {
@@ -47,15 +48,15 @@ var Acceleration = {
     },
 
     /**
-     * [description]
+     * Sets the horizontal and vertical acceleration of this body.
      *
      * @method Phaser.Physics.Impact.Components.Acceleration#setAcceleration
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
+     * @param {number} x - The amount of horizontal acceleration to apply.
+     * @param {number} y - The amount of vertical acceleration to apply.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setAcceleration: function (x, y)
     {

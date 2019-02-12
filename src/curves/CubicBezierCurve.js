@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -13,15 +13,15 @@ var Vector2 = require('../math/Vector2');
 
 /**
  * @classdesc
- * [description]
+ * A higher-order Bézier curve constructed of four points.
  *
- * @class CubicBezierCurve
+ * @class CubicBezier
  * @extends Phaser.Curves.Curve
- * @memberOf Phaser.Curves
+ * @memberof Phaser.Curves
  * @constructor
  * @since 3.0.0
  *
- * @param {Phaser.Math.Vector2|Phaser.Math.Vector2[]} p0 - Start point, or an array of point pairs.
+ * @param {(Phaser.Math.Vector2|Phaser.Math.Vector2[])} p0 - Start point, or an array of point pairs.
  * @param {Phaser.Math.Vector2} p1 - Control Point 1.
  * @param {Phaser.Math.Vector2} p2 - Control Point 2.
  * @param {Phaser.Math.Vector2} p3 - End Point.
@@ -45,36 +45,36 @@ var CubicBezierCurve = new Class({
         }
 
         /**
-         * [description]
+         * The start point of this curve.
          *
-         * @name Phaser.Curves.CubicBezierCurve#p0
+         * @name Phaser.Curves.CubicBezier#p0
          * @type {Phaser.Math.Vector2}
          * @since 3.0.0
          */
         this.p0 = p0;
 
         /**
-         * [description]
+         * The first control point of this curve.
          *
-         * @name Phaser.Curves.CubicBezierCurve#p1
+         * @name Phaser.Curves.CubicBezier#p1
          * @type {Phaser.Math.Vector2}
          * @since 3.0.0
          */
         this.p1 = p1;
 
         /**
-         * [description]
+         * The second control point of this curve.
          *
-         * @name Phaser.Curves.CubicBezierCurve#p2
+         * @name Phaser.Curves.CubicBezier#p2
          * @type {Phaser.Math.Vector2}
          * @since 3.0.0
          */
         this.p2 = p2;
 
         /**
-         * [description]
+         * The end point of this curve.
          *
-         * @name Phaser.Curves.CubicBezierCurve#p3
+         * @name Phaser.Curves.CubicBezier#p3
          * @type {Phaser.Math.Vector2}
          * @since 3.0.0
          */
@@ -82,14 +82,16 @@ var CubicBezierCurve = new Class({
     },
 
     /**
-     * [description]
+     * Gets the starting point on the curve.
      *
-     * @method Phaser.Curves.CubicBezierCurve#getStartPoint
+     * @method Phaser.Curves.CubicBezier#getStartPoint
      * @since 3.0.0
      *
-     * @param {Phaser.Math.Vector2} out - [description]
+     * @generic {Phaser.Math.Vector2} O - [out,$return]
      *
-     * @return {Phaser.Math.Vector2} [description]
+     * @param {Phaser.Math.Vector2} [out] - A Vector2 object to store the result in. If not given will be created.
+     *
+     * @return {Phaser.Math.Vector2} The coordinates of the point on the curve. If an `out` object was given this will be returned.
      */
     getStartPoint: function (out)
     {
@@ -99,14 +101,14 @@ var CubicBezierCurve = new Class({
     },
 
     /**
-     * [description]
+     * Returns the resolution of this curve.
      *
-     * @method Phaser.Curves.CubicBezierCurve#getResolution
+     * @method Phaser.Curves.CubicBezier#getResolution
      * @since 3.0.0
      *
-     * @param {[type]} divisions - [description]
+     * @param {number} divisions - The amount of divisions used by this curve.
      *
-     * @return {[type]} [description]
+     * @return {number} The resolution of the curve.
      */
     getResolution: function (divisions)
     {
@@ -114,15 +116,17 @@ var CubicBezierCurve = new Class({
     },
 
     /**
-     * [description]
+     * Get point at relative position in curve according to length.
      *
-     * @method Phaser.Curves.CubicBezierCurve#getPoint
+     * @method Phaser.Curves.CubicBezier#getPoint
      * @since 3.0.0
      *
-     * @param {[type]} t - [description]
-     * @param {[type]} out - [description]
+     * @generic {Phaser.Math.Vector2} O - [out,$return]
      *
-     * @return {[type]} [description]
+     * @param {number} t - The position along the curve to return. Where 0 is the start and 1 is the end.
+     * @param {Phaser.Math.Vector2} [out] - A Vector2 object to store the result in. If not given will be created.
+     *
+     * @return {Phaser.Math.Vector2} The coordinates of the point on the curve. If an `out` object was given this will be returned.
      */
     getPoint: function (t, out)
     {
@@ -137,15 +141,17 @@ var CubicBezierCurve = new Class({
     },
 
     /**
-     * [description]
+     * Draws this curve to the specified graphics object.
      *
-     * @method Phaser.Curves.CubicBezierCurve#draw
+     * @method Phaser.Curves.CubicBezier#draw
      * @since 3.0.0
      *
-     * @param {Phaser.GameObjects.Graphics} graphics - [description]
-     * @param {integer} [pointsTotal=32] - [description]
+     * @generic {Phaser.GameObjects.Graphics} G - [graphics,$return]
      *
-     * @return {Phaser.GameObjects.Graphics} [description]
+     * @param {Phaser.GameObjects.Graphics} graphics - The graphics object this curve should be drawn to.
+     * @param {integer} [pointsTotal=32] - The number of intermediary points that make up this curve. A higher number of points will result in a smoother curve.
+     *
+     * @return {Phaser.GameObjects.Graphics} The graphics object this curve was drawn to. Useful for method chaining.
      */
     draw: function (graphics, pointsTotal)
     {
@@ -168,12 +174,12 @@ var CubicBezierCurve = new Class({
     },
 
     /**
-     * [description]
+     * Returns a JSON object that describes this curve.
      *
-     * @method Phaser.Curves.CubicBezierCurve#toJSON
+     * @method Phaser.Curves.CubicBezier#toJSON
      * @since 3.0.0
      *
-     * @return {object} [description]
+     * @return {JSONCurve} The JSON object containing this curve data.
      */
     toJSON: function ()
     {
@@ -190,6 +196,16 @@ var CubicBezierCurve = new Class({
 
 });
 
+/**
+ * Generates a curve from a JSON object.
+ *
+ * @function Phaser.Curves.CubicBezier.fromJSON
+ * @since 3.0.0
+ *
+ * @param {JSONCurve} data - The JSON object containing this curve data.
+ *
+ * @return {Phaser.Curves.CubicBezier} The curve generated from the JSON object.
+ */
 CubicBezierCurve.fromJSON = function (data)
 {
     var points = data.points;

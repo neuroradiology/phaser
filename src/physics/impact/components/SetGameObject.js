@@ -1,13 +1,14 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * The Impact Set Game Object component.
+ * Should be applied as a mixin.
  *
- * @name Phaser.Physics.Impact.Components.SetGameObject
+ * @namespace Phaser.Physics.Impact.Components.SetGameObject
  * @since 3.0.0
  */
 var SetGameObject = {
@@ -18,10 +19,10 @@ var SetGameObject = {
      * @method Phaser.Physics.Impact.Components.SetGameObject#setGameObject
      * @since 3.0.0
      *
-     * @param {[type]} gameObject - [description]
-     * @param {[type]} sync - [description]
+     * @param {Phaser.GameObjects.GameObject} gameObject - [description]
+     * @param {boolean} [sync=true] - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setGameObject: function (gameObject, sync)
     {
@@ -50,7 +51,7 @@ var SetGameObject = {
      * @method Phaser.Physics.Impact.Components.SetGameObject#syncGameObject
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     syncGameObject: function ()
     {

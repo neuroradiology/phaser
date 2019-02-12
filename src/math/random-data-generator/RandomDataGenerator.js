@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -8,14 +8,23 @@ var Class = require('../../utils/Class');
 
 /**
  * @classdesc
- * [description]
+ * A seeded Random Data Generator.
+ * 
+ * Access via `Phaser.Math.RND` which is an instance of this class pre-defined
+ * by Phaser. Or, create your own instance to use as you require.
+ * 
+ * The `Math.RND` generator is seeded by the Game Config property value `seed`.
+ * If no such config property exists, a random number is used.
+ * 
+ * If you create your own instance of this class you should provide a seed for it.
+ * If no seed is given it will use a 'random' one based on Date.now.
  *
  * @class RandomDataGenerator
- * @memberOf Phaser.Math
+ * @memberof Phaser.Math
  * @constructor
  * @since 3.0.0
  *
- * @param {array} [seeds] - [description]
+ * @param {(string|string[])} [seeds] - The seeds to use for the random number generator.
  */
 var RandomDataGenerator = new Class({
 
@@ -23,6 +32,8 @@ var RandomDataGenerator = new Class({
 
     function RandomDataGenerator (seeds)
     {
+        if (seeds === undefined) { seeds = [ (Date.now() * Math.random()).toString() ]; }
+
         /**
          * Internal var.
          *
@@ -68,13 +79,24 @@ var RandomDataGenerator = new Class({
         this.s2 = 0;
 
         /**
-         * [description]
+         * Internal var.
          *
-         * @name Phaser.Math.RandomDataGenerator#sign
-         * @type {array}
+         * @name Phaser.Math.RandomDataGenerator#n
+         * @type {number}
+         * @default 0
+         * @private
+         * @since 3.2.0
+         */
+        this.n = 0;
+
+        /**
+         * Signs to choose from.
+         *
+         * @name Phaser.Math.RandomDataGenerator#signs
+         * @type {number[]}
          * @since 3.0.0
          */
-        this.sign = [ -1, 1 ];
+        this.signs = [ -1, 1 ];
 
         if (seeds)
         {
@@ -89,7 +111,7 @@ var RandomDataGenerator = new Class({
      * @since 3.0.0
      * @private
      *
-     * @return {number} [description]
+     * @return {number} A random number.
      */
     rnd: function ()
     {
@@ -110,14 +132,14 @@ var RandomDataGenerator = new Class({
      * @since 3.0.0
      * @private
      *
-     * @param {[type]} data - [description]
+     * @param {string} data - The value to hash.
      *
      * @return {number} The hashed value.
      */
     hash: function (data)
     {
         var h;
-        var n = 0xefc8249d;
+        var n = this.n;
 
         data = data.toString();
 
@@ -133,16 +155,18 @@ var RandomDataGenerator = new Class({
             n += h * 0x100000000;// 2^32
         }
 
+        this.n = n;
+
         return (n >>> 0) * 2.3283064365386963e-10;// 2^-32
     },
 
     /**
-     * [description]
+     * Initialize the state of the random data generator.
      *
      * @method Phaser.Math.RandomDataGenerator#init
      * @since 3.0.0
      *
-     * @param {string|array} seeds - [description]
+     * @param {(string|string[])} seeds - The seeds to initialize the random data generator with.
      */
     init: function (seeds)
     {
@@ -158,20 +182,21 @@ var RandomDataGenerator = new Class({
 
     /**
      * Reset the seed of the random data generator.
-     * 
+     *
      * _Note_: the seed array is only processed up to the first `undefined` (or `null`) value, should such be present.
      *
      * @method Phaser.Math.RandomDataGenerator#sow
      * @since 3.0.0
      *
-     * @param {any[]} seeds - The array of seeds: the `toString()` of each value is used.
+     * @param {string[]} seeds - The array of seeds: the `toString()` of each value is used.
      */
     sow: function (seeds)
     {
         // Always reset to default seed
+        this.n = 0xefc8249d;
         this.s0 = this.hash(' ');
-        this.s1 = this.hash(this.s0);
-        this.s2 = this.hash(this.s1);
+        this.s1 = this.hash(' ');
+        this.s2 = this.hash(' ');
         this.c = 1;
 
         if (!seeds)
@@ -309,8 +334,9 @@ var RandomDataGenerator = new Class({
         var a = '';
         var b = '';
 
-        for (b = a = ''; a++ < 36; b +=~a % 5 | a*3 & 4 ? (a^15 ? 8 ^ this.frac()*(a^20 ? 16 : 4) : 4).toString(16) : '-')
+        for (b = a = ''; a++ < 36; b += ~a % 5 | a * 3 & 4 ? (a ^ 15 ? 8 ^ this.frac() * (a ^ 20 ? 16 : 4) : 4).toString(16) : '-')
         {
+            // eslint-disable-next-line no-empty
         }
 
         return b;
@@ -324,7 +350,7 @@ var RandomDataGenerator = new Class({
      *
      * @param {array} array - The array to pick a random element from.
      *
-     * @return {any} A random member of the array.
+     * @return {*} A random member of the array.
      */
     pick: function (array)
     {
@@ -341,7 +367,7 @@ var RandomDataGenerator = new Class({
      */
     sign: function ()
     {
-        return this.pick(this.sign);
+        return this.pick(this.signs);
     },
 
     /**
@@ -352,7 +378,7 @@ var RandomDataGenerator = new Class({
      *
      * @param {array} array - The array to pick a random element from.
      *
-     * @return {any} A random member of the array.
+     * @return {*} A random member of the array.
      */
     weightedPick: function (array)
     {
@@ -434,6 +460,32 @@ var RandomDataGenerator = new Class({
         }
 
         return [ '!rnd', this.c, this.s0, this.s1, this.s2 ].join(',');
+    },
+
+    /**
+     * Shuffles the given array, using the current seed.
+     *
+     * @method Phaser.Math.RandomDataGenerator#shuffle
+     * @since 3.7.0
+     *
+     * @param {array} [array] - The array to be shuffled.
+     *
+     * @return {array} The shuffled array.
+     */
+    shuffle: function (array)
+    {
+        var len = array.length - 1;
+
+        for (var i = len; i > 0; i--)
+        {
+            var randomIndex = Math.floor(this.frac() * (i + 1));
+            var itemAtIndex = array[randomIndex];
+
+            array[randomIndex] = array[i];
+            array[i] = itemAtIndex;
+        }
+
+        return array;
     }
 
 });

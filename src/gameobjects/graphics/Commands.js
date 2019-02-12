@@ -1,11 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
- */
-
-/**
- * @namespace Phaser.GameObjects.Graphics.Commands
  */
 
 module.exports = {
@@ -28,6 +24,10 @@ module.exports = {
     RESTORE: 15,
     TRANSLATE: 16,
     SCALE: 17,
-    ROTATE: 18
+    ROTATE: 18,
+    SET_TEXTURE: 19,
+    CLEAR_TEXTURE: 20,
+    GRADIENT_FILL_STYLE: 21,
+    GRADIENT_LINE_STYLE: 22
 
 };

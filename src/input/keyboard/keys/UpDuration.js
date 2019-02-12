@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -11,10 +11,10 @@
  * @function Phaser.Input.Keyboard.UpDuration
  * @since 3.0.0
  *
- * @param {Phaser.Input.Keyboard.Key} key - [description]
- * @param {integer} [duration] - [description]
+ * @param {Phaser.Input.Keyboard.Key} key - The Key object to test.
+ * @param {integer} [duration=50] - The duration, in ms, within which the key must have been released.
  *
- * @return {boolean} [description]
+ * @return {boolean} `true` if the Key was released within `duration` ms, otherwise `false`.
  */
 var UpDuration = function (key, duration)
 {

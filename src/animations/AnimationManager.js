@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -8,26 +8,28 @@ var Animation = require('./Animation');
 var Class = require('../utils/Class');
 var CustomMap = require('../structs/Map');
 var EventEmitter = require('eventemitter3');
+var Events = require('./events');
+var GameEvents = require('../core/events');
 var GetValue = require('../utils/object/GetValue');
 var Pad = require('../utils/string/Pad');
 
 /**
  * @classdesc
  * The Animation Manager.
- * 
+ *
  * Animations are managed by the global Animation Manager. This is a singleton class that is
  * responsible for creating and delivering animations and their corresponding data to all Game Objects.
  * Unlike plugins it is owned by the Game instance, not the Scene.
- * 
+ *
  * Sprites and other Game Objects get the data they need from the AnimationManager.
  *
  * @class AnimationManager
- * @extends EventEmitter
- * @memberOf Phaser.Animations
+ * @extends Phaser.Events.EventEmitter
+ * @memberof Phaser.Animations
  * @constructor
  * @since 3.0.0
- * 
- * @param {Phaser.Game} game - [description]
+ *
+ * @param {Phaser.Game} game - A reference to the Phaser.Game instance.
  */
 var AnimationManager = new Class({
 
@@ -40,7 +42,7 @@ var AnimationManager = new Class({
         EventEmitter.call(this);
 
         /**
-         * [description]
+         * A reference to the Phaser.Game instance.
          *
          * @name Phaser.Animations.AnimationManager#game
          * @type {Phaser.Game}
@@ -50,7 +52,7 @@ var AnimationManager = new Class({
         this.game = game;
 
         /**
-         * [description]
+         * A reference to the Texture Manager.
          *
          * @name Phaser.Animations.AnimationManager#textureManager
          * @type {Phaser.Textures.TextureManager}
@@ -60,7 +62,9 @@ var AnimationManager = new Class({
         this.textureManager = null;
 
         /**
-         * [description]
+         * The global time scale of the Animation Manager.
+         *
+         * This scales the time delta between two frames, thus influencing the speed of time for the Animation Manager.
          *
          * @name Phaser.Animations.AnimationManager#globalTimeScale
          * @type {number}
@@ -70,17 +74,19 @@ var AnimationManager = new Class({
         this.globalTimeScale = 1;
 
         /**
-         * [description]
+         * The Animations registered in the Animation Manager.
+         *
+         * This map should be modified with the {@link #add} and {@link #create} methods of the Animation Manager.
          *
          * @name Phaser.Animations.AnimationManager#anims
-         * @type {Phaser.Structs.Map}
+         * @type {Phaser.Structs.Map.<string, Phaser.Animations.Animation>}
          * @protected
          * @since 3.0.0
          */
         this.anims = new CustomMap();
 
         /**
-         * [description]
+         * Whether the Animation Manager is paused along with all of its Animations.
          *
          * @name Phaser.Animations.AnimationManager#paused
          * @type {boolean}
@@ -90,7 +96,7 @@ var AnimationManager = new Class({
         this.paused = false;
 
         /**
-         * [description]
+         * The name of this Animation Manager.
          *
          * @name Phaser.Animations.AnimationManager#name
          * @type {string}
@@ -98,39 +104,41 @@ var AnimationManager = new Class({
          */
         this.name = 'AnimationManager';
 
-        game.events.once('boot', this.boot, this);
+        game.events.once(GameEvents.BOOT, this.boot, this);
     },
 
     /**
-     * [description]
+     * Registers event listeners after the Game boots.
      *
      * @method Phaser.Animations.AnimationManager#boot
+     * @listens Phaser.Core.Events#DESTROY
      * @since 3.0.0
      */
     boot: function ()
     {
         this.textureManager = this.game.textures;
 
-        this.game.events.once('destroy', this.destroy, this);
+        this.game.events.once(GameEvents.DESTROY, this.destroy, this);
     },
 
     /**
-     * [description]
+     * Adds an existing Animation to the Animation Manager.
      *
      * @method Phaser.Animations.AnimationManager#add
-     * @fires AddAnimationEvent
+     * @fires Phaser.Animations.Events#ADD_ANIMATION
      * @since 3.0.0
-     * 
-     * @param {string} key - [description]
-     * @param {Phaser.Animations.Animation} animation - [description]
-     * 
+     *
+     * @param {string} key - The key under which the Animation should be added. The Animation will be updated with it. Must be unique.
+     * @param {Phaser.Animations.Animation} animation - The Animation which should be added to the Animation Manager.
+     *
      * @return {Phaser.Animations.AnimationManager} This Animation Manager.
      */
     add: function (key, animation)
     {
         if (this.anims.has(key))
         {
-            console.warn('Animation with key', key, 'already exists');
+            console.warn('Animation key exists: ' + key);
+
             return;
         }
 
@@ -138,50 +146,81 @@ var AnimationManager = new Class({
 
         this.anims.set(key, animation);
 
-        this.emit('add', key, animation);
+        this.emit(Events.ADD_ANIMATION, key, animation);
 
         return this;
     },
 
     /**
-     * [description]
+     * Checks to see if the given key is already in use within the Animation Manager or not.
+     * 
+     * Animations are global. Keys created in one scene can be used from any other Scene in your game. They are not Scene specific.
+     *
+     * @method Phaser.Animations.AnimationManager#exists
+     * @since 3.16.0
+     *
+     * @param {string} key - The key of the Animation to check.
+     *
+     * @return {boolean} `true` if the Animation already exists in the Animation Manager, or `false` if the key is available.
+     */
+    exists: function (key)
+    {
+        return this.anims.has(key);
+    },
+
+    /**
+     * Creates a new Animation and adds it to the Animation Manager.
+     * 
+     * Animations are global. Once created, you can use them in any Scene in your game. They are not Scene specific.
+     * 
+     * If an invalid key is given this method will return `false`.
+     * 
+     * If you pass the key of an animation that already exists in the Animation Manager, that animation will be returned.
+     * 
+     * A brand new animation is only created if the key is valid and not already in use.
+     * 
+     * If you wish to re-use an existing key, call `AnimationManager.remove` first, then this method.
      *
      * @method Phaser.Animations.AnimationManager#create
-     * @fires AddAnimationEvent
+     * @fires Phaser.Animations.Events#ADD_ANIMATION
      * @since 3.0.0
-     * 
-     * @param {object} config - [description]
-     * 
-     * @return {Phaser.Animations.Animation} The Animation that was created.
+     *
+     * @param {Phaser.Animations.Types.Animation} config - The configuration settings for the Animation.
+     *
+     * @return {(Phaser.Animations.Animation|false)} The Animation that was created, or `false` is the key is already in use.
      */
     create: function (config)
     {
         var key = config.key;
 
-        if (!key || this.anims.has(key))
+        var anim = false;
+
+        if (key)
         {
-            console.warn('Invalid Animation Key, or Key already in use: ' + key);
-            return;
+            anim = this.get(key);
+
+            if (!anim)
+            {
+                anim = new Animation(this, key, config);
+
+                this.anims.set(key, anim);
+        
+                this.emit(Events.ADD_ANIMATION, key, anim);
+            }
         }
-
-        var anim = new Animation(this, key, config);
-
-        this.anims.set(key, anim);
-
-        this.emit('add', key, anim);
 
         return anim;
     },
 
     /**
-     * [description]
+     * Loads this Animation Manager's Animations and settings from a JSON object.
      *
      * @method Phaser.Animations.AnimationManager#fromJSON
      * @since 3.0.0
-     * 
-     * @param {string|object} data - [description]
-     * @param {boolean} [clearCurrentAnimations=false] - [description]
-     * 
+     *
+     * @param {(string|Phaser.Animations.Types.JSONAnimations|Phaser.Animations.Types.JSONAnimation)} data - The JSON object to parse.
+     * @param {boolean} [clearCurrentAnimations=false] - If set to `true`, the current animations will be removed (`anims.clear()`). If set to `false` (default), the animations in `data` will be added.
+     *
      * @return {Phaser.Animations.Animation[]} An array containing all of the Animation objects that were created as a result of this call.
      */
     fromJSON: function (data, clearCurrentAnimations)
@@ -227,18 +266,11 @@ var AnimationManager = new Class({
      *
      * @method Phaser.Animations.AnimationManager#generateFrameNames
      * @since 3.0.0
-     * 
-     * @param {string} key - [description]
-     * @param {object} config - [description]
-     * @param {string} [config.prefix=''] - [description]
-     * @param {integer} [config.start=0] - [description]
-     * @param {integer} [config.end=0] - [description]
-     * @param {string} [config.suffix=''] - [description]
-     * @param {integer} [config.zeroPad=0] - [description]
-     * @param {array} [config.outputArray=[]] - [description]
-     * @param {boolean} [config.frames=false] - [description]
-     * 
-     * @return {object[]} [description]
+     *
+     * @param {string} key - The key for the texture containing the animation frames.
+     * @param {Phaser.Animations.Types.GenerateFrameNames} [config] - The configuration object for the animation frame names.
+     *
+     * @return {Phaser.Animations.Types.AnimationFrame[]} The array of {@link Phaser.Animations.Types.AnimationFrame} objects.
      */
     generateFrameNames: function (key, config)
     {
@@ -265,9 +297,19 @@ var AnimationManager = new Class({
         var i;
         var frame;
 
-        //  Have they provided their own custom frame sequence array?
-        if (Array.isArray(frames))
+        if (!config)
         {
+            //  Use every frame in the atlas?
+            frames = texture.getFrameNames();
+
+            for (i = 0; i < frames.length; i++)
+            {
+                out.push({ key: key, frame: frames[i] });
+            }
+        }
+        else if (Array.isArray(frames))
+        {
+            //  Have they provided their own custom frame sequence array?
             for (i = 0; i < frames.length; i++)
             {
                 frame = prefix + Pad(frames[i], zeroPad, '0', 1) + suffix;
@@ -295,20 +337,17 @@ var AnimationManager = new Class({
     },
 
     /**
-     * [description]
+     * Generate an array of {@link Phaser.Animations.Types.AnimationFrame} objects from a texture key and configuration object.
+     *
+     * Generates objects with numbered frame names, as configured by the given {@link Phaser.Animations.Types.GenerateFrameNumbers}.
      *
      * @method Phaser.Animations.AnimationManager#generateFrameNumbers
      * @since 3.0.0
-     * 
-     * @param {string} key - [description]
-     * @param {object} config - [description]
-     * @param {integer} [config.start=0] - [description]
-     * @param {integer} [config.end=-1] - [description]
-     * @param {boolean} [config.first=false] - [description]
-     * @param {array} [config.outputArray=[]] - [description]
-     * @param {boolean} [config.frames=false] - [description]
-     * 
-     * @return {object[]} [description]
+     *
+     * @param {string} key - The key for the texture containing the animation frames.
+     * @param {Phaser.Animations.Types.GenerateFrameNumbers} config - The configuration object for the animation frames.
+     *
+     * @return {Phaser.Animations.Types.AnimationFrame[]} The array of {@link Phaser.Animations.Types.AnimationFrame} objects.
      */
     generateFrameNumbers: function (key, config)
     {
@@ -346,7 +385,6 @@ var AnimationManager = new Class({
         else
         {
             //  No endFrame then see if we can get it
-
             if (endFrame === -1)
             {
                 endFrame = texture.frameTotal;
@@ -365,14 +403,14 @@ var AnimationManager = new Class({
     },
 
     /**
-     * [description]
+     * Get an Animation.
      *
      * @method Phaser.Animations.AnimationManager#get
      * @since 3.0.0
-     * 
-     * @param {string} key - [description]
-     * 
-     * @return {Phaser.Animations.Animation} [description]
+     *
+     * @param {string} key - The key of the Animation to retrieve.
+     *
+     * @return {Phaser.Animations.Animation} The Animation.
      */
     get: function (key)
     {
@@ -380,16 +418,16 @@ var AnimationManager = new Class({
     },
 
     /**
-     * Load an Animation into a Game Objects Animation Component.
+     * Load an Animation into a Game Object's Animation Component.
      *
      * @method Phaser.Animations.AnimationManager#load
      * @since 3.0.0
-     * 
-     * @param {Phaser.GameObjects.GameObject} child - [description]
-     * @param {string} key - [description]
-     * @param {string|integer} [startFrame] - [description]
-     * 
-     * @return {Phaser.GameObjects.GameObject} [description]
+     *
+     * @param {Phaser.GameObjects.GameObject} child - The Game Object to load the animation into.
+     * @param {string} key - The key of the animation to load.
+     * @param {(string|integer)} [startFrame] - The name of a start frame to set on the loaded animation.
+     *
+     * @return {Phaser.GameObjects.GameObject} The Game Object with the animation loaded into it.
      */
     load: function (child, key, startFrame)
     {
@@ -404,12 +442,12 @@ var AnimationManager = new Class({
     },
 
     /**
-     * [description]
+     * Pause all animations.
      *
      * @method Phaser.Animations.AnimationManager#pauseAll
-     * @fires PauseAllAnimationEvent
+     * @fires Phaser.Animations.Events#PAUSE_ALL
      * @since 3.0.0
-     * 
+     *
      * @return {Phaser.Animations.AnimationManager} This Animation Manager.
      */
     pauseAll: function ()
@@ -418,21 +456,21 @@ var AnimationManager = new Class({
         {
             this.paused = true;
 
-            this.emit('pauseall');
+            this.emit(Events.PAUSE_ALL);
         }
 
         return this;
     },
 
     /**
-     * [description]
+     * Play an animation on the given Game Objects that have an Animation Component.
      *
      * @method Phaser.Animations.AnimationManager#play
      * @since 3.0.0
-     * 
-     * @param {string} key - [description]
-     * @param {Phaser.GameObjects.GameObject} child - [description]
-     * 
+     *
+     * @param {string} key - The key of the animation to play on the Game Object.
+     * @param {Phaser.GameObjects.GameObject|Phaser.GameObjects.GameObject[]} child - The Game Objects to play the animation on.
+     *
      * @return {Phaser.Animations.AnimationManager} This Animation Manager.
      */
     play: function (key, child)
@@ -458,14 +496,14 @@ var AnimationManager = new Class({
     },
 
     /**
-     * [description]
+     * Remove an animation.
      *
      * @method Phaser.Animations.AnimationManager#remove
-     * @fires RemoveAnimationEvent
+     * @fires Phaser.Animations.Events#REMOVE_ANIMATION
      * @since 3.0.0
-     * 
-     * @param {string} key - [description]
-     * 
+     *
+     * @param {string} key - The key of the animation to remove.
+     *
      * @return {Phaser.Animations.Animation} [description]
      */
     remove: function (key)
@@ -474,7 +512,7 @@ var AnimationManager = new Class({
 
         if (anim)
         {
-            this.emit('remove', key, anim);
+            this.emit(Events.REMOVE_ANIMATION, key, anim);
 
             this.anims.delete(key);
         }
@@ -483,12 +521,12 @@ var AnimationManager = new Class({
     },
 
     /**
-     * [description]
+     * Resume all paused animations.
      *
      * @method Phaser.Animations.AnimationManager#resumeAll
-     * @fires ResumeAllAnimationEvent
+     * @fires Phaser.Animations.Events#RESUME_ALL
      * @since 3.0.0
-     * 
+     *
      * @return {Phaser.Animations.AnimationManager} This Animation Manager.
      */
     resumeAll: function ()
@@ -497,31 +535,35 @@ var AnimationManager = new Class({
         {
             this.paused = false;
 
-            this.emit('resumeall');
+            this.emit(Events.RESUME_ALL);
         }
 
         return this;
     },
 
     /**
-     * [description]
+     * Takes an array of Game Objects that have an Animation Component and then
+     * starts the given animation playing on them, each one offset by the
+     * `stagger` amount given to this method.
      *
      * @method Phaser.Animations.AnimationManager#staggerPlay
      * @since 3.0.0
-     * 
-     * @param {string} key - [description]
-     * @param {Phaser.GameObjects.GameObject} child - [description]
-     * @param {number} [stagger=0] - [description]
-     * 
+     *
+     * @generic {Phaser.GameObjects.GameObject[]} G - [items,$return]
+     *
+     * @param {string} key - The key of the animation to play on the Game Objects.
+     * @param {Phaser.GameObjects.GameObject|Phaser.GameObjects.GameObject[]} children - An array of Game Objects to play the animation on. They must have an Animation Component.
+     * @param {number} [stagger=0] - The amount of time, in milliseconds, to offset each play time by.
+     *
      * @return {Phaser.Animations.AnimationManager} This Animation Manager.
      */
-    staggerPlay: function (key, child, stagger)
+    staggerPlay: function (key, children, stagger)
     {
         if (stagger === undefined) { stagger = 0; }
 
-        if (!Array.isArray(child))
+        if (!Array.isArray(children))
         {
-            child = [ child ];
+            children = [ children ];
         }
 
         var anim = this.get(key);
@@ -531,23 +573,23 @@ var AnimationManager = new Class({
             return;
         }
 
-        for (var i = 0; i < child.length; i++)
+        for (var i = 0; i < children.length; i++)
         {
-            child[i].anims.delayedPlay(stagger * i, key);
+            children[i].anims.delayedPlay(stagger * i, key);
         }
 
         return this;
     },
 
     /**
-     * [description]
+     * Get the animation data as javascript object by giving key, or get the data of all animations as array of objects, if key wasn't provided.
      *
      * @method Phaser.Animations.AnimationManager#toJSON
      * @since 3.0.0
-     * 
+     *
      * @param {string} key - [description]
-     * 
-     * @return {object} [description]
+     *
+     * @return {Phaser.Animations.Types.JSONAnimations} [description]
      */
     toJSON: function (key)
     {
@@ -572,7 +614,8 @@ var AnimationManager = new Class({
     },
 
     /**
-     * [description]
+     * Destroy this Animation Manager and clean up animation definitions and references to other objects.
+     * This method should not be called directly. It will be called automatically as a response to a `destroy` event from the Phaser.Game instance.
      *
      * @method Phaser.Animations.AnimationManager#destroy
      * @since 3.0.0

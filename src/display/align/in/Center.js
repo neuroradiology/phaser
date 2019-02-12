@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -13,6 +13,8 @@ var GetCenterY = require('../../bounds/GetCenterY');
  *
  * @function Phaser.Display.Align.In.Center
  * @since 3.0.0
+ *
+ * @generic {Phaser.GameObjects.GameObject} G - [gameObject,$return]
  *
  * @param {Phaser.GameObjects.GameObject} gameObject - The Game Object that will be positioned.
  * @param {Phaser.GameObjects.GameObject} alignIn - The Game Object to base the alignment position on.

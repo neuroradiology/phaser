@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -10,6 +10,17 @@ var GetValue = require('../../utils/object/GetValue');
 var MeasureText = require('./MeasureText');
 
 //  Key: [ Object Key, Default Value ]
+
+/**
+ * A custom function that will be responsible for wrapping the text.
+ * @callback TextStyleWordWrapCallback
+ *
+ * @param {string} text - The string to wrap.
+ * @param {Phaser.GameObjects.Text} textObject - The Text instance.
+ *
+ * @return {(string|string[])} Should return the wrapped lines either as an array of lines or as a string with
+ * newline characters in place to indicate where breaks should happen.
+ */
 
 var propertyMap = {
     fontFamily: [ 'fontFamily', 'Courier' ],
@@ -29,8 +40,11 @@ var propertyMap = {
     maxLines: [ 'maxLines', 0 ],
     fixedWidth: [ 'fixedWidth', 0 ],
     fixedHeight: [ 'fixedHeight', 0 ],
+    resolution: [ 'resolution', 0 ],
     rtl: [ 'rtl', false ],
-    testString: [ 'testString', '|MÉqgy' ],
+    testString: [ 'testString', '|MÃ‰qgy' ],
+    baselineX: [ 'baselineX', 1.2 ],
+    baselineY: [ 'baselineY', 1.4 ],
     wordWrapWidth: [ 'wordWrap.width', null ],
     wordWrapCallback: [ 'wordWrap.callback', null ],
     wordWrapCallbackScope: [ 'wordWrap.callbackScope', null ],
@@ -38,16 +52,30 @@ var propertyMap = {
 };
 
 /**
+ * Font metrics for a Text Style object.
+ *
+ * @typedef {object} BitmapTextMetrics
+ *
+ * @property {number} ascent - The ascent of the font.
+ * @property {number} descent - The descent of the font.
+ * @property {number} fontSize - The size of the font.
+ */
+
+/**
  * @classdesc
- * [description]
+ * A TextStyle class manages all of the style settings for a Text object.
+ * 
+ * Text Game Objects create a TextStyle instance automatically, which is
+ * accessed via the `Text.style` property. You do not normally need to
+ * instantiate one yourself.
  *
  * @class TextStyle
- * @memberOf Phaser.GameObjects.Components
+ * @memberof Phaser.GameObjects
  * @constructor
  * @since 3.0.0
  *
  * @param {Phaser.GameObjects.Text} text - The Text object that this TextStyle is styling.
- * @param {object} style - [description]
+ * @param {object} style - The style settings to set.
  */
 var TextStyle = new Class({
 
@@ -58,16 +86,16 @@ var TextStyle = new Class({
         /**
          * The Text object that this TextStyle is styling.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#parent
+         * @name Phaser.GameObjects.TextStyle#parent
          * @type {Phaser.GameObjects.Text}
          * @since 3.0.0
          */
         this.parent = text;
 
         /**
-         * [description]
+         * The font family.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#fontFamily
+         * @name Phaser.GameObjects.TextStyle#fontFamily
          * @type {string}
          * @default 'Courier'
          * @since 3.0.0
@@ -75,9 +103,9 @@ var TextStyle = new Class({
         this.fontFamily;
 
         /**
-         * [description]
+         * The font size.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#fontSize
+         * @name Phaser.GameObjects.TextStyle#fontSize
          * @type {string}
          * @default '16px'
          * @since 3.0.0
@@ -85,27 +113,27 @@ var TextStyle = new Class({
         this.fontSize;
 
         /**
-         * [description]
+         * The font style.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#fontStyle
+         * @name Phaser.GameObjects.TextStyle#fontStyle
          * @type {string}
          * @since 3.0.0
          */
         this.fontStyle;
 
         /**
-         * [description]
+         * The background color.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#backgroundColor
+         * @name Phaser.GameObjects.TextStyle#backgroundColor
          * @type {string}
          * @since 3.0.0
          */
         this.backgroundColor;
 
         /**
-         * [description]
+         * The text fill color.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#color
+         * @name Phaser.GameObjects.TextStyle#color
          * @type {string}
          * @default '#fff'
          * @since 3.0.0
@@ -113,9 +141,9 @@ var TextStyle = new Class({
         this.color;
 
         /**
-         * [description]
+         * The text stroke color.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#stroke
+         * @name Phaser.GameObjects.TextStyle#stroke
          * @type {string}
          * @default '#fff'
          * @since 3.0.0
@@ -123,9 +151,9 @@ var TextStyle = new Class({
         this.stroke;
 
         /**
-         * [description]
+         * The text stroke thickness.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#strokeThickness
+         * @name Phaser.GameObjects.TextStyle#strokeThickness
          * @type {number}
          * @default 0
          * @since 3.0.0
@@ -133,9 +161,9 @@ var TextStyle = new Class({
         this.strokeThickness;
 
         /**
-         * [description]
+         * The horizontal shadow offset.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#shadowOffsetX
+         * @name Phaser.GameObjects.TextStyle#shadowOffsetX
          * @type {number}
          * @default 0
          * @since 3.0.0
@@ -143,9 +171,9 @@ var TextStyle = new Class({
         this.shadowOffsetX;
 
         /**
-         * [description]
+         * The vertical shadow offset.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#shadowOffsetY
+         * @name Phaser.GameObjects.TextStyle#shadowOffsetY
          * @type {number}
          * @default 0
          * @since 3.0.0
@@ -153,9 +181,9 @@ var TextStyle = new Class({
         this.shadowOffsetY;
 
         /**
-         * [description]
+         * The shadow color.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#shadowColor
+         * @name Phaser.GameObjects.TextStyle#shadowColor
          * @type {string}
          * @default '#000'
          * @since 3.0.0
@@ -163,9 +191,9 @@ var TextStyle = new Class({
         this.shadowColor;
 
         /**
-         * [description]
+         * The shadow blur radius.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#shadowBlur
+         * @name Phaser.GameObjects.TextStyle#shadowBlur
          * @type {number}
          * @default 0
          * @since 3.0.0
@@ -173,9 +201,9 @@ var TextStyle = new Class({
         this.shadowBlur;
 
         /**
-         * [description]
+         * Whether shadow stroke is enabled or not.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#shadowStroke
+         * @name Phaser.GameObjects.TextStyle#shadowStroke
          * @type {boolean}
          * @default false
          * @since 3.0.0
@@ -183,9 +211,9 @@ var TextStyle = new Class({
         this.shadowStroke;
 
         /**
-         * [description]
+         * Whether shadow fill is enabled or not.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#shadowFill
+         * @name Phaser.GameObjects.TextStyle#shadowFill
          * @type {boolean}
          * @default false
          * @since 3.0.0
@@ -193,9 +221,9 @@ var TextStyle = new Class({
         this.shadowFill;
 
         /**
-         * [description]
+         * The text alignment.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#align
+         * @name Phaser.GameObjects.TextStyle#align
          * @type {string}
          * @default 'left'
          * @since 3.0.0
@@ -203,9 +231,9 @@ var TextStyle = new Class({
         this.align;
 
         /**
-         * [description]
+         * The maximum number of lines to draw.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#maxLines
+         * @name Phaser.GameObjects.TextStyle#maxLines
          * @type {integer}
          * @default 0
          * @since 3.0.0
@@ -213,9 +241,11 @@ var TextStyle = new Class({
         this.maxLines;
 
         /**
-         * [description]
+         * The fixed width of the text.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#fixedWidth
+         * `0` means no fixed with.
+         *
+         * @name Phaser.GameObjects.TextStyle#fixedWidth
          * @type {number}
          * @default 0
          * @since 3.0.0
@@ -223,9 +253,11 @@ var TextStyle = new Class({
         this.fixedWidth;
 
         /**
-         * [description]
+         * The fixed height of the text.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#fixedHeight
+         * `0` means no fixed height.
+         *
+         * @name Phaser.GameObjects.TextStyle#fixedHeight
          * @type {number}
          * @default 0
          * @since 3.0.0
@@ -233,9 +265,20 @@ var TextStyle = new Class({
         this.fixedHeight;
 
         /**
-         * [description]
+         * The resolution the text is rendered to its internal canvas at.
+         * The default is 0, which means it will use the resolution set in the Game Config.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#rtl
+         * @name Phaser.GameObjects.TextStyle#resolution
+         * @type {number}
+         * @default 0
+         * @since 3.12.0
+         */
+        this.resolution;
+
+        /**
+         * Whether the text should render right to left.
+         *
+         * @name Phaser.GameObjects.TextStyle#rtl
          * @type {boolean}
          * @default false
          * @since 3.0.0
@@ -243,9 +286,9 @@ var TextStyle = new Class({
         this.rtl;
 
         /**
-         * [description]
+         * The test string to use when measuring the font.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#testString
+         * @name Phaser.GameObjects.TextStyle#testString
          * @type {string}
          * @default '|MÉqgy'
          * @since 3.0.0
@@ -253,9 +296,29 @@ var TextStyle = new Class({
         this.testString;
 
         /**
-         * [description]
+         * The amount of horizontal padding adding to the width of the text when calculating the font metrics.
          *
-         * @name Phaser.GameObjects.Components.TextStyle#_font
+         * @name Phaser.GameObjects.TextStyle#baselineX
+         * @type {number}
+         * @default 1.2
+         * @since 3.3.0
+         */
+        this.baselineX;
+
+        /**
+         * The amount of vertical padding adding to the width of the text when calculating the font metrics.
+         *
+         * @name Phaser.GameObjects.TextStyle#baselineY
+         * @type {number}
+         * @default 1.4
+         * @since 3.3.0
+         */
+        this.baselineY;
+
+        /**
+         * The font style, size and family.
+         *
+         * @name Phaser.GameObjects.TextStyle#_font
          * @type {string}
          * @private
          * @since 3.0.0
@@ -263,7 +326,7 @@ var TextStyle = new Class({
         this._font;
 
         //  Set to defaults + user style
-        this.setStyle(style, false);
+        this.setStyle(style, false, true);
 
         var metrics = GetValue(style, 'metrics', false);
 
@@ -284,19 +347,30 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the text style.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setStyle
+     * @example
+     * text.setStyle({
+     *     fontSize: '64px',
+     *     fontFamily: 'Arial',
+     *     color: '#ffffff',
+     *     align: 'center',
+     *     backgroundColor: '#ff00ff'
+     * });
+     *
+     * @method Phaser.GameObjects.TextStyle#setStyle
      * @since 3.0.0
      *
-     * @param {[type]} style - [description]
-     * @param {[type]} updateText - [description]
+     * @param {object} style - The style settings to set.
+     * @param {boolean} [updateText=true] - Whether to update the text immediately.
+     * @param {boolean} [setDefaults=false] - Use the default values is not set, or the local values.
      *
-     * @return {Phaser.GameObjects.Components.TextStyle This TextStyle component.
+     * @return {Phaser.GameObjects.Text} The parent Text object.
      */
-    setStyle: function (style, updateText)
+    setStyle: function (style, updateText, setDefaults)
     {
         if (updateText === undefined) { updateText = true; }
+        if (setDefaults === undefined) { setDefaults = false; }
 
         //  Avoid type mutation
         if (style && style.hasOwnProperty('fontSize') && typeof style.fontSize === 'number')
@@ -306,28 +380,28 @@ var TextStyle = new Class({
 
         for (var key in propertyMap)
         {
+            var value = (setDefaults) ? propertyMap[key][1] : this[key];
+
             if (key === 'wordWrapCallback' || key === 'wordWrapCallbackScope')
             {
                 // Callback & scope should be set without processing the values
-                this[key] = GetValue(style, propertyMap[key][0], propertyMap[key][1]);
+                this[key] = GetValue(style, propertyMap[key][0], value);
             }
             else
             {
-                this[key] = GetAdvancedValue(style, propertyMap[key][0], propertyMap[key][1]);
+                this[key] = GetAdvancedValue(style, propertyMap[key][0], value);
             }
         }
 
         //  Allow for 'font' override
         var font = GetValue(style, 'font', null);
 
-        if (font === null)
+        if (font !== null)
         {
-            this._font = [ this.fontStyle, this.fontSize, this.fontFamily ].join(' ');
+            this.setFont(font, false);
         }
-        else
-        {
-            this._font = font;
-        }
+
+        this._font = [ this.fontStyle, this.fontSize, this.fontFamily ].join(' ').trim();
 
         //  Allow for 'fill' to be used in place of 'color'
         var fill = GetValue(style, 'fill', null);
@@ -339,20 +413,22 @@ var TextStyle = new Class({
 
         if (updateText)
         {
-            this.update(true);
+            return this.update(true);
         }
-
-        return this;
+        else
+        {
+            return this.parent;
+        }
     },
 
     /**
-     * [description]
+     * Synchronize the font settings to the given Canvas Rendering Context.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#syncFont
+     * @method Phaser.GameObjects.TextStyle#syncFont
      * @since 3.0.0
      *
-     * @param {[type]} canvas - [description]
-     * @param {[type]} context - [description]
+     * @param {HTMLCanvasElement} canvas - The Canvas Element.
+     * @param {CanvasRenderingContext2D} context - The Canvas Rendering Context.
      */
     syncFont: function (canvas, context)
     {
@@ -360,13 +436,13 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Synchronize the text style settings to the given Canvas Rendering Context.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#syncStyle
+     * @method Phaser.GameObjects.TextStyle#syncStyle
      * @since 3.0.0
      *
-     * @param {[type]} canvas - [description]
-     * @param {[type]} context - [description]
+     * @param {HTMLCanvasElement} canvas - The Canvas Element.
+     * @param {CanvasRenderingContext2D} context - The Canvas Rendering Context.
      */
     syncStyle: function (canvas, context)
     {
@@ -381,13 +457,13 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Synchronize the shadow settings to the given Canvas Rendering Context.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#syncShadow
+     * @method Phaser.GameObjects.TextStyle#syncShadow
      * @since 3.0.0
      *
-     * @param {[type]} context - [description]
-     * @param {[type]} enabled - [description]
+     * @param {CanvasRenderingContext2D} context - The Canvas Rendering Context.
+     * @param {boolean} enabled - Whether shadows are enabled or not.
      */
     syncShadow: function (context, enabled)
     {
@@ -408,12 +484,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Update the style settings for the parent Text object.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#update
+     * @method Phaser.GameObjects.TextStyle#update
      * @since 3.0.0
      *
-     * @param {boolean} recalculateMetrics - [description]
+     * @param {boolean} recalculateMetrics - Whether to recalculate font and text metrics.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -421,7 +497,7 @@ var TextStyle = new Class({
     {
         if (recalculateMetrics)
         {
-            this._font = [ this.fontStyle, this.fontSize, this.fontFamily ].join(' ');
+            this._font = [ this.fontStyle, this.fontSize, this.fontFamily ].join(' ').trim();
 
             this.metrics = MeasureText(this);
         }
@@ -430,74 +506,112 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the font.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setFont
+     * If a string is given, the font family is set.
+     *
+     * If an object is given, the `fontFamily`, `fontSize` and `fontStyle`
+     * properties of that object are set.
+     *
+     * @method Phaser.GameObjects.TextStyle#setFont
      * @since 3.0.0
      *
-     * @param {string|object} font - [description]
+     * @param {(string|object)} font - The font family or font settings to set.
+     * @param {boolean} [updateText=true] - Whether to update the text immediately.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
-    setFont: function (font)
+    setFont: function (font, updateText)
     {
-        if (typeof font === 'string')
+        if (updateText === undefined) { updateText = true; }
+
+        var fontFamily = font;
+        var fontSize = '';
+        var fontStyle = '';
+
+        if (typeof font !== 'string')
         {
-            this.fontFamily = font;
-            this.fontSize = '';
-            this.fontStyle = '';
+            fontFamily = GetValue(font, 'fontFamily', 'Courier');
+            fontSize = GetValue(font, 'fontSize', '16px');
+            fontStyle = GetValue(font, 'fontStyle', '');
         }
         else
         {
-            this.fontFamily = GetValue(font, 'fontFamily', 'Courier');
-            this.fontSize = GetValue(font, 'fontSize', '16px');
-            this.fontStyle = GetValue(font, 'fontStyle', '');
+            var fontSplit = font.split(' ');
+
+            var i = 0;
+
+            fontStyle = (fontSplit.length > 2) ? fontSplit[i++] : '';
+            fontSize = fontSplit[i++] || '16px';
+            fontFamily = fontSplit[i++] || 'Courier';
         }
 
-        return this.update(true);
+        if (fontFamily !== this.fontFamily || fontSize !== this.fontSize || fontStyle !== this.fontStyle)
+        {
+            this.fontFamily = fontFamily;
+            this.fontSize = fontSize;
+            this.fontStyle = fontStyle;
+
+            if (updateText)
+            {
+                this.update(true);
+            }
+        }
+
+        return this.parent;
     },
 
     /**
-     * [description]
+     * Set the font family.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setFontFamily
+     * @method Phaser.GameObjects.TextStyle#setFontFamily
      * @since 3.0.0
      *
-     * @param {[type]} family - [description]
+     * @param {string} family - The font family.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
     setFontFamily: function (family)
     {
-        this.fontFamily = family;
+        if (this.fontFamily !== family)
+        {
+            this.fontFamily = family;
 
-        return this.update(true);
+            this.update(true);
+        }
+
+        return this.parent;
     },
 
     /**
-     * [description]
+     * Set the font style.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setFontStyle
+     * @method Phaser.GameObjects.TextStyle#setFontStyle
      * @since 3.0.0
      *
-     * @param {[type]} style - [description]
+     * @param {string} style - The font style.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
     setFontStyle: function (style)
     {
-        this.fontStyle = style;
+        if (this.fontStyle !== style)
+        {
+            this.fontStyle = style;
 
-        return this.update(true);
+            this.update(true);
+        }
+
+        return this.parent;
     },
 
     /**
-     * [description]
+     * Set the font size.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setFontSize
+     * @method Phaser.GameObjects.TextStyle#setFontSize
      * @since 3.0.0
      *
-     * @param {[type]} size - [description]
+     * @param {(number|string)} size - The font size.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -508,18 +622,23 @@ var TextStyle = new Class({
             size = size.toString() + 'px';
         }
 
-        this.fontSize = size;
+        if (this.fontSize !== size)
+        {
+            this.fontSize = size;
 
-        return this.update(true);
+            this.update(true);
+        }
+
+        return this.parent;
     },
 
     /**
-     * [description]
+     * Set the test string to use when measuring the font.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setTestString
+     * @method Phaser.GameObjects.TextStyle#setTestString
      * @since 3.0.0
      *
-     * @param {[type]} string - [description]
+     * @param {string} string - The test string to use when measuring the font.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -531,13 +650,15 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set a fixed width and height for the text.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setFixedSize
+     * Pass in `0` for either of these parameters to disable fixed width or height respectively.
+     *
+     * @method Phaser.GameObjects.TextStyle#setFixedSize
      * @since 3.0.0
      *
-     * @param {number} width - [description]
-     * @param {number} height - [description]
+     * @param {number} width - The fixed width to set.
+     * @param {number} height - The fixed height to set.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -548,24 +669,24 @@ var TextStyle = new Class({
 
         if (width)
         {
-            this.text.width = width;
+            this.parent.width = width;
         }
 
         if (height)
         {
-            this.text.height = height;
+            this.parent.height = height;
         }
 
         return this.update(false);
     },
 
     /**
-     * [description]
+     * Set the background color.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setBackgroundColor
+     * @method Phaser.GameObjects.TextStyle#setBackgroundColor
      * @since 3.0.0
      *
-     * @param {string color - [description]
+     * @param {string} color - The background color.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -577,12 +698,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the text fill color.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setFill
+     * @method Phaser.GameObjects.TextStyle#setFill
      * @since 3.0.0
      *
-     * @param {string} color - [description]
+     * @param {string} color - The text fill color.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -594,12 +715,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the text fill color.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setColor
+     * @method Phaser.GameObjects.TextStyle#setColor
      * @since 3.0.0
      *
-     * @param {string} color - [description]
+     * @param {string} color - The text fill color.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -611,46 +732,76 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the resolution used by the Text object.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setStroke
+     * By default it will be set to match the resolution set in the Game Config,
+     * but you can override it via this method. It allows for much clearer text on High DPI devices,
+     * at the cost of memory because it uses larger internal Canvas textures for the Text.
+     * 
+     * Please use with caution, as the more high res Text you have, the more memory it uses up.
+     *
+     * @method Phaser.GameObjects.TextStyle#setResolution
+     * @since 3.12.0
+     *
+     * @param {number} value - The resolution for this Text object to use.
+     *
+     * @return {Phaser.GameObjects.Text} The parent Text object.
+     */
+    setResolution: function (value)
+    {
+        this.resolution = value;
+
+        return this.update(false);
+    },
+
+    /**
+     * Set the stroke settings.
+     *
+     * @method Phaser.GameObjects.TextStyle#setStroke
      * @since 3.0.0
      *
-     * @param {string} color - [description]
-     * @param {number} thickness - [description]
+     * @param {string} color - The stroke color.
+     * @param {number} thickness - The stroke thickness.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
     setStroke: function (color, thickness)
     {
-        if (color === undefined)
+        if (thickness === undefined) { thickness = this.strokeThickness; }
+
+        if (color === undefined && this.strokeThickness !== 0)
         {
             //  Reset the stroke to zero (disabling it)
             this.strokeThickness = 0;
-        }
-        else
-        {
-            if (thickness === undefined) { thickness = this.strokeThickness; }
 
+            this.update(true);
+        }
+        else if (this.stroke !== color || this.strokeThickness !== thickness)
+        {
             this.stroke = color;
             this.strokeThickness = thickness;
+
+            this.update(true);
         }
 
-        return this.update(true);
+        return this.parent;
     },
 
     /**
-     * [description]
+     * Set the shadow settings.
+     * 
+     * Calling this method always re-measures the parent Text object,
+     * so only call it when you actually change the shadow settings.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setShadow
+     * @method Phaser.GameObjects.TextStyle#setShadow
      * @since 3.0.0
      *
-     * @param {number} [x=0] - [description]
-     * @param {number} [y=0] - [description]
-     * @param {string} [color='#000'] - [description]
-     * @param {number} [blur=0] - [description]
-     * @param {boolean} [shadowStroke=false] - [description]
-     * @param {boolean} [shadowFill=true] - [description]
+     * @param {number} [x=0] - The horizontal shadow offset.
+     * @param {number} [y=0] - The vertical shadow offset.
+     * @param {string} [color='#000'] - The shadow color.
+     * @param {number} [blur=0] - The shadow blur radius.
+     * @param {boolean} [shadowStroke=false] - Whether to stroke the shadow.
+     * @param {boolean} [shadowFill=true] - Whether to fill the shadow.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -674,13 +825,13 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the shadow offset.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setShadowOffset
+     * @method Phaser.GameObjects.TextStyle#setShadowOffset
      * @since 3.0.0
      *
-     * @param {number} [x=0] - [description]
-     * @param {number} [y=0] - [description]
+     * @param {number} [x=0] - The horizontal shadow offset.
+     * @param {number} [y=0] - The vertical shadow offset.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -696,12 +847,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the shadow color.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setShadowColor
+     * @method Phaser.GameObjects.TextStyle#setShadowColor
      * @since 3.0.0
      *
-     * @param {string} [color='#000'] - [description]
+     * @param {string} [color='#000'] - The shadow color.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -715,12 +866,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the shadow blur radius.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setShadowBlur
+     * @method Phaser.GameObjects.TextStyle#setShadowBlur
      * @since 3.0.0
      *
-     * @param {number} [blur=0] - [description]
+     * @param {number} [blur=0] - The shadow blur radius.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -734,12 +885,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Enable or disable shadow stroke.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setShadowStroke
+     * @method Phaser.GameObjects.TextStyle#setShadowStroke
      * @since 3.0.0
      *
-     * @param {boolean} enabled - [description]
+     * @param {boolean} enabled - Whether shadow stroke is enabled or not.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -751,12 +902,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Enable or disable shadow fill.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setShadowFill
+     * @method Phaser.GameObjects.TextStyle#setShadowFill
      * @since 3.0.0
      *
-     * @param {boolean} enabled - [description]
+     * @param {boolean} enabled - Whether shadow fill is enabled or not.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -768,9 +919,11 @@ var TextStyle = new Class({
     },
 
     /**
-     * Set the width (in pixels) to use for wrapping lines. Pass in null to remove wrapping by width.
+     * Set the width (in pixels) to use for wrapping lines.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setWordWrapWidth
+     * Pass in null to remove wrapping by width.
+     *
+     * @method Phaser.GameObjects.TextStyle#setWordWrapWidth
      * @since 3.0.0
      *
      * @param {number} width - The maximum width of a line in pixels. Set to null to remove wrapping.
@@ -791,12 +944,14 @@ var TextStyle = new Class({
     },
 
     /**
-     * Set a custom callback for wrapping lines. Pass in null to remove wrapping by callback.
+     * Set a custom callback for wrapping lines.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setWordWrapCallback
+     * Pass in null to remove wrapping by callback.
+     *
+     * @method Phaser.GameObjects.TextStyle#setWordWrapCallback
      * @since 3.0.0
      *
-     * @param {function} callback - A custom function that will be responsible for wrapping the
+     * @param {TextStyleWordWrapCallback} callback - A custom function that will be responsible for wrapping the
      * text. It will receive two arguments: text (the string to wrap), textObject (this Text
      * instance). It should return the wrapped lines either as an array of lines or as a string with
      * newline characters in place to indicate where breaks should happen.
@@ -815,12 +970,14 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the text alignment.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setAlign
+     * Expects values like `'left'`, `'right'`, `'center'` or `'justified'`.
+     *
+     * @method Phaser.GameObjects.TextStyle#setAlign
      * @since 3.0.0
      *
-     * @param {string} align - [description]
+     * @param {string} align - The text alignment.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -834,12 +991,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Set the maximum number of lines to draw.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#setMaxLines
+     * @method Phaser.GameObjects.TextStyle#setMaxLines
      * @since 3.0.0
      *
-     * @param {integer} [max=0] - [description]
+     * @param {integer} [max=0] - The maximum number of lines to draw.
      *
      * @return {Phaser.GameObjects.Text} The parent Text object.
      */
@@ -853,12 +1010,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Get the current text metrics.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#getTextMetrics
+     * @method Phaser.GameObjects.TextStyle#getTextMetrics
      * @since 3.0.0
      *
-     * @return {object} [description]
+     * @return {BitmapTextMetrics} The text metrics.
      */
     getTextMetrics: function ()
     {
@@ -872,12 +1029,12 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Build a JSON representation of this Text Style.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#toJSON
+     * @method Phaser.GameObjects.TextStyle#toJSON
      * @since 3.0.0
      *
-     * @return {object} [description]
+     * @return {object} A JSON representation of this Text Style.
      */
     toJSON: function ()
     {
@@ -894,9 +1051,9 @@ var TextStyle = new Class({
     },
 
     /**
-     * [description]
+     * Destroy this Text Style.
      *
-     * @method Phaser.GameObjects.Components.TextStyle#destroy
+     * @method Phaser.GameObjects.TextStyle#destroy
      * @since 3.0.0
      */
     destroy: function ()

@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -13,12 +13,26 @@ var TWEEN_CONST = require('../../tweens/tween/const');
 var Vector2 = require('../../math/Vector2');
 
 /**
+ * Settings for a PathFollower.
+ *
+ * @typedef {object} PathConfig
+ *
+ * @property {number} duration - The duration of the path follow.
+ * @property {number} from - The start position of the path follow, between 0 and 1.
+ * @property {number} to - The end position of the path follow, between 0 and 1.
+ * @property {boolean} [positionOnPath=false] - Whether to position the PathFollower on the Path using its path offset.
+ * @property {boolean} [rotateToPath=false] - Should the PathFollower automatically rotate to point in the direction of the Path?
+ * @property {number} [rotationOffset=0] - If the PathFollower is rotating to match the Path, this value is added to the rotation value. This allows you to rotate objects to a path but control the angle of the rotation as well.
+ * @property {number} [startAt=0] - Current start position of the path follow, between 0 and 1.
+ */
+
+/**
  * @classdesc
  * A PathFollower Game Object.
  *
  * A PathFollower is a Sprite Game Object with some extra helpers to allow it to follow a Path automatically.
  *
- * Anything you can do with a standard Sprite can be done with this PathFollower, such as animate it, tint it, 
+ * Anything you can do with a standard Sprite can be done with this PathFollower, such as animate it, tint it,
  * scale it and so on.
  *
  * PathFollowers are bound to a single Path at any one time and can traverse the length of the Path, from start
@@ -27,16 +41,16 @@ var Vector2 = require('../../math/Vector2');
  *
  * @class PathFollower
  * @extends Phaser.GameObjects.Sprite
- * @memberOf Phaser.GameObjects
+ * @memberof Phaser.GameObjects
  * @constructor
  * @since 3.0.0
  *
- * @param {Phaser.Scene} scene - [description]
+ * @param {Phaser.Scene} scene - The Scene to which this PathFollower belongs.
  * @param {Phaser.Curves.Path} path - The Path this PathFollower is following. It can only follow one Path at a time.
  * @param {number} x - The horizontal position of this Game Object in the world.
  * @param {number} y - The vertical position of this Game Object in the world.
  * @param {string} texture - The key of the Texture this Game Object will use to render with, as stored in the Texture Manager.
- * @param {string|integer} [frame] - An optional frame from the Texture this Game Object is rendering with.
+ * @param {(string|integer)} [frame] - An optional frame from the Texture this Game Object is rendering with.
  */
 var PathFollower = new Class({
 
@@ -68,16 +82,6 @@ var PathFollower = new Class({
         this.rotateToPath = false;
 
         /**
-         * [description]
-         *
-         * @name Phaser.GameObjects.PathFollower#pathRotationVerticalAdjust
-         * @type {boolean}
-         * @default false
-         * @since 3.0.0
-         */
-        this.pathRotationVerticalAdjust = false;
-
-        /**
          * If the PathFollower is rotating to match the Path (@see Phaser.GameObjects.PathFollower#rotateToPath)
          * this value is added to the rotation value. This allows you to rotate objects to a path but control
          * the angle of the rotation as well.
@@ -100,7 +104,7 @@ var PathFollower = new Class({
         this.pathOffset = new Vector2(x, y);
 
         /**
-         * [description]
+         * A Vector2 that stores the current point of the path the follower is on.
          *
          * @name Phaser.GameObjects.PathFollower#pathVector
          * @type {Phaser.Math.Vector2}
@@ -109,19 +113,19 @@ var PathFollower = new Class({
         this.pathVector = new Vector2();
 
         /**
-         * [description]
+         * The Tween used for following the Path.
          *
          * @name Phaser.GameObjects.PathFollower#pathTween
-         * @type {null}
+         * @type {Phaser.Tweens.Tween}
          * @since 3.0.0
          */
         this.pathTween;
 
         /**
-         * [description]
+         * Settings for the PathFollower.
          *
          * @name Phaser.GameObjects.PathFollower#pathConfig
-         * @type {?[type]}
+         * @type {?PathConfig}
          * @default null
          * @since 3.0.0
          */
@@ -139,13 +143,15 @@ var PathFollower = new Class({
     },
 
     /**
-     * [description]
+     * Set the Path that this PathFollower should follow.
+     *
+     * Optionally accepts {@link PathConfig} settings.
      *
      * @method Phaser.GameObjects.PathFollower#setPath
      * @since 3.0.0
      *
      * @param {Phaser.Curves.Path} path - The Path this PathFollower is following. It can only follow one Path at a time.
-     * @param {[type]} config - [description]
+     * @param {PathConfig} [config] - Settings for the PathFollower.
      *
      * @return {Phaser.GameObjects.PathFollower} This Game Object.
      */
@@ -164,40 +170,37 @@ var PathFollower = new Class({
 
         if (config)
         {
-            this.start(config);
+            this.startFollow(config);
         }
 
         return this;
     },
 
-    //  rotation offset in degrees
     /**
-     * [description]
+     * Set whether the PathFollower should automatically rotate to point in the direction of the Path.
      *
      * @method Phaser.GameObjects.PathFollower#setRotateToPath
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
-     * @param {[type]} offset - [description]
-     * @param {[type]} verticalAdjust - [description]
+     * @param {boolean} value - Whether the PathFollower should automatically rotate to point in the direction of the Path.
+     * @param {number} [offset=0] - Rotation offset in degrees.
      *
      * @return {Phaser.GameObjects.PathFollower} This Game Object.
      */
-    setRotateToPath: function (value, offset, verticalAdjust)
+    setRotateToPath: function (value, offset)
     {
         if (offset === undefined) { offset = 0; }
-        if (verticalAdjust === undefined) { verticalAdjust = false; }
 
         this.rotateToPath = value;
 
         this.pathRotationOffset = offset;
-        this.pathRotationVerticalAdjust = verticalAdjust;
 
         return this;
     },
 
     /**
      * Is this PathFollower actively following a Path or not?
+     *
      * To be considered as `isFollowing` it must be currently moving on a Path, and not paused.
      *
      * @method Phaser.GameObjects.PathFollower#isFollowing
@@ -215,15 +218,15 @@ var PathFollower = new Class({
     /**
      * Starts this PathFollower following its given Path.
      *
-     * @method Phaser.GameObjects.PathFollower#start
-     * @since 3.0.0
+     * @method Phaser.GameObjects.PathFollower#startFollow
+     * @since 3.3.0
      *
-     * @param {object} config - [description]
-     * @param {number} [startAt=0] - [description]
+     * @param {(number|PathConfig)} [config={}] - The duration of the follow, or a PathFollower config object.
+     * @param {number} [startAt=0] - Optional start position of the follow, between 0 and 1.
      *
      * @return {Phaser.GameObjects.PathFollower} This Game Object.
      */
-    start: function (config, startAt)
+    startFollow: function (config, startAt)
     {
         if (config === undefined) { config = {}; }
         if (startAt === undefined) { startAt = 0; }
@@ -250,7 +253,22 @@ var PathFollower = new Class({
 
         this.rotateToPath = GetBoolean(config, 'rotateToPath', false);
         this.pathRotationOffset = GetValue(config, 'rotationOffset', 0);
-        this.pathRotationVerticalAdjust = GetBoolean(config, 'verticalAdjust', false);
+
+        //  This works, but it's not an ideal way of doing it as the follower jumps position
+        var seek = GetValue(config, 'startAt', startAt);
+
+        if (seek)
+        {
+            config.onStart = function (tween)
+            {
+                var tweenData = tween.data[0];
+                tweenData.progress = seek;
+                tweenData.elapsed = tweenData.duration * seek;
+                var v = tweenData.ease(tweenData.progress);
+                tweenData.current = tweenData.start + ((tweenData.end - tweenData.start) * v);
+                tweenData.target[tweenData.key] = tweenData.current;
+            };
+        }
 
         this.pathTween = this.scene.sys.tweens.addCounter(config);
 
@@ -285,12 +303,12 @@ var PathFollower = new Class({
      * Pauses this PathFollower. It will still continue to render, but it will remain motionless at the
      * point on the Path at which you paused it.
      *
-     * @method Phaser.GameObjects.PathFollower#pause
-     * @since 3.0.0
+     * @method Phaser.GameObjects.PathFollower#pauseFollow
+     * @since 3.3.0
      *
      * @return {Phaser.GameObjects.PathFollower} This Game Object.
      */
-    pause: function ()
+    pauseFollow: function ()
     {
         var tween = this.pathTween;
 
@@ -304,14 +322,15 @@ var PathFollower = new Class({
 
     /**
      * Resumes a previously paused PathFollower.
+     *
      * If the PathFollower was not paused this has no effect.
      *
-     * @method Phaser.GameObjects.PathFollower#resume
-     * @since 3.0.0
+     * @method Phaser.GameObjects.PathFollower#resumeFollow
+     * @since 3.3.0
      *
      * @return {Phaser.GameObjects.PathFollower} This Game Object.
      */
-    resume: function ()
+    resumeFollow: function ()
     {
         var tween = this.pathTween;
 
@@ -325,14 +344,15 @@ var PathFollower = new Class({
 
     /**
      * Stops this PathFollower from following the path any longer.
+     *
      * This will invoke any 'stop' conditions that may exist on the Path, or for the follower.
      *
-     * @method Phaser.GameObjects.PathFollower#stop
-     * @since 3.0.0
+     * @method Phaser.GameObjects.PathFollower#stopFollow
+     * @since 3.3.0
      *
      * @return {Phaser.GameObjects.PathFollower} This Game Object.
      */
-    stop: function ()
+    stopFollow: function ()
     {
         var tween = this.pathTween;
 
@@ -346,14 +366,15 @@ var PathFollower = new Class({
 
     /**
      * Internal update handler that advances this PathFollower along the path.
+     *
      * Called automatically by the Scene step, should not typically be called directly.
      *
      * @method Phaser.GameObjects.PathFollower#preUpdate
      * @protected
      * @since 3.0.0
      *
-     * @param {[type]} time - [description]
-     * @param {[type]} delta - [description]
+     * @param {integer} time - The current timestamp as generated by the Request Animation Frame or SetTimeout.
+     * @param {number} delta - The delta time, in ms, elapsed since the last frame.
      */
     preUpdate: function (time, delta)
     {
@@ -402,11 +423,6 @@ var PathFollower = new Class({
             if (this.rotateToPath)
             {
                 this.rotation = Math.atan2(speedY, speedX) + DegToRad(this.pathRotationOffset);
-
-                if (this.pathRotationVerticalAdjust)
-                {
-                    this.flipY = (this.rotation !== 0 && tweenData.state === TWEEN_CONST.PLAYING_BACKWARD);
-                }
             }
         }
     }

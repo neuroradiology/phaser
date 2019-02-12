@@ -1,10 +1,14 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var OS = require('../device/OS');
+
+/**
+ * @callback ContentLoadedCallback
+ */
 
 /**
  * Inspects the readyState of the document. If the document is already complete then it invokes the given callback.
@@ -14,7 +18,7 @@ var OS = require('../device/OS');
  * @function Phaser.DOM.DOMContentLoaded
  * @since 3.0.0
  *
- * @param {function} callback - The callback to be invoked when the device is ready and the DOM content is loaded.
+ * @param {ContentLoadedCallback} callback - The callback to be invoked when the device is ready and the DOM content is loaded.
  */
 var DOMContentLoaded = function (callback)
 {

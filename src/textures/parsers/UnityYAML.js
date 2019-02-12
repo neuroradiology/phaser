@@ -1,20 +1,23 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 var imageHeight = 0;
 
+/**
+ * @function addFrame
+ * @private
+ * @since 3.0.0
+ */
 var addFrame = function (texture, sourceIndex, name, frame)
 {
     //  The frame values are the exact coordinates to cut the frame out of the atlas from
 
     var y = imageHeight - frame.y - frame.height;
 
-    var newFrame = texture.add(name, sourceIndex, frame.x, y, frame.width, frame.height);
-
-    // console.log('name', name, 'rect', frame.x, y, frame.width, frame.height);
+    texture.add(name, sourceIndex, frame.x, y, frame.width, frame.height);
 
     //  These are the original (non-trimmed) sprite values
     /*
@@ -37,6 +40,8 @@ var addFrame = function (texture, sourceIndex, name, frame)
  * For more details about Sprite Meta Data see https://docs.unity3d.com/ScriptReference/SpriteMetaData.html
  *
  * @function Phaser.Textures.Parsers.UnityYAML
+ * @memberof Phaser.Textures.Parsers
+ * @private
  * @since 3.0.0
  *
  * @param {Phaser.Textures.Texture} texture - The Texture to add the Frames to.
@@ -61,8 +66,9 @@ var UnityYAML = function (texture, sourceIndex, yaml)
     var prevSprite = '';
     var currentSprite = '';
     var rect = { x: 0, y: 0, width: 0, height: 0 };
-    var pivot = { x: 0, y: 0 };
-    var border = { x: 0, y: 0, z: 0, w: 0 };
+
+    // var pivot = { x: 0, y: 0 };
+    // var border = { x: 0, y: 0, z: 0, w: 0 };
 
     for (var i = 0; i < data.length; i++)
     {
@@ -105,13 +111,13 @@ var UnityYAML = function (texture, sourceIndex, yaml)
                 rect[key] = parseInt(value, 10);
                 break;
 
-            case 'pivot':
-                pivot = eval('var obj = ' + value);
-                break;
+            // case 'pivot':
+            //     pivot = eval('var obj = ' + value);
+            //     break;
 
-            case 'border':
-                border = eval('var obj = ' + value);
-                break;
+            // case 'border':
+            //     border = eval('var obj = ' + value);
+            //     break;
         }
     }
 

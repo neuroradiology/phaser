@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -15,18 +15,18 @@ var _FLAG = 4; // 0100
 //  Transform Component
 
 /**
- * [description]
+ * Provides methods used for getting and setting the position, scale and rotation of a Game Object.
  *
- * @name Phaser.Physics.Matter.Components.Transform
+ * @namespace Phaser.Physics.Matter.Components.Transform
  * @since 3.0.0
  */
 var Transform = {
 
     /**
-     * [description]
+     * The x position of this Game Object.
      *
      * @name Phaser.Physics.Matter.Components.Transform#x
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     x: {
@@ -46,10 +46,10 @@ var Transform = {
     },
 
     /**
-     * [description]
+     * The y position of this Game Object.
      *
      * @name Phaser.Physics.Matter.Components.Transform#y
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     y: {
@@ -69,10 +69,10 @@ var Transform = {
     },
 
     /**
-     * [description]
+     * The horizontal scale of this Game Object.
      *
      * @name Phaser.Physics.Matter.Components.Transform#scaleX
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     scaleX: {
@@ -84,6 +84,9 @@ var Transform = {
 
         set: function (value)
         {
+            var factorX = 1 / this._scaleX;
+            var factorY = 1 / this._scaleY;
+    
             this._scaleX = value;
 
             if (this._scaleX === 0)
@@ -95,16 +98,19 @@ var Transform = {
                 this.renderFlags |= _FLAG;
             }
 
+            //  Reset Matter scale back to 1 (sigh)
+            Body.scale(this.body, factorX, factorY);
+
             Body.scale(this.body, value, this._scaleY);
         }
 
     },
 
     /**
-     * [description]
+     * The vertical scale of this Game Object.
      *
      * @name Phaser.Physics.Matter.Components.Transform#scaleY
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     scaleY: {
@@ -116,6 +122,9 @@ var Transform = {
 
         set: function (value)
         {
+            var factorX = 1 / this._scaleX;
+            var factorY = 1 / this._scaleY;
+
             this._scaleY = value;
 
             if (this._scaleY === 0)
@@ -127,16 +136,18 @@ var Transform = {
                 this.renderFlags |= _FLAG;
             }
 
+            Body.scale(this.body, factorX, factorY);
+
             Body.scale(this.body, this._scaleX, value);
         }
 
     },
 
     /**
-     * [description]
+     * Use `angle` to set or get rotation of the physics body associated to this GameObject. Unlike rotation, when using set the value can be in degrees, which will be converted to radians internally.
      *
      * @name Phaser.Physics.Matter.Components.Transform#angle
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     angle: {
@@ -154,10 +165,10 @@ var Transform = {
     },
 
     /**
-     * [description]
+     * Use `rotation` to set or get the rotation of the physics body associated with this GameObject. The value when set must be in radians.
      *
      * @name Phaser.Physics.Matter.Components.Transform#rotation
-     * @type {[type]}
+     * @type {number}
      * @since 3.0.0
      */
     rotation: {
@@ -177,15 +188,15 @@ var Transform = {
     },
 
     /**
-     * [description]
+     * Sets the position of the physics body along x and y axes. Both the parameters to this function are optional and if not passed any they default to 0.
      *
      * @method Phaser.Physics.Matter.Components.Transform#setPosition
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
+     * @param {number} [x=0] - The horizontal position of the body.
+     * @param {number} [y=x] - The vertical position of the body.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setPosition: function (x, y)
     {
@@ -205,9 +216,9 @@ var Transform = {
      * @method Phaser.Physics.Matter.Components.Transform#setRotation
      * @since 3.0.0
      *
-     * @param {[type]} radians - [description]
+     * @param {number} [radians=0] - [description]
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setRotation: function (radians)
     {
@@ -226,7 +237,7 @@ var Transform = {
      * @method Phaser.Physics.Matter.Components.Transform#setFixedRotation
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setFixedRotation: function ()
     {
@@ -241,9 +252,9 @@ var Transform = {
      * @method Phaser.Physics.Matter.Components.Transform#setAngle
      * @since 3.0.0
      *
-     * @param {[type]} degrees - [description]
+     * @param {number} [degrees=0] - [description]
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setAngle: function (degrees)
     {
@@ -257,24 +268,29 @@ var Transform = {
     },
 
     /**
-     * [description]
+     * Sets the scale of this Game Object.
      *
      * @method Phaser.Physics.Matter.Components.Transform#setScale
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
-     * @param {[type]} point - [description]
+     * @param {number} [x=1] - The horizontal scale of this Game Object.
+     * @param {number} [y=x] - The vertical scale of this Game Object. If not set it will use the x value.
+     * @param {Phaser.Math.Vector2} [point] - The point (Vector2) from which scaling will occur.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setScale: function (x, y, point)
     {
         if (x === undefined) { x = 1; }
         if (y === undefined) { y = x; }
 
+        var factorX = 1 / this._scaleX;
+        var factorY = 1 / this._scaleY;
+
         this._scaleX = x;
         this._scaleY = y;
+
+        Body.scale(this.body, factorX, factorY, point);
 
         Body.scale(this.body, x, y, point);
 

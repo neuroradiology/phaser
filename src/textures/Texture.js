@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -8,10 +8,12 @@ var Class = require('../utils/Class');
 var Frame = require('./Frame');
 var TextureSource = require('./TextureSource');
 
+var TEXTURE_MISSING_ERROR = 'Texture.frame missing: ';
+
 /**
  * @classdesc
- * A Texture consists of a source, usually an Image from the Cache, or a Canvas, and a collection
- * of Frames. The Frames represent the different areas of the Texture. For example a texture atlas
+ * A Texture consists of a source, usually an Image from the Cache, and a collection of Frames.
+ * The Frames represent the different areas of the Texture. For example a texture atlas
  * may have many Frames, one for each element within the atlas. Where-as a single image would have
  * just one frame, that encompasses the whole image.
  *
@@ -21,13 +23,13 @@ var TextureSource = require('./TextureSource');
  * Sprites and other Game Objects get the texture data they need from the TextureManager.
  *
  * @class Texture
- * @memberOf Phaser.Textures
+ * @memberof Phaser.Textures
  * @constructor
  * @since 3.0.0
  *
  * @param {Phaser.Textures.TextureManager} manager - A reference to the Texture Manager this Texture belongs to.
  * @param {string} key - The unique string-based key of this Texture.
- * @param {Image|HTMLCanvasElement} source - The source that is used to create the texture. Usually an Image, but can also be a Canvas.
+ * @param {(HTMLImageElement|HTMLCanvasElement|HTMLImageElement[]|HTMLCanvasElement[])} source - An array of sources that are used to create the texture. Usually Images, but can also be a Canvas.
  * @param {number} [width] - The width of the Texture. This is optional and automatically derived from the source images.
  * @param {number} [height] - The height of the Texture. This is optional and automatically derived from the source images.
  */
@@ -133,7 +135,7 @@ var Texture = new Class({
      * @method Phaser.Textures.Texture#add
      * @since 3.0.0
      *
-     * @param {integer|string} name - The name of this Frame. The name is unique within the Texture.
+     * @param {(integer|string)} name - The name of this Frame. The name is unique within the Texture.
      * @param {integer} sourceIndex - The index of the TextureSource that this Frame is a part of.
      * @param {number} x - The x coordinate of the top-left of this Frame.
      * @param {number} y - The y coordinate of the top-left of this Frame.
@@ -187,29 +189,28 @@ var Texture = new Class({
      * @method Phaser.Textures.Texture#get
      * @since 3.0.0
      *
-     * @param {string|integer} [name] - The string-based name, or integer based index, of the Frame to get from this Texture.
+     * @param {(string|integer)} [name] - The string-based name, or integer based index, of the Frame to get from this Texture.
      *
      * @return {Phaser.Textures.Frame} The Texture Frame.
      */
     get: function (name)
     {
-        if (name === undefined || name === null || (typeof name !== 'string' && typeof name !== 'number'))
+        //  null, undefined, empty string, zero
+        if (!name)
         {
-            name = (this.frameTotal === 1) ? '__BASE' : this.firstFrame;
+            name = this.firstFrame;
         }
 
         var frame = this.frames[name];
 
         if (!frame)
         {
-            console.warn('No Texture.frame found with name ' + name);
+            console.warn(TEXTURE_MISSING_ERROR + name);
 
-            return this.frames['__BASE'];
+            frame = this.frames[this.firstFrame];
         }
-        else
-        {
-            return frame;
-        }
+
+        return frame;
     },
 
     /**
@@ -245,16 +246,19 @@ var Texture = new Class({
      * @since 3.0.0
      *
      * @param {integer} sourceIndex - The index of the TextureSource to get the Frames from.
+     * @param {boolean} [includeBase=false] - Include the `__BASE` Frame in the output array?
      *
      * @return {Phaser.Textures.Frame[]} An array of Texture Frames.
      */
-    getFramesFromTextureSource: function (sourceIndex)
+    getFramesFromTextureSource: function (sourceIndex, includeBase)
     {
+        if (includeBase === undefined) { includeBase = false; }
+
         var out = [];
 
         for (var frameName in this.frames)
         {
-            if (frameName === '__BASE')
+            if (frameName === '__BASE' && !includeBase)
             {
                 continue;
             }
@@ -263,7 +267,7 @@ var Texture = new Class({
 
             if (frame.sourceIndex === sourceIndex)
             {
-                out.push(frame.name);
+                out.push(frame);
             }
         }
 
@@ -272,7 +276,7 @@ var Texture = new Class({
 
     /**
      * Returns an array with all of the names of the Frames in this Texture.
-     * 
+     *
      * Useful if you want to randomly assign a Frame to a Game Object, as you can
      * pick a random element from the returned array.
      *
@@ -310,9 +314,9 @@ var Texture = new Class({
      * @method Phaser.Textures.Texture#getSourceImage
      * @since 3.0.0
      *
-     * @param {string|integer} [name] - The string-based name, or integer based index, of the Frame to get from this Texture.
+     * @param {(string|integer)} [name] - The string-based name, or integer based index, of the Frame to get from this Texture.
      *
-     * @return {Image|HTMLCanvasElement} The DOM Image or Canvas Element.
+     * @return {(HTMLImageElement|HTMLCanvasElement|Phaser.GameObjects.RenderTexture)} The DOM Image, Canvas Element or Render Texture.
      */
     getSourceImage: function (name)
     {
@@ -323,28 +327,65 @@ var Texture = new Class({
 
         var frame = this.frames[name];
 
-        if (!frame)
+        if (frame)
         {
-            console.warn('No Texture.frame found with name ' + name);
-
-            return this.frames['__BASE'].source.image;
+            return frame.source.image;
         }
         else
         {
-            return frame.source.image;
+            console.warn(TEXTURE_MISSING_ERROR + name);
+
+            return this.frames['__BASE'].source.image;
         }
     },
 
     /**
+     * Given a Frame name, return the data source image it uses to render with.
+     * You can use this to get the normal map for an image for example.
+     *
+     * This will return the actual DOM Image.
+     *
+     * @method Phaser.Textures.Texture#getDataSourceImage
+     * @since 3.7.0
+     *
+     * @param {(string|integer)} [name] - The string-based name, or integer based index, of the Frame to get from this Texture.
+     *
+     * @return {(HTMLImageElement|HTMLCanvasElement)} The DOM Image or Canvas Element.
+     */
+    getDataSourceImage: function (name)
+    {
+        if (name === undefined || name === null || this.frameTotal === 1)
+        {
+            name = '__BASE';
+        }
+
+        var frame = this.frames[name];
+        var idx;
+
+        if (!frame)
+        {
+            console.warn(TEXTURE_MISSING_ERROR + name);
+
+            idx = this.frames['__BASE'].sourceIndex;
+        }
+        else
+        {
+            idx = frame.sourceIndex;
+        }
+
+        return this.dataSource[idx].image;
+    },
+
+    /**
      * Adds a data source image to this Texture.
-     * 
+     *
      * An example of a data source image would be a normal map, where all of the Frames for this Texture
      * equally apply to the normal map.
      *
      * @method Phaser.Textures.Texture#setDataSource
      * @since 3.0.0
      *
-     * @param {Image|HTMLCanvasElement} data - The source image.
+     * @param {(HTMLImageElement|HTMLCanvasElement|HTMLImageElement[]|HTMLCanvasElement[])} data - The source image.
      */
     setDataSource: function (data)
     {
@@ -352,7 +393,7 @@ var Texture = new Class({
         {
             data = [ data ];
         }
-
+        
         for (var i = 0; i < data.length; i++)
         {
             var source = this.source[i];
@@ -373,7 +414,7 @@ var Texture = new Class({
      * @method Phaser.Textures.Texture#setFilter
      * @since 3.0.0
      *
-     * @param {Phaser.Textures.FilterMode.LINEAR|Phaser.Textures.FilterMode.NEAREST} filterMode - The Filter Mode.
+     * @param {Phaser.Textures.FilterMode} filterMode - The Filter Mode.
      */
     setFilter: function (filterMode)
     {
@@ -420,6 +461,7 @@ var Texture = new Class({
         this.source = [];
         this.dataSource = [];
         this.frames = {};
+        this.manager = null;
     }
 
 });

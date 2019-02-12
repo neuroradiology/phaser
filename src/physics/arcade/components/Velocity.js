@@ -1,84 +1,88 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * Provides methods for modifying the velocity of an Arcade Physics body.
  *
- * @name Phaser.Physics.Arcade.Components.Velocity
+ * Should be applied as a mixin and not used directly.
+ *
+ * @namespace Phaser.Physics.Arcade.Components.Velocity
  * @since 3.0.0
  */
 var Velocity = {
 
     /**
-     * [description]
+     * Sets the velocity of the Body.
      *
      * @method Phaser.Physics.Arcade.Components.Velocity#setVelocity
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
+     * @param {number} x - The horizontal velocity of the body. Positive values move the body to the right, while negative values move it to the left.
+     * @param {number} [y=x] - The vertical velocity of the body. Positive values move the body down, while negative values move it up.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setVelocity: function (x, y)
     {
-        this.body.velocity.set(x, y);
+        this.body.setVelocity(x, y);
 
         return this;
     },
 
     /**
-     * [description]
+     * Sets the horizontal component of the body's velocity.
+     *
+     * Positive values move the body to the right, while negative values move it to the left.
      *
      * @method Phaser.Physics.Arcade.Components.Velocity#setVelocityX
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
+     * @param {number} x - The new horizontal velocity.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setVelocityX: function (x)
     {
-        this.body.velocity.x = x;
+        this.body.setVelocityX(x);
 
         return this;
     },
 
     /**
-     * [description]
+     * Sets the vertical component of the body's velocity.
+     *
+     * Positive values move the body down, while negative values move it up.
      *
      * @method Phaser.Physics.Arcade.Components.Velocity#setVelocityY
      * @since 3.0.0
      *
-     * @param {[type]} y - [description]
+     * @param {number} y - The new vertical velocity of the body.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setVelocityY: function (y)
     {
-        this.body.velocity.y = y;
+        this.body.setVelocityY(y);
 
         return this;
     },
 
     /**
-     * [description]
+     * Sets the maximum velocity of the body.
      *
      * @method Phaser.Physics.Arcade.Components.Velocity#setMaxVelocity
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
+     * @param {number} x - The new maximum horizontal velocity.
+     * @param {number} [y=x] - The new maximum vertical velocity.
      *
-     * @return {[type]} [description]
+     * @return {this} This Game Object.
      */
     setMaxVelocity: function (x, y)
     {
-        if (y === undefined) { y = x; }
-
         this.body.maxVelocity.set(x, y);
 
         return this;

@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -9,7 +9,7 @@ var Body = require('../lib/body/Body');
 /**
  * [description]
  *
- * @name Phaser.Physics.Matter.Components.Velocity
+ * @namespace Phaser.Physics.Matter.Components.Velocity
  * @since 3.0.0
  */
 var Velocity = {
@@ -20,9 +20,9 @@ var Velocity = {
      * @method Phaser.Physics.Matter.Components.Velocity#setAngularVelocity
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {number} value - [description]
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setAngularVelocity: function (value)
     {
@@ -32,14 +32,14 @@ var Velocity = {
     },
 
     /**
-     * [description]
+     * Sets the horizontal velocity of the physics body.
      *
      * @method Phaser.Physics.Matter.Components.Velocity#setVelocityX
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
+     * @param {number} x - The horizontal velocity value.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setVelocityX: function (x)
     {
@@ -51,14 +51,14 @@ var Velocity = {
     },
 
     /**
-     * [description]
+     * Sets vertical velocity of the physics body.
      *
      * @method Phaser.Physics.Matter.Components.Velocity#setVelocityY
      * @since 3.0.0
      *
-     * @param {[type]} y - [description]
+     * @param {number} y - The vertical velocity value.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setVelocityY: function (y)
     {
@@ -70,15 +70,15 @@ var Velocity = {
     },
 
     /**
-     * [description]
+     * Sets both the horizontal and vertical velocity of the physics body.
      *
      * @method Phaser.Physics.Matter.Components.Velocity#setVelocity
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
+     * @param {number} x - The horizontal velocity value.
+     * @param {number} [y=x] - The vertical velocity value, it can be either positive or negative. If not given, it will be the same as the `x` value.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setVelocity: function (x, y)
     {

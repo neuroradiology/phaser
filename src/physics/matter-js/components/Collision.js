@@ -1,26 +1,26 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
 /**
- * [description]
+ * Contains methods for changing the collision filter of a Matter Body. Should be used as a mixin and not called directly.
  *
- * @name Phaser.Physics.Matter.Components.Collision
+ * @namespace Phaser.Physics.Matter.Components.Collision
  * @since 3.0.0
  */
 var Collision = {
 
     /**
-     * [description]
+     * Sets the collision category of this Game Object's Matter Body. This number must be a power of two between 2^0 (= 1) and 2^31. Two bodies with different collision groups (see {@link #setCollisionGroup}) will only collide if their collision categories are included in their collision masks (see {@link #setCollidesWith}).
      *
      * @method Phaser.Physics.Matter.Components.Collision#setCollisionCategory
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {number} value - Unique category bitfield.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCollisionCategory: function (value)
     {
@@ -30,14 +30,14 @@ var Collision = {
     },
 
     /**
-     * [description]
+     * Sets the collision group of this Game Object's Matter Body. If this is zero or two Matter Bodies have different values, they will collide according to the usual rules (see {@link #setCollisionCategory} and {@link #setCollisionGroup}). If two Matter Bodies have the same positive value, they will always collide; if they have the same negative value, they will never collide.
      *
      * @method Phaser.Physics.Matter.Components.Collision#setCollisionGroup
      * @since 3.0.0
      *
-     * @param {[type]} value - [description]
+     * @param {number} value - Unique group index.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCollisionGroup: function (value)
     {
@@ -47,14 +47,14 @@ var Collision = {
     },
 
     /**
-     * [description]
+     * Sets the collision mask for this Game Object's Matter Body. Two Matter Bodies with different collision groups will only collide if each one includes the other's category in its mask based on a bitwise AND, i.e. `(categoryA & maskB) !== 0` and `(categoryB & maskA) !== 0` are both true.
      *
      * @method Phaser.Physics.Matter.Components.Collision#setCollidesWith
      * @since 3.0.0
      *
-     * @param {[type]} categories - [description]
+     * @param {(number|number[])} categories - A unique category bitfield, or an array of them.
      *
-     * @return {[type]} [description]
+     * @return {Phaser.GameObjects.GameObject} This Game Object.
      */
     setCollidesWith: function (categories)
     {
@@ -75,7 +75,7 @@ var Collision = {
         this.body.collisionFilter.mask = flags;
 
         return this;
-    },
+    }
 
 };
 

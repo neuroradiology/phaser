@@ -1,21 +1,19 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
-//  Checks if rectB is fully contained within rectA
-
 /**
- * [description]
+ * Tests if one rectangle fully contains another.
  *
  * @function Phaser.Geom.Rectangle.ContainsRect
  * @since 3.0.0
  *
- * @param {Phaser.Geom.Rectangle} rectA - [description]
- * @param {Phaser.Geom.Rectangle} rectB - [description]
+ * @param {Phaser.Geom.Rectangle} rectA - The first rectangle.
+ * @param {Phaser.Geom.Rectangle} rectB - The second rectangle.
  *
- * @return {boolean} [description]
+ * @return {boolean} True only if rectA fully contains rectB.
  */
 var ContainsRect = function (rectA, rectB)
 {
@@ -28,7 +26,7 @@ var ContainsRect = function (rectA, rectB)
     return (
         (rectB.x > rectA.x && rectB.x < rectA.right) &&
         (rectB.right > rectA.x && rectB.right < rectA.right) &&
-        (rectB.y > rectA.y && rectB.y < rectA.bottom) && 
+        (rectB.y > rectA.y && rectB.y < rectA.bottom) &&
         (rectB.bottom > rectA.y && rectB.bottom < rectA.bottom)
     );
 };

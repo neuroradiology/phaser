@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2018 Photon Storm Ltd.
+ * @copyright    2019 Photon Storm Ltd.
  * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
  */
 
@@ -8,6 +8,7 @@ var Class = require('../../utils/Class');
 var Contains = require('./Contains');
 var GetPoint = require('./GetPoint');
 var GetPoints = require('./GetPoints');
+var Line = require('../line/Line');
 var Random = require('./Random');
 
 /**
@@ -15,14 +16,14 @@ var Random = require('./Random');
  * Encapsulates a 2D rectangle defined by its corner point in the top-left and its extends in x (width) and y (height)
  *
  * @class Rectangle
- * @memberOf Phaser.Geom
+ * @memberof Phaser.Geom
  * @constructor
  * @since 3.0.0
  *
- * @param {number} [x] - [description]
- * @param {number} [y] - [description]
- * @param {number} [width] - [description]
- * @param {number} [height] - [description]
+ * @param {number} [x=0] - The X coordinate of the top left corner of the Rectangle.
+ * @param {number} [y=0] - The Y coordinate of the top left corner of the Rectangle.
+ * @param {number} [width=0] - The width of the Rectangle.
+ * @param {number} [height=0] - The height of the Rectangle.
  */
 var Rectangle = new Class({
 
@@ -36,7 +37,7 @@ var Rectangle = new Class({
         if (height === undefined) { height = 0; }
 
         /**
-         * [description]
+         * The X coordinate of the top left corner of the Rectangle.
          *
          * @name Phaser.Geom.Rectangle#x
          * @type {number}
@@ -46,7 +47,7 @@ var Rectangle = new Class({
         this.x = x;
 
         /**
-         * [description]
+         * The Y coordinate of the top left corner of the Rectangle.
          *
          * @name Phaser.Geom.Rectangle#y
          * @type {number}
@@ -56,7 +57,7 @@ var Rectangle = new Class({
         this.y = y;
 
         /**
-         * [description]
+         * The width of the Rectangle, i.e. the distance between its left side (defined by `x`) and its right side.
          *
          * @name Phaser.Geom.Rectangle#width
          * @type {number}
@@ -66,7 +67,7 @@ var Rectangle = new Class({
         this.width = width;
 
         /**
-         * [description]
+         * The height of the Rectangle, i.e. the distance between its top side (defined by `y`) and its bottom side.
          *
          * @name Phaser.Geom.Rectangle#height
          * @type {number}
@@ -77,15 +78,15 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Checks if the given point is inside the Rectangle's bounds.
      *
      * @method Phaser.Geom.Rectangle#contains
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
+     * @param {number} x - The X coordinate of the point to check.
+     * @param {number} y - The Y coordinate of the point to check.
      *
-     * @return {[type]} [description]
+     * @return {boolean} `true` if the point is within the Rectangle's bounds, otherwise `false`.
      */
     contains: function (x, y)
     {
@@ -93,15 +94,21 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Calculates the coordinates of a point at a certain `position` on the Rectangle's perimeter.
+     * 
+     * The `position` is a fraction between 0 and 1 which defines how far into the perimeter the point is.
+     * 
+     * A value of 0 or 1 returns the point at the top left corner of the rectangle, while a value of 0.5 returns the point at the bottom right corner of the rectangle. Values between 0 and 0.5 are on the top or the right side and values between 0.5 and 1 are on the bottom or the left side.
      *
      * @method Phaser.Geom.Rectangle#getPoint
      * @since 3.0.0
      *
-     * @param {[type]} position - [description]
-     * @param {[type]} output - [description]
+     * @generic {Phaser.Geom.Point} O - [output,$return]
      *
-     * @return {[type]} [description]
+     * @param {number} position - The normalized distance into the Rectangle's perimeter to return.
+     * @param {(Phaser.Geom.Point|object)} [output] - An object to update with the `x` and `y` coordinates of the point.
+     *
+     * @return {(Phaser.Geom.Point|object)} The updated `output` object, or a new Point if no `output` object was given.
      */
     getPoint: function (position, output)
     {
@@ -109,16 +116,18 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Returns an array of points from the perimeter of the Rectangle, each spaced out based on the quantity or step required.
      *
      * @method Phaser.Geom.Rectangle#getPoints
      * @since 3.0.0
      *
-     * @param {[type]} quantity - [description]
-     * @param {[type]} stepRate - [description]
-     * @param {[type]} output - [description]
+     * @generic {Phaser.Geom.Point[]} O - [output,$return]
      *
-     * @return {[type]} [description]
+     * @param {integer} quantity - The number of points to return. Set to `false` or 0 to return an arbitrary number of points (`perimeter / stepRate`) evenly spaced around the Rectangle based on the `stepRate`.
+     * @param {number} [stepRate] - If `quantity` is 0, determines the normalized distance between each returned point.
+     * @param {(array|Phaser.Geom.Point[])} [output] - An array to which to append the points.
+     *
+     * @return {(array|Phaser.Geom.Point[])} The modified `output` array, or a new array if none was provided.
      */
     getPoints: function (quantity, stepRate, output)
     {
@@ -126,14 +135,16 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Returns a random point within the Rectangle's bounds.
      *
      * @method Phaser.Geom.Rectangle#getRandomPoint
      * @since 3.0.0
      *
-     * @param {[type]} point - [description]
+     * @generic {Phaser.Geom.Point} O - [point,$return]
      *
-     * @return {[type]} [description]
+     * @param {Phaser.Geom.Point} [point] - The object in which to store the `x` and `y` coordinates of the point.
+     *
+     * @return {Phaser.Geom.Point} The updated `point`, or a new Point if none was provided.
      */
     getRandomPoint: function (point)
     {
@@ -141,15 +152,15 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Sets the position, width, and height of the Rectangle.
      *
      * @method Phaser.Geom.Rectangle#setTo
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
-     * @param {[type]} width - [description]
-     * @param {[type]} height - [description]
+     * @param {number} x - The X coordinate of the top left corner of the Rectangle.
+     * @param {number} y - The Y coordinate of the top left corner of the Rectangle.
+     * @param {number} width - The width of the Rectangle.
+     * @param {number} height - The height of the Rectangle.
      *
      * @return {Phaser.Geom.Rectangle} This Rectangle object.
      */
@@ -164,7 +175,7 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Resets the position, width, and height of the Rectangle to 0.
      *
      * @method Phaser.Geom.Rectangle#setEmpty
      * @since 3.0.0
@@ -177,13 +188,13 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Sets the position of the Rectangle.
      *
      * @method Phaser.Geom.Rectangle#setPosition
      * @since 3.0.0
      *
-     * @param {[type]} x - [description]
-     * @param {[type]} y - [description]
+     * @param {number} x - The X coordinate of the top left corner of the Rectangle.
+     * @param {number} [y=x] - The Y coordinate of the top left corner of the Rectangle.
      *
      * @return {Phaser.Geom.Rectangle} This Rectangle object.
      */
@@ -198,13 +209,13 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Sets the width and height of the Rectangle.
      *
      * @method Phaser.Geom.Rectangle#setSize
      * @since 3.0.0
      *
-     * @param {[type]} width - [description]
-     * @param {[type]} height - [description]
+     * @param {number} width - The width to set the Rectangle to.
+     * @param {number} [height=width] - The height to set the Rectangle to.
      *
      * @return {Phaser.Geom.Rectangle} This Rectangle object.
      */
@@ -219,77 +230,106 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
+     * Determines if the Rectangle is empty. A Rectangle is empty if its width or height is less than or equal to 0.
      *
      * @method Phaser.Geom.Rectangle#isEmpty
      * @since 3.0.0
      *
-     * @return {boolean} [description]
+     * @return {boolean} `true` if the Rectangle is empty. A Rectangle object is empty if its width or height is less than or equal to 0.
      */
     isEmpty: function ()
     {
         return (this.width <= 0 || this.height <= 0);
     },
 
-    //  TOP
     /**
-     * [description]
+     * Returns a Line object that corresponds to the top of this Rectangle.
      *
      * @method Phaser.Geom.Rectangle#getLineA
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @generic {Phaser.Geom.Line} O - [line,$return]
+     *
+     * @param {Phaser.Geom.Line} [line] - A Line object to set the results in. If `undefined` a new Line will be created.
+     *
+     * @return {Phaser.Geom.Line} A Line object that corresponds to the top of this Rectangle.
      */
-    getLineA: function ()
+    getLineA: function (line)
     {
-        return { x1: this.x, y1: this.y, x2: this.right, y2: this.y };
+        if (line === undefined) { line = new Line(); }
+
+        line.setTo(this.x, this.y, this.right, this.y);
+
+        return line;
     },
 
-    //  RIGHT
     /**
-     * [description]
+     * Returns a Line object that corresponds to the right of this Rectangle.
      *
      * @method Phaser.Geom.Rectangle#getLineB
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @generic {Phaser.Geom.Line} O - [line,$return]
+     *
+     * @param {Phaser.Geom.Line} [line] - A Line object to set the results in. If `undefined` a new Line will be created.
+     *
+     * @return {Phaser.Geom.Line} A Line object that corresponds to the right of this Rectangle.
      */
-    getLineB: function ()
+    getLineB: function (line)
     {
-        return { x1: this.right, y1: this.y, x2: this.right, y2: this.bottom };
+        if (line === undefined) { line = new Line(); }
+
+        line.setTo(this.right, this.y, this.right, this.bottom);
+
+        return line;
     },
 
-    //  BOTTOM
     /**
-     * [description]
+     * Returns a Line object that corresponds to the bottom of this Rectangle.
      *
      * @method Phaser.Geom.Rectangle#getLineC
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @generic {Phaser.Geom.Line} O - [line,$return]
+     *
+     * @param {Phaser.Geom.Line} [line] - A Line object to set the results in. If `undefined` a new Line will be created.
+     *
+     * @return {Phaser.Geom.Line} A Line object that corresponds to the bottom of this Rectangle.
      */
-    getLineC: function ()
+    getLineC: function (line)
     {
-        return { x1: this.right, y1: this.bottom, x2: this.x, y2: this.bottom };
+        if (line === undefined) { line = new Line(); }
+
+        line.setTo(this.right, this.bottom, this.x, this.bottom);
+
+        return line;
     },
 
-    //  LEFT
     /**
-     * [description]
+     * Returns a Line object that corresponds to the left of this Rectangle.
      *
      * @method Phaser.Geom.Rectangle#getLineD
      * @since 3.0.0
      *
-     * @return {[type]} [description]
+     * @generic {Phaser.Geom.Line} O - [line,$return]
+     *
+     * @param {Phaser.Geom.Line} [line] - A Line object to set the results in. If `undefined` a new Line will be created.
+     *
+     * @return {Phaser.Geom.Line} A Line object that corresponds to the left of this Rectangle.
      */
-    getLineD: function ()
+    getLineD: function (line)
     {
-        return { x1: this.x, y1: this.bottom, x2: this.x, y2: this.y };
+        if (line === undefined) { line = new Line(); }
+
+        line.setTo(this.x, this.bottom, this.x, this.y);
+
+        return line;
     },
 
     /**
-     * [description]
-     * 
+     * The x coordinate of the left of the Rectangle.
+     * Changing the left property of a Rectangle object has no effect on the y and height properties. However it does affect the width property, whereas changing the x value does not affect the width property.
+     *
      * @name Phaser.Geom.Rectangle#left
      * @type {number}
      * @since 3.0.0
@@ -318,8 +358,9 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
-     * 
+     * The sum of the x and width properties.
+     * Changing the right property of a Rectangle object has no effect on the x, y and height properties, however it does affect the width property.
+     *
      * @name Phaser.Geom.Rectangle#right
      * @type {number}
      * @since 3.0.0
@@ -346,8 +387,9 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
-     * 
+     * The y coordinate of the top of the Rectangle. Changing the top property of a Rectangle object has no effect on the x and width properties.
+     * However it does affect the height property, whereas changing the y value does not affect the height property.
+     *
      * @name Phaser.Geom.Rectangle#top
      * @type {number}
      * @since 3.0.0
@@ -364,19 +406,21 @@ var Rectangle = new Class({
             if (value >= this.bottom)
             {
                 this.height = 0;
-                this.y = value;
             }
             else
             {
                 this.height = (this.bottom - value);
             }
+
+            this.y = value;
         }
 
     },
 
     /**
-     * [description]
-     * 
+     * The sum of the y and height properties.
+     * Changing the bottom property of a Rectangle object has no effect on the x, y and width properties, but does change the height property.
+     *
      * @name Phaser.Geom.Rectangle#bottom
      * @type {number}
      * @since 3.0.0
@@ -403,8 +447,8 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
-     * 
+     * The x coordinate of the center of the Rectangle.
+     *
      * @name Phaser.Geom.Rectangle#centerX
      * @type {number}
      * @since 3.0.0
@@ -424,8 +468,8 @@ var Rectangle = new Class({
     },
 
     /**
-     * [description]
-     * 
+     * The y coordinate of the center of the Rectangle.
+     *
      * @name Phaser.Geom.Rectangle#centerY
      * @type {number}
      * @since 3.0.0
