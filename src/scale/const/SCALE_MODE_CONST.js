@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -17,7 +17,7 @@
  * 
  * To find out what each mode does please see [Phaser.Scale.ScaleModes]{@link Phaser.Scale.ScaleModes}.
  * 
- * @typedef {(Phaser.Scale.ScaleModes.NONE|Phaser.Scale.ScaleModes.WIDTH_CONTROLS_HEIGHT|Phaser.Scale.ScaleModes.HEIGHT_CONTROLS_WIDTH|Phaser.Scale.ScaleModes.FIT|Phaser.Scale.ScaleModes.ENVELOP|Phaser.Scale.ScaleModes.RESIZE)} Phaser.Scale.ScaleModeType
+ * @typedef {Phaser.Scale.ScaleModes} Phaser.Scale.ScaleModeType
  * @memberof Phaser.Scale
  * @since 3.16.0
  */

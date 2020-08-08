@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../utils/Class');
@@ -14,19 +14,6 @@ var XHRLoader = require('./XHRLoader');
 var XHRSettings = require('./XHRSettings');
 
 /**
- * @typedef {object} FileConfig
- *
- * @property {string} type - The file type string (image, json, etc) for sorting within the Loader.
- * @property {string} key - Unique cache key (unique within its file type)
- * @property {string} [url] - The URL of the file, not including baseURL.
- * @property {string} [path] - The path of the file, not including the baseURL.
- * @property {string} [extension] - The default extension this file uses.
- * @property {XMLHttpRequestResponseType} [responseType] - The responseType to be used by the XHR request.
- * @property {(XHRSettingsObject|false)} [xhrSettings=false] - Custom XHR Settings specific to this file and merged with the Loader defaults.
- * @property {any} [config] - A config object that can be used by file types to store transitional data.
- */
-
-/**
  * @classdesc
  * The base File class used by all File Types that the Loader can support.
  * You shouldn't create an instance of a File directly, but should extend it with your own class, setting a custom type and processing methods.
@@ -37,7 +24,7 @@ var XHRSettings = require('./XHRSettings');
  * @since 3.0.0
  *
  * @param {Phaser.Loader.LoaderPlugin} loader - The Loader that is going to load this File.
- * @param {FileConfig} fileConfig - The file configuration object, as created by the file type.
+ * @param {Phaser.Types.Loader.FileConfig} fileConfig - The file configuration object, as created by the file type.
  */
 var File = new Class({
 
@@ -95,10 +82,13 @@ var File = new Class({
 
         /**
          * The URL of the file, not including baseURL.
-         * Automatically has Loader.path prepended to it.
+         *
+         * Automatically has Loader.path prepended to it if a string.
+         *
+         * Can also be a JavaScript Object, such as the results of parsing JSON data.
          *
          * @name Phaser.Loader.File#url
-         * @type {string}
+         * @type {object|string}
          * @since 3.0.0
          */
         this.url = GetFastValue(fileConfig, 'url');
@@ -107,7 +97,7 @@ var File = new Class({
         {
             this.url = loader.path + loadKey + '.' + GetFastValue(fileConfig, 'extension', '');
         }
-        else if (typeof(this.url) !== 'function')
+        else if (typeof this.url === 'string' && this.url.indexOf('blob:') !== 0 && this.url.indexOf('data:') !== 0)
         {
             this.url = loader.path + this.url;
         }
@@ -126,7 +116,7 @@ var File = new Class({
          * The merged XHRSettings for this file.
          *
          * @name Phaser.Loader.File#xhrSettings
-         * @type {XHRSettingsObject}
+         * @type {Phaser.Types.Loader.XHRSettingsObject}
          * @since 3.0.0
          */
         this.xhrSettings = XHRSettings(GetFastValue(fileConfig, 'responseType', undefined));
@@ -285,6 +275,8 @@ var File = new Class({
         }
         else
         {
+            this.state = CONST.FILE_LOADING;
+
             this.src = GetURL(this, this.loader.baseURL);
 
             if (this.src.indexOf('data:') === 0)
@@ -295,7 +287,7 @@ var File = new Class({
             {
                 //  The creation of this XHRLoader starts the load process going.
                 //  It will automatically call the following, based on the load outcome:
-                //  
+                //
                 // xhr.onload = this.onLoad
                 // xhr.onerror = this.onError
                 // xhr.onprogress = this.onProgress
@@ -325,6 +317,8 @@ var File = new Class({
         {
             success = false;
         }
+
+        this.state = CONST.FILE_LOADED;
 
         this.resetXHR();
 
@@ -500,7 +494,7 @@ var File = new Class({
  * @method Phaser.Loader.File.createObjectURL
  * @static
  * @since 3.7.0
- * 
+ *
  * @param {HTMLImageElement} image - Image object which 'src' attribute should be set to object URL.
  * @param {Blob} blob - A Blob object to create an object URL for.
  * @param {string} defaultType - Default mime type used if blob type is not available.
@@ -534,7 +528,7 @@ File.createObjectURL = function (image, blob, defaultType)
  * @method Phaser.Loader.File.revokeObjectURL
  * @static
  * @since 3.7.0
- * 
+ *
  * @param {HTMLImageElement} image - Image object which 'src' attribute should be revoked.
  */
 File.revokeObjectURL = function (image)

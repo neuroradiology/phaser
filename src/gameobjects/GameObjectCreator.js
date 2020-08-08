@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../utils/Class');
@@ -63,7 +63,7 @@ var GameObjectCreator = new Class({
         /**
          * A reference to the Scene Update List.
          *
-         * @name Phaser.GameObjects.GameObjectCreator#updateList;
+         * @name Phaser.GameObjects.GameObjectCreator#updateList
          * @type {Phaser.GameObjects.UpdateList}
          * @protected
          * @since 3.0.0
@@ -146,6 +146,14 @@ GameObjectCreator.register = function (factoryType, factoryFunction)
     if (!GameObjectCreator.prototype.hasOwnProperty(factoryType))
     {
         GameObjectCreator.prototype[factoryType] = factoryFunction;
+    }
+};
+
+GameObjectCreator.remove = function (factoryType)
+{
+    if (GameObjectCreator.prototype.hasOwnProperty(factoryType))
+    {
+        delete GameObjectCreator.prototype[factoryType];
     }
 };
 

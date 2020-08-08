@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -65,7 +65,7 @@ var Size = {
 
         get: function ()
         {
-            return this.scaleX * this.frame.realWidth;
+            return Math.abs(this.scaleX * this.frame.realWidth);
         },
 
         set: function (value)
@@ -90,7 +90,7 @@ var Size = {
 
         get: function ()
         {
-            return this.scaleY * this.frame.realHeight;
+            return Math.abs(this.scaleY * this.frame.realHeight);
         },
 
         set: function (value)

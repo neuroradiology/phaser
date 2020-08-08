@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -12,6 +12,8 @@ module.exports = {
 
     BLUR: require('./BLUR_EVENT'),
     BOOT: require('./BOOT_EVENT'),
+    CONTEXT_LOST: require('./CONTEXT_LOST_EVENT'),
+    CONTEXT_RESTORED: require('./CONTEXT_RESTORED_EVENT'),
     DESTROY: require('./DESTROY_EVENT'),
     FOCUS: require('./FOCUS_EVENT'),
     HIDDEN: require('./HIDDEN_EVENT'),

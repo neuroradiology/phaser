@@ -1,8 +1,8 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
  * @author       Felipe Alfonso <@bitnenfer>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var ArrayUtils = require('../../utils/array');
@@ -25,6 +25,10 @@ var Vector2 = require('../../math/Vector2');
  * By default it will be removed from the Display List and instead added to the Containers own internal list.
  *
  * The position of the Game Object automatically becomes relative to the position of the Container.
+ *
+ * The origin of a Container is 0x0 (in local space) and that cannot be changed. The children you add to the
+ * Container should be positioned with this value in mind. I.e. you should treat 0x0 as being the center of
+ * the Container, and position children positively and negative around it as required.
  *
  * When the Container is rendered, all of its children are rendered as well, in the order in which they exist
  * within the Container. Container children can be repositioned using methods such as `MoveUp`, `MoveDown` and `SendToBack`.
@@ -58,12 +62,11 @@ var Vector2 = require('../../math/Vector2');
  * @constructor
  * @since 3.4.0
  *
- * @extends Phaser.GameObjects.Components.Alpha
+ * @extends Phaser.GameObjects.Components.AlphaSingle
  * @extends Phaser.GameObjects.Components.BlendMode
  * @extends Phaser.GameObjects.Components.ComputedSize
  * @extends Phaser.GameObjects.Components.Depth
  * @extends Phaser.GameObjects.Components.Mask
- * @extends Phaser.GameObjects.Components.ScrollFactor
  * @extends Phaser.GameObjects.Components.Transform
  * @extends Phaser.GameObjects.Components.Visible
  *
@@ -77,12 +80,11 @@ var Container = new Class({
     Extends: GameObject,
 
     Mixins: [
-        Components.Alpha,
+        Components.AlphaSingle,
         Components.BlendMode,
         Components.ComputedSize,
         Components.Depth,
         Components.Mask,
-        Components.ScrollFactor,
         Components.Transform,
         Components.Visible,
         Render
@@ -193,6 +195,60 @@ var Container = new Class({
          */
         this._sysEvents = scene.sys.events;
 
+        /**
+         * The horizontal scroll factor of this Container.
+         *
+         * The scroll factor controls the influence of the movement of a Camera upon this Container.
+         *
+         * When a camera scrolls it will change the location at which this Container is rendered on-screen.
+         * It does not change the Containers actual position values.
+         *
+         * For a Container, setting this value will only update the Container itself, not its children.
+         * If you wish to change the scrollFactor of the children as well, use the `setScrollFactor` method.
+         *
+         * A value of 1 means it will move exactly in sync with a camera.
+         * A value of 0 means it will not move at all, even if the camera moves.
+         * Other values control the degree to which the camera movement is mapped to this Container.
+         *
+         * Please be aware that scroll factor values other than 1 are not taken in to consideration when
+         * calculating physics collisions. Bodies always collide based on their world position, but changing
+         * the scroll factor is a visual adjustment to where the textures are rendered, which can offset
+         * them from physics bodies if not accounted for in your code.
+         *
+         * @name Phaser.GameObjects.Container#scrollFactorX
+         * @type {number}
+         * @default 1
+         * @since 3.0.0
+         */
+        this.scrollFactorX = 1;
+
+        /**
+         * The vertical scroll factor of this Container.
+         *
+         * The scroll factor controls the influence of the movement of a Camera upon this Container.
+         *
+         * When a camera scrolls it will change the location at which this Container is rendered on-screen.
+         * It does not change the Containers actual position values.
+         *
+         * For a Container, setting this value will only update the Container itself, not its children.
+         * If you wish to change the scrollFactor of the children as well, use the `setScrollFactor` method.
+         *
+         * A value of 1 means it will move exactly in sync with a camera.
+         * A value of 0 means it will not move at all, even if the camera moves.
+         * Other values control the degree to which the camera movement is mapped to this Container.
+         *
+         * Please be aware that scroll factor values other than 1 are not taken in to consideration when
+         * calculating physics collisions. Bodies always collide based on their world position, but changing
+         * the scroll factor is a visual adjustment to where the textures are rendered, which can offset
+         * them from physics bodies if not accounted for in your code.
+         *
+         * @name Phaser.GameObjects.Container#scrollFactorY
+         * @type {number}
+         * @default 1
+         * @since 3.0.0
+         */
+        this.scrollFactorY = 1;
+
         this.setPosition(x, y);
 
         this.clearAlpha();
@@ -295,7 +351,7 @@ var Container = new Class({
      *
      * @param {boolean} [value=true] - The exclusive state of this Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container.
+     * @return {this} This Container.
      */
     setExclusive: function (value)
     {
@@ -332,10 +388,21 @@ var Container = new Class({
 
         output.setTo(this.x, this.y, 0, 0);
 
+        if (this.parentContainer)
+        {
+            var parentMatrix = this.parentContainer.getBoundsTransformMatrix();
+            var transformedPosition = parentMatrix.transformPoint(this.x, this.y);
+
+            output.setTo(transformedPosition.x, transformedPosition.y, 0, 0);
+        }
+
         if (this.list.length > 0)
         {
             var children = this.list;
             var tempRect = new Rectangle();
+            var hasSetFirst = false;
+
+            output.setEmpty();
 
             for (var i = 0; i < children.length; i++)
             {
@@ -345,7 +412,15 @@ var Container = new Class({
                 {
                     entry.getBounds(tempRect);
 
-                    Union(tempRect, output, output);
+                    if (!hasSetFirst)
+                    {
+                        output.setTo(tempRect.x, tempRect.y, tempRect.width, tempRect.height);
+                        hasSetFirst = true;
+                    }
+                    else
+                    {
+                        Union(tempRect, output, output);
+                    }
                 }
             }
         }
@@ -416,7 +491,11 @@ var Container = new Class({
 
         if (this.parentContainer)
         {
-            return this.parentContainer.pointToContainer(source, output);
+            this.parentContainer.pointToContainer(source, output);
+        }
+        else
+        {
+            output = new Vector2(source.x, source.y);
         }
 
         var tempMatrix = this.tempTransformMatrix;
@@ -433,7 +512,7 @@ var Container = new Class({
 
     /**
      * Returns the world transform matrix as used for Bounds checks.
-     * 
+     *
      * The returned matrix is temporal and shouldn't be stored.
      *
      * @method Phaser.GameObjects.Container#getBoundsTransformMatrix
@@ -456,7 +535,7 @@ var Container = new Class({
      *
      * @param {Phaser.GameObjects.GameObject|Phaser.GameObjects.GameObject[]} child - The Game Object, or array of Game Objects, to add to the Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     add: function (child)
     {
@@ -478,7 +557,7 @@ var Container = new Class({
      * @param {Phaser.GameObjects.GameObject|Phaser.GameObjects.GameObject[]} child - The Game Object, or array of Game Objects, to add to the Container.
      * @param {integer} [index=0] - The position to insert the Game Object/s at.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     addAt: function (child, index)
     {
@@ -527,7 +606,7 @@ var Container = new Class({
      * @param {string} property - The property to lexically sort by.
      * @param {function} [handler] - Provide your own custom handler function. Will receive 2 children which it should compare and return a boolean.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     sort: function (property, handler)
     {
@@ -669,7 +748,7 @@ var Container = new Class({
      * @param {Phaser.GameObjects.GameObject} child1 - The first Game Object to swap.
      * @param {Phaser.GameObjects.GameObject} child2 - The second Game Object to swap.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     swap: function (child1, child2)
     {
@@ -692,7 +771,7 @@ var Container = new Class({
      * @param {Phaser.GameObjects.GameObject} child - The Game Object to move.
      * @param {integer} index - The new position of the Game Object in this Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     moveTo: function (child, index)
     {
@@ -714,7 +793,7 @@ var Container = new Class({
      * @param {Phaser.GameObjects.GameObject|Phaser.GameObjects.GameObject[]} child - The Game Object, or array of Game Objects, to be removed from the Container.
      * @param {boolean} [destroyChild=false] - Optionally call `destroy` on each child successfully removed from this Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     remove: function (child, destroyChild)
     {
@@ -747,7 +826,7 @@ var Container = new Class({
      * @param {integer} index - The index of the Game Object to be removed.
      * @param {boolean} [destroyChild=false] - Optionally call `destroy` on the Game Object if successfully removed from this Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     removeAt: function (index, destroyChild)
     {
@@ -773,7 +852,7 @@ var Container = new Class({
      * @param {integer} [endIndex=Container.length] - An optional end index to search up to (but not included)
      * @param {boolean} [destroyChild=false] - Optionally call `destroy` on each Game Object successfully removed from this Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     removeBetween: function (startIndex, endIndex, destroyChild)
     {
@@ -800,7 +879,7 @@ var Container = new Class({
      *
      * @param {boolean} [destroyChild=false] - Optionally call `destroy` on each Game Object successfully removed from this Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     removeAll: function (destroyChild)
     {
@@ -826,7 +905,7 @@ var Container = new Class({
      *
      * @param {Phaser.GameObjects.GameObject} child - The Game Object to bring to the top of the Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     bringToTop: function (child)
     {
@@ -844,7 +923,7 @@ var Container = new Class({
      *
      * @param {Phaser.GameObjects.GameObject} child - The Game Object to send to the bottom of the Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     sendToBack: function (child)
     {
@@ -861,7 +940,7 @@ var Container = new Class({
      *
      * @param {Phaser.GameObjects.GameObject} child - The Game Object to be moved in the Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     moveUp: function (child)
     {
@@ -878,7 +957,7 @@ var Container = new Class({
      *
      * @param {Phaser.GameObjects.GameObject} child - The Game Object to be moved in the Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     moveDown: function (child)
     {
@@ -893,7 +972,7 @@ var Container = new Class({
      * @method Phaser.GameObjects.Container#reverse
      * @since 3.4.0
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     reverse: function ()
     {
@@ -908,7 +987,7 @@ var Container = new Class({
      * @method Phaser.GameObjects.Container#shuffle
      * @since 3.4.0
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     shuffle: function ()
     {
@@ -928,7 +1007,7 @@ var Container = new Class({
      * @param {Phaser.GameObjects.GameObject} newChild - The Game Object to be added to this Container.
      * @param {boolean} [destroyChild=false] - Optionally call `destroy` on the Game Object if successfully removed from this Container.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     replace: function (oldChild, newChild, destroyChild)
     {
@@ -980,7 +1059,7 @@ var Container = new Class({
      * @param {integer} [startIndex=0] - An optional start index to search from.
      * @param {integer} [endIndex=Container.length] - An optional end index to search up to (but not included)
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     setAll: function (property, value, startIndex, endIndex)
     {
@@ -1013,7 +1092,7 @@ var Container = new Class({
      * @param {object} [context] - Value to use as `this` when executing callback.
      * @param {...*} [args] - Additional arguments that will be passed to the callback, after the child.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     each: function (callback, context)
     {
@@ -1050,7 +1129,7 @@ var Container = new Class({
      * @param {object} [context] - Value to use as `this` when executing callback.
      * @param {...*} [args] - Additional arguments that will be passed to the callback, after the child.
      *
-     * @return {Phaser.GameObjects.Container} This Container instance.
+     * @return {this} This Container instance.
      */
     iterate: function (callback, context)
     {
@@ -1067,6 +1146,49 @@ var Container = new Class({
             args[0] = this.list[i];
 
             callback.apply(context, args);
+        }
+
+        return this;
+    },
+
+    /**
+     * Sets the scroll factor of this Container and optionally all of its children.
+     *
+     * The scroll factor controls the influence of the movement of a Camera upon this Game Object.
+     *
+     * When a camera scrolls it will change the location at which this Game Object is rendered on-screen.
+     * It does not change the Game Objects actual position values.
+     *
+     * A value of 1 means it will move exactly in sync with a camera.
+     * A value of 0 means it will not move at all, even if the camera moves.
+     * Other values control the degree to which the camera movement is mapped to this Game Object.
+     *
+     * Please be aware that scroll factor values other than 1 are not taken in to consideration when
+     * calculating physics collisions. Bodies always collide based on their world position, but changing
+     * the scroll factor is a visual adjustment to where the textures are rendered, which can offset
+     * them from physics bodies if not accounted for in your code.
+     *
+     * @method Phaser.GameObjects.Container#setScrollFactor
+     * @since 3.0.0
+     *
+     * @param {number} x - The horizontal scroll factor of this Game Object.
+     * @param {number} [y=x] - The vertical scroll factor of this Game Object. If not set it will use the `x` value.
+     * @param {boolean} [updateChildren=false] - Apply this scrollFactor to all Container children as well?
+     *
+     * @return {this} This Game Object instance.
+     */
+    setScrollFactor: function (x, y, updateChildren)
+    {
+        if (y === undefined) { y = x; }
+        if (updateChildren === undefined) { updateChildren = false; }
+
+        this.scrollFactorX = x;
+        this.scrollFactorY = y;
+
+        if (updateChildren)
+        {
+            ArrayUtils.SetAll(this.list, 'scrollFactorX', x);
+            ArrayUtils.SetAll(this.list, 'scrollFactorY', y);
         }
 
         return this;

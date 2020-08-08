@@ -1,10 +1,11 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
+var MATH_CONST = require('../../math/const');
 var Vector2 = require('../../math/Vector2');
 
 /**
@@ -25,8 +26,8 @@ var Vector2 = require('../../math/Vector2');
  * @since 3.0.0
  *
  * @param {number} [a=1] - The Scale X value.
- * @param {number} [b=0] - The Shear Y value.
- * @param {number} [c=0] - The Shear X value.
+ * @param {number} [b=0] - The Skew Y value.
+ * @param {number} [c=0] - The Skew X value.
  * @param {number} [d=1] - The Scale Y value.
  * @param {number} [tx=0] - The Translate X value.
  * @param {number} [ty=0] - The Translate Y value.
@@ -91,7 +92,7 @@ var TransformMatrix = new Class({
     },
 
     /**
-     * The Shear Y value.
+     * The Skew Y value.
      *
      * @name Phaser.GameObjects.Components.TransformMatrix#b
      * @type {number}
@@ -112,7 +113,7 @@ var TransformMatrix = new Class({
     },
 
     /**
-     * The Shear X value.
+     * The Skew X value.
      *
      * @name Phaser.GameObjects.Components.TransformMatrix#c
      * @type {number}
@@ -238,7 +239,7 @@ var TransformMatrix = new Class({
     },
 
     /**
-     * The rotation of the Matrix.
+     * The rotation of the Matrix. Value is in radians.
      *
      * @name Phaser.GameObjects.Components.TransformMatrix#rotation
      * @type {number}
@@ -249,13 +250,53 @@ var TransformMatrix = new Class({
 
         get: function ()
         {
-            return Math.acos(this.a / this.scaleX) * (Math.atan(-this.c / this.a) < 0 ? -1 : 1);
+            return Math.acos(this.a / this.scaleX) * ((Math.atan(-this.c / this.a) < 0) ? -1 : 1);
         }
 
     },
 
     /**
-     * The horizontal scale of the Matrix.
+     * The rotation of the Matrix, normalized to be within the Phaser right-handed
+     * clockwise rotation space. Value is in radians.
+     *
+     * @name Phaser.GameObjects.Components.TransformMatrix#rotationNormalized
+     * @type {number}
+     * @readonly
+     * @since 3.19.0
+     */
+    rotationNormalized: {
+
+        get: function ()
+        {
+            var matrix = this.matrix;
+
+            var a = matrix[0];
+            var b = matrix[1];
+            var c = matrix[2];
+            var d = matrix[3];
+
+            if (a || b)
+            {
+                // var r = Math.sqrt(a * a + b * b);
+    
+                return (b > 0) ? Math.acos(a / this.scaleX) : -Math.acos(a / this.scaleX);
+            }
+            else if (c || d)
+            {
+                // var s = Math.sqrt(c * c + d * d);
+    
+                return MATH_CONST.TAU - ((d > 0) ? Math.acos(-c / this.scaleY) : -Math.acos(c / this.scaleY));
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+    },
+
+    /**
+     * The decomposed horizontal scale of the Matrix. This value is always positive.
      *
      * @name Phaser.GameObjects.Components.TransformMatrix#scaleX
      * @type {number}
@@ -266,13 +307,13 @@ var TransformMatrix = new Class({
 
         get: function ()
         {
-            return Math.sqrt((this.a * this.a) + (this.c * this.c));
+            return Math.sqrt((this.a * this.a) + (this.b * this.b));
         }
 
     },
 
     /**
-     * The vertical scale of the Matrix.
+     * The decomposed vertical scale of the Matrix. This value is always positive.
      *
      * @name Phaser.GameObjects.Components.TransformMatrix#scaleY
      * @type {number}
@@ -283,7 +324,7 @@ var TransformMatrix = new Class({
 
         get: function ()
         {
-            return Math.sqrt((this.b * this.b) + (this.d * this.d));
+            return Math.sqrt((this.c * this.c) + (this.d * this.d));
         }
 
     },
@@ -397,7 +438,7 @@ var TransformMatrix = new Class({
      * @param {Phaser.GameObjects.Components.TransformMatrix} rhs - The Matrix to multiply by.
      * @param {Phaser.GameObjects.Components.TransformMatrix} [out] - An optional Matrix to store the results in.
      *
-     * @return {Phaser.GameObjects.Components.TransformMatrix} Either this TransformMatrix, or the `out` Matrix, if given in the arguments.
+     * @return {(this|Phaser.GameObjects.Components.TransformMatrix)} Either this TransformMatrix, or the `out` Matrix, if given in the arguments.
      */
     multiply: function (rhs, out)
     {
@@ -887,6 +928,58 @@ var TransformMatrix = new Class({
     getY: function (x, y)
     {
         return x * this.b + y * this.d + this.f;
+    },
+
+    /**
+     * Returns the X component of this matrix multiplied by the given values.
+     * 
+     * This is the same as `x * a + y * c + e`, optionally passing via `Math.round`.
+     *
+     * @method Phaser.GameObjects.Components.TransformMatrix#getXRound
+     * @since 3.50.0
+     * 
+     * @param {number} x - The x value.
+     * @param {number} y - The y value.
+     * @param {boolean} [round=false] - Math.round the resulting value?
+     *
+     * @return {number} The calculated x value.
+     */
+    getXRound: function (x, y, round)
+    {
+        var v = this.getX(x, y);
+
+        if (round)
+        {
+            v = Math.round(v);
+        }
+
+        return v;
+    },
+
+    /**
+     * Returns the Y component of this matrix multiplied by the given values.
+     * 
+     * This is the same as `x * b + y * d + f`, optionally passing via `Math.round`.
+     *
+     * @method Phaser.GameObjects.Components.TransformMatrix#getYRound
+     * @since 3.50.0
+     * 
+     * @param {number} x - The x value.
+     * @param {number} y - The y value.
+     * @param {boolean} [round=false] - Math.round the resulting value?
+     *
+     * @return {number} The calculated y value.
+     */
+    getYRound: function (x, y, round)
+    {
+        var v = this.getY(x, y);
+
+        if (round)
+        {
+            v = Math.round(v);
+        }
+
+        return v;
     },
 
     /**

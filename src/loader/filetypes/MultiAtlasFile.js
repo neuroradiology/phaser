@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -13,23 +13,11 @@ var JSONFile = require('./JSONFile.js');
 var MultiFile = require('../MultiFile.js');
 
 /**
- * @typedef {object} Phaser.Loader.FileTypes.MultiAtlasFileConfig
- *
- * @property {string} key - The key of the file. Must be unique within both the Loader and the Texture Manager.
- * @property {string} [atlasURL] - The absolute or relative URL to load the multi atlas json file from. Or, a well formed JSON object.
- * @property {string} [atlasExtension='json'] - The default file extension to use for the atlas json if no url is provided.
- * @property {XHRSettingsObject} [atlasXhrSettings] - Extra XHR Settings specifically for the atlas json file.
- * @property {string} [path] - Optional path to use when loading the textures defined in the atlas data.
- * @property {string} [baseURL] - Optional Base URL to use when loading the textures defined in the atlas data.
- * @property {XHRSettingsObject} [textureXhrSettings] - Extra XHR Settings specifically for the texture files.
- */
-
-/**
  * @classdesc
  * A single Multi Texture Atlas File suitable for loading by the Loader.
  *
  * These are created when you use the Phaser.Loader.LoaderPlugin#multiatlas method and are not typically created directly.
- * 
+ *
  * For documentation about what all the arguments and configuration options mean please see Phaser.Loader.LoaderPlugin#multiatlas.
  *
  * @class MultiAtlasFile
@@ -39,12 +27,12 @@ var MultiFile = require('../MultiFile.js');
  * @since 3.7.0
  *
  * @param {Phaser.Loader.LoaderPlugin} loader - A reference to the Loader that is responsible for this file.
- * @param {string} key - The key of the file. Must be unique within both the Loader and the Texture Manager.
+ * @param {(string|Phaser.Types.Loader.FileTypes.MultiAtlasFileConfig)} key - The key of the file. Must be unique within both the Loader and the Texture Manager. Or a config object.
  * @param {string} [atlasURL] - The absolute or relative URL to load the multi atlas json file from.
  * @param {string} [path] - Optional path to use when loading the textures defined in the atlas data.
  * @param {string} [baseURL] - Optional Base URL to use when loading the textures defined in the atlas data.
- * @param {XHRSettingsObject} [atlasXhrSettings] - Extra XHR Settings specifically for the atlas json file.
- * @param {XHRSettingsObject} [textureXhrSettings] - Extra XHR Settings specifically for the texture files.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [atlasXhrSettings] - Extra XHR Settings specifically for the atlas json file.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [textureXhrSettings] - Extra XHR Settings specifically for the texture files.
  */
 var MultiAtlasFile = new Class({
 
@@ -59,7 +47,16 @@ var MultiAtlasFile = new Class({
             var config = key;
 
             key = GetFastValue(config, 'key');
-            atlasURL = GetFastValue(config, 'url');
+
+            if (GetFastValue(config, 'url', false))
+            {
+                atlasURL = GetFastValue(config, 'url');
+            }
+            else
+            {
+                atlasURL = GetFastValue(config, 'atlasURL');
+            }
+
             atlasXhrSettings = GetFastValue(config, 'xhrSettings');
             path = GetFastValue(config, 'path');
             baseURL = GetFastValue(config, 'baseURL');
@@ -103,9 +100,9 @@ var MultiAtlasFile = new Class({
                 var currentPath = loader.path;
                 var currentPrefix = loader.prefix;
 
-                var baseURL = GetFastValue(config, 'baseURL', currentBaseURL);
-                var path = GetFastValue(config, 'path', currentPath);
-                var prefix = GetFastValue(config, 'prefix', currentPrefix);
+                var baseURL = GetFastValue(config, 'baseURL', this.baseURL);
+                var path = GetFastValue(config, 'path', this.path);
+                var prefix = GetFastValue(config, 'prefix', this.prefix);
                 var textureXhrSettings = GetFastValue(config, 'textureXhrSettings');
 
                 loader.setBaseURL(baseURL);
@@ -117,7 +114,7 @@ var MultiAtlasFile = new Class({
                     //  "image": "texture-packer-multi-atlas-0.png",
                     var textureURL = textures[i].image;
 
-                    var key = '_MA_' + textureURL;
+                    var key = 'MA' + this.multiKeyIndex + '_' + textureURL;
 
                     var image = new ImageFile(loader, key, textureURL, textureXhrSettings);
 
@@ -160,8 +157,6 @@ var MultiAtlasFile = new Class({
         {
             var fileJSON = this.files[0];
 
-            fileJSON.addToCache();
-
             var data = [];
             var images = [];
             var normalMaps = [];
@@ -175,7 +170,9 @@ var MultiAtlasFile = new Class({
                     continue;
                 }
 
-                var key = file.key.substr(4);
+                var pos = file.key.indexOf('_');
+                var key = file.key.substr(pos + 1);
+
                 var image = file.data;
 
                 //  Now we need to find out which json entry this mapped to
@@ -186,7 +183,7 @@ var MultiAtlasFile = new Class({
                     if (item.image === key)
                     {
                         images.push(image);
-                        
+
                         data.push(item);
 
                         if (file.linkFile)
@@ -221,7 +218,7 @@ var MultiAtlasFile = new Class({
  * Adds a Multi Texture Atlas, or array of multi atlases, to the current load queue.
  *
  * You can call this method from within your Scene's `preload`, along with any other files you wish to load:
- * 
+ *
  * ```javascript
  * function preload ()
  * {
@@ -236,7 +233,7 @@ var MultiAtlasFile = new Class({
  * The typical flow for a Phaser Scene is that you load assets in the Scene's `preload` method and then when the
  * Scene's `create` method is called you are guaranteed that all of those assets are ready for use and have been
  * loaded.
- * 
+ *
  * If you call this from outside of `preload` then you are responsible for starting the Loader afterwards and monitoring
  * its events to know when it's safe to use the asset. Please see the Phaser.Loader.LoaderPlugin class for more details.
  *
@@ -246,14 +243,14 @@ var MultiAtlasFile = new Class({
  * The way it works internally is that you provide a URL to the JSON file. Phaser then loads this JSON, parses it and
  * extracts which texture files it also needs to load to complete the process. If the JSON also defines normal maps,
  * Phaser will load those as well.
- * 
+ *
  * The key must be a unique String. It is used to add the file to the global Texture Manager upon a successful load.
  * The key should be unique both in terms of files being loaded and files already present in the Texture Manager.
  * Loading a file using a key that is already taken will result in a warning. If you wish to replace an existing file
  * then remove it from the Texture Manager first, before loading a new one.
  *
  * Instead of passing arguments you can pass a configuration object, such as:
- * 
+ *
  * ```javascript
  * this.load.multiatlas({
  *     key: 'level1',
@@ -261,12 +258,12 @@ var MultiAtlasFile = new Class({
  * });
  * ```
  *
- * See the documentation for `Phaser.Loader.FileTypes.MultiAtlasFileConfig` for more details.
+ * See the documentation for `Phaser.Types.Loader.FileTypes.MultiAtlasFileConfig` for more details.
  *
  * Instead of passing a URL for the atlas JSON data you can also pass in a well formed JSON object instead.
  *
  * Once the atlas has finished loading you can use frames from it as textures for a Game Object by referencing its key:
- * 
+ *
  * ```javascript
  * this.load.multiatlas('level1', 'images/Level1.json');
  * // and later in your game ...
@@ -289,16 +286,16 @@ var MultiAtlasFile = new Class({
  * It is available in the default build but can be excluded from custom builds.
  *
  * @method Phaser.Loader.LoaderPlugin#multiatlas
- * @fires Phaser.Loader.LoaderPlugin#addFileEvent
+ * @fires Phaser.Loader.LoaderPlugin#ADD
  * @since 3.7.0
  *
- * @param {(string|Phaser.Loader.FileTypes.MultiAtlasFileConfig|Phaser.Loader.FileTypes.MultiAtlasFileConfig[])} key - The key to use for this file, or a file configuration object, or array of them.
+ * @param {(string|Phaser.Types.Loader.FileTypes.MultiAtlasFileConfig|Phaser.Types.Loader.FileTypes.MultiAtlasFileConfig[])} key - The key to use for this file, or a file configuration object, or array of them.
  * @param {string} [atlasURL] - The absolute or relative URL to load the texture atlas json data file from. If undefined or `null` it will be set to `<key>.json`, i.e. if `key` was "alien" then the URL will be "alien.json".
  * @param {string} [path] - Optional path to use when loading the textures defined in the atlas data.
  * @param {string} [baseURL] - Optional Base URL to use when loading the textures defined in the atlas data.
- * @param {XHRSettingsObject} [atlasXhrSettings] - An XHR Settings configuration object for the atlas json file. Used in replacement of the Loaders default XHR Settings.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [atlasXhrSettings] - An XHR Settings configuration object for the atlas json file. Used in replacement of the Loaders default XHR Settings.
  *
- * @return {Phaser.Loader.LoaderPlugin} The Loader instance.
+ * @return {this} The Loader instance.
  */
 FileTypesManager.register('multiatlas', function (key, atlasURL, path, baseURL, atlasXhrSettings)
 {

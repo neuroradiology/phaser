@@ -1,13 +1,13 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var CanvasPool = require('../../display/canvas/CanvasPool');
 var Class = require('../../utils/Class');
 var Components = require('../components');
-var CONST = require('../../const');
+var GameEvents = require('../../core/events');
 var GameObject = require('../GameObject');
 var GetPowerOfTwo = require('../../math/pow2/GetPowerOfTwo');
 var Smoothing = require('../../display/canvas/Smoothing');
@@ -56,7 +56,6 @@ var _FLAG = 8; // 1000
  * @extends Phaser.GameObjects.Components.Mask
  * @extends Phaser.GameObjects.Components.Origin
  * @extends Phaser.GameObjects.Components.Pipeline
- * @extends Phaser.GameObjects.Components.ScaleMode
  * @extends Phaser.GameObjects.Components.ScrollFactor
  * @extends Phaser.GameObjects.Components.Tint
  * @extends Phaser.GameObjects.Components.Transform
@@ -85,7 +84,6 @@ var TileSprite = new Class({
         Components.Mask,
         Components.Origin,
         Components.Pipeline,
-        Components.ScaleMode,
         Components.ScrollFactor,
         Components.Tint,
         Components.Transform,
@@ -277,17 +275,15 @@ var TileSprite = new Class({
         this.setOriginFromFrame();
         this.initPipeline();
 
-        if (scene.sys.game.config.renderType === CONST.WEBGL)
+        scene.sys.game.events.on(GameEvents.CONTEXT_RESTORED, function (renderer)
         {
-            scene.sys.game.renderer.onContextRestored(function (renderer)
-            {
-                var gl = renderer.gl;
+            var gl = renderer.gl;
 
-                this.dirty = true;
-                this.fillPattern = null;
-                this.fillPattern = renderer.createTexture2D(0, gl.LINEAR, gl.LINEAR, gl.REPEAT, gl.REPEAT, gl.RGBA, this.fillCanvas, this.potWidth, this.potHeight);
-            }, this);
-        }
+            this.dirty = true;
+            this.fillPattern = null;
+            this.fillPattern = renderer.createTexture2D(0, gl.LINEAR, gl.LINEAR, gl.REPEAT, gl.REPEAT, gl.RGBA, this.fillCanvas, this.potWidth, this.potHeight);
+
+        }, this);
     },
 
     /**
@@ -326,9 +322,15 @@ var TileSprite = new Class({
      */
     setFrame: function (frame)
     {
-        this.displayFrame = this.displayTexture.get(frame);
+        var newFrame = this.displayTexture.get(frame);
 
-        if (!this.displayFrame.cutWidth || !this.displayFrame.cutHeight)
+        this.potWidth = GetPowerOfTwo(newFrame.width);
+        this.potHeight = GetPowerOfTwo(newFrame.height);
+
+        //  So updateCanvas is triggered
+        this.canvas.width = 0;
+
+        if (!newFrame.cutWidth || !newFrame.cutHeight)
         {
             this.renderFlags &= ~_FLAG;
         }
@@ -336,6 +338,8 @@ var TileSprite = new Class({
         {
             this.renderFlags |= _FLAG;
         }
+
+        this.displayFrame = newFrame;
 
         this.dirty = true;
 
@@ -409,6 +413,15 @@ var TileSprite = new Class({
         //  Draw the displayTexture to our fillCanvas
 
         var frame = this.displayFrame;
+
+        if (frame.source.isRenderTexture || frame.source.isGLTexture)
+        {
+            console.warn('TileSprites can only use Image or Canvas based textures');
+
+            this.dirty = false;
+
+            return;
+        }
 
         var ctx = this.fillContext;
         var canvas = this.fillCanvas;

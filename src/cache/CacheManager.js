@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var BaseCache = require('./BaseCache');
@@ -93,6 +93,15 @@ var CacheManager = new Class({
          * @since 3.0.0
          */
         this.audio = new BaseCache();
+
+        /**
+         * A Cache storing all non-streaming video files, typically added via the Loader.
+         *
+         * @name Phaser.Cache.CacheManager#video
+         * @type {Phaser.Cache.BaseCache}
+         * @since 3.20.0
+         */
+        this.video = new BaseCache();
 
         /**
          * A Cache storing all text files, typically added via the Loader.
@@ -190,6 +199,7 @@ var CacheManager = new Class({
             'physics',
             'shader',
             'audio',
+            'video',
             'text',
             'html',
             'obj',

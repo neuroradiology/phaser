@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -37,7 +37,9 @@ module.exports = {
     GAMEOBJECT_POINTER_OUT: require('./GAMEOBJECT_POINTER_OUT_EVENT'),
     GAMEOBJECT_POINTER_OVER: require('./GAMEOBJECT_POINTER_OVER_EVENT'),
     GAMEOBJECT_POINTER_UP: require('./GAMEOBJECT_POINTER_UP_EVENT'),
+    GAMEOBJECT_POINTER_WHEEL: require('./GAMEOBJECT_POINTER_WHEEL_EVENT'),
     GAMEOBJECT_UP: require('./GAMEOBJECT_UP_EVENT'),
+    GAMEOBJECT_WHEEL: require('./GAMEOBJECT_WHEEL_EVENT'),
     MANAGER_BOOT: require('./MANAGER_BOOT_EVENT'),
     MANAGER_PROCESS: require('./MANAGER_PROCESS_EVENT'),
     MANAGER_UPDATE: require('./MANAGER_UPDATE_EVENT'),
@@ -48,6 +50,7 @@ module.exports = {
     POINTER_OVER: require('./POINTER_OVER_EVENT'),
     POINTER_UP: require('./POINTER_UP_EVENT'),
     POINTER_UP_OUTSIDE: require('./POINTER_UP_OUTSIDE_EVENT'),
+    POINTER_WHEEL: require('./POINTER_WHEEL_EVENT'),
     POINTERLOCK_CHANGE: require('./POINTERLOCK_CHANGE_EVENT'),
     PRE_UPDATE: require('./PRE_UPDATE_EVENT'),
     SHUTDOWN: require('./SHUTDOWN_EVENT'),

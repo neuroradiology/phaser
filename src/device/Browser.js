@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var OS = require('./OS');
@@ -53,7 +53,7 @@ function init ()
 {
     var ua = navigator.userAgent;
 
-    if (/Edge\/\d+/.test(ua))
+    if ((/Edge\/\d+/).test(ua))
     {
         Browser.edge = true;
     }

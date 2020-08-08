@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var AddToDOM = require('../dom/AddToDOM');
@@ -10,6 +10,7 @@ var CacheManager = require('../cache/CacheManager');
 var CanvasPool = require('../display/canvas/CanvasPool');
 var Class = require('../utils/Class');
 var Config = require('./Config');
+var CreateDOMContainer = require('../dom/CreateDOMContainer');
 var CreateRenderer = require('./CreateRenderer');
 var DataManager = require('../data/DataManager');
 var DebugHeader = require('./DebugHeader');
@@ -22,15 +23,14 @@ var PluginCache = require('../plugins/PluginCache');
 var PluginManager = require('../plugins/PluginManager');
 var ScaleManager = require('../scale/ScaleManager');
 var SceneManager = require('../scene/SceneManager');
-var SoundManagerCreator = require('../sound/SoundManagerCreator');
 var TextureEvents = require('../textures/events');
 var TextureManager = require('../textures/TextureManager');
 var TimeStep = require('./TimeStep');
 var VisibilityHandler = require('./VisibilityHandler');
 
-if (typeof EXPERIMENTAL)
+if (typeof FEATURE_SOUND)
 {
-    var CreateDOMContainer = require('../dom/CreateDOMContainer');
+    var SoundManagerCreator = require('../sound/SoundManagerCreator');
 }
 
 if (typeof PLUGIN_FBINSTANT)
@@ -57,7 +57,7 @@ if (typeof PLUGIN_FBINSTANT)
  * @fires Phaser.Core.Events#VISIBLE
  * @since 3.0.0
  *
- * @param {GameConfig} [GameConfig] - The configuration object for your Phaser Game instance.
+ * @param {Phaser.Types.Core.GameConfig} [GameConfig] - The configuration object for your Phaser Game instance.
  */
 var Game = new Class({
 
@@ -86,22 +86,19 @@ var Game = new Class({
          */
         this.renderer = null;
 
-        if (typeof EXPERIMENTAL)
-        {
-            /**
-             * A reference to an HTML Div Element used as a DOM Element Container.
-             * 
-             * Only set if `createDOMContainer` is `true` in the game config (by default it is `false`) and
-             * if you provide a parent element to insert the Phaser Game inside.
-             *
-             * See the DOM Element Game Object for more details.
-             *
-             * @name Phaser.Game#domContainer
-             * @type {HTMLDivElement}
-             * @since 3.12.0
-             */
-            this.domContainer = null;
-        }
+        /**
+         * A reference to an HTML Div Element used as the DOM Element Container.
+         *
+         * Only set if `createDOMContainer` is `true` in the game config (by default it is `false`) and
+         * if you provide a parent element to insert the Phaser Game inside.
+         *
+         * See the DOM Element Game Object for more details.
+         *
+         * @name Phaser.Game#domContainer
+         * @type {HTMLDivElement}
+         * @since 3.17.0
+         */
+        this.domContainer = null;
 
         /**
          * A reference to the HTML Canvas Element that Phaser uses to render the game.
@@ -248,11 +245,18 @@ var Game = new Class({
          *
          * The Sound Manager is a global system responsible for the playback and updating of all audio in your game.
          *
+         * You can disable the inclusion of the Sound Manager in your build by toggling the webpack `FEATURE_SOUND` flag.
+         *
          * @name Phaser.Game#sound
-         * @type {Phaser.Sound.BaseSoundManager}
+         * @type {(Phaser.Sound.NoAudioSoundManager|Phaser.Sound.HTML5AudioSoundManager|Phaser.Sound.WebAudioSoundManager)}
          * @since 3.0.0
          */
-        this.sound = SoundManagerCreator.create(this);
+        this.sound = null;
+
+        if (typeof FEATURE_SOUND)
+        {
+            this.sound = SoundManagerCreator.create(this);
+        }
 
         /**
          * An instance of the Time Step.
@@ -282,7 +286,7 @@ var Game = new Class({
         {
             /**
              * An instance of the Facebook Instant Games Plugin.
-             * 
+             *
              * This will only be available if the plugin has been built into Phaser,
              * or you're using the special Facebook Instant Games custom build.
              *
@@ -366,10 +370,7 @@ var Game = new Class({
 
         CreateRenderer(this);
 
-        if (typeof EXPERIMENTAL)
-        {
-            CreateDOMContainer(this);
-        }
+        CreateDOMContainer(this);
 
         DebugHeader(this);
 
@@ -388,7 +389,7 @@ var Game = new Class({
      *
      * @method Phaser.Game#texturesReady
      * @private
-     * @fires Phaser.Game#ready
+     * @fires Phaser.Game#READY
      * @since 3.12.0
      */
     texturesReady: function ()
@@ -442,11 +443,11 @@ var Game = new Class({
      * It will then render each Scene in turn, via the Renderer. This process emits `prerender` and `postrender` events.
      *
      * @method Phaser.Game#step
-     * @fires Phaser.Core.Events#PRE_STEP_EVENT
-     * @fires Phaser.Core.Events#STEP_EVENT
-     * @fires Phaser.Core.Events#POST_STEP_EVENT
-     * @fires Phaser.Core.Events#PRE_RENDER_EVENT
-     * @fires Phaser.Core.Events#POST_RENDER_EVENT
+     * @fires Phaser.Core.Events#PRE_STEP
+     * @fires Phaser.Core.Events#STEP
+     * @fires Phaser.Core.Events#POST_STEP
+     * @fires Phaser.Core.Events#PRE_RENDER
+     * @fires Phaser.Core.Events#POST_RENDER
      * @since 3.0.0
      *
      * @param {number} time - The current time. Either a High Resolution Timer value if it comes from Request Animation Frame, or Date.now if using SetTimeout.
@@ -509,8 +510,8 @@ var Game = new Class({
      * This process emits `prerender` and `postrender` events, even though nothing actually displays.
      *
      * @method Phaser.Game#headlessStep
-     * @fires Phaser.Game#prerenderEvent
-     * @fires Phaser.Game#postrenderEvent
+     * @fires Phaser.Game#PRE_RENDER
+     * @fires Phaser.Game#POST_RENDER
      * @since 3.2.0
      *
      * @param {number} time - The current time. Either a High Resolution Timer value if it comes from Request Animation Frame, or Date.now if using SetTimeout.
@@ -518,6 +519,11 @@ var Game = new Class({
      */
     headlessStep: function (time, delta)
     {
+        if (this.pendingDestroy)
+        {
+            return this.runDestroy();
+        }
+
         var eventEmitter = this.events;
 
         //  Global Managers
@@ -603,11 +609,12 @@ var Game = new Class({
 
     /**
      * Returns the current game frame.
+     *
      * When the game starts running, the frame is incremented every time Request Animation Frame, or Set Timeout, fires.
      *
      * @method Phaser.Game#getFrame
      * @since 3.16.0
-     * 
+     *
      * @return {number} The current game frame.
      */
     getFrame: function ()
@@ -616,23 +623,25 @@ var Game = new Class({
     },
 
     /**
-     * Returns the current game timestamp.
-     * When the game starts running, the frame is incremented every time Request Animation Frame, or Set Timeout, fires.
+     * Returns the time that the current game step started at, as based on `performance.now`.
      *
      * @method Phaser.Game#getTime
      * @since 3.16.0
-     * 
+     *
      * @return {number} The current game timestamp.
      */
     getTime: function ()
     {
-        return this.loop.frame.time;
+        return this.loop.now;
     },
 
     /**
-     * Flags this Game instance as needing to be destroyed on the next frame.
+     * Flags this Game instance as needing to be destroyed on the _next frame_, making this an asynchronous operation.
+     *
      * It will wait until the current frame has completed and then call `runDestroy` internally.
-     * 
+     *
+     * If you need to react to the games eventual destruction, listen for the `DESTROY` event.
+     *
      * If you **do not** need to run Phaser again on the same web page you can set the `noReturn` argument to `true` and it will free-up
      * memory being held by the core Phaser plugins. If you do need to create another game instance on the same page, leave this as `false`.
      *
@@ -646,7 +655,7 @@ var Game = new Class({
     destroy: function (removeCanvas, noReturn)
     {
         if (noReturn === undefined) { noReturn = false; }
-        
+
         this.pendingDestroy = true;
 
         this.removeCanvas = removeCanvas;
@@ -662,11 +671,11 @@ var Game = new Class({
      */
     runDestroy: function ()
     {
+        this.scene.destroy();
+
         this.events.emit(Events.DESTROY);
 
         this.events.removeAllListeners();
-
-        this.scene.destroy();
 
         if (this.renderer)
         {
@@ -683,16 +692,13 @@ var Game = new Class({
             }
         }
 
-        if (typeof EXPERIMENTAL)
+        if (this.domContainer)
         {
-            if (this.domContainer)
-            {
-                this.domContainer.parentNode.removeChild(this.domContainer);
-            }
+            this.domContainer.parentNode.removeChild(this.domContainer);
         }
 
         this.loop.destroy();
-        
+
         this.pendingDestroy = false;
     }
 

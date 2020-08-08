@@ -1,12 +1,13 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var ArcadeSprite = require('./ArcadeSprite');
 var Class = require('../../utils/Class');
 var CONST = require('./const');
+var GetFastValue = require('../../utils/object/GetFastValue');
 var Group = require('../../gameobjects/group/Group');
 var IsPlainObject = require('../../utils/object/IsPlainObject');
 
@@ -14,7 +15,7 @@ var IsPlainObject = require('../../utils/object/IsPlainObject');
  * @classdesc
  * An Arcade Physics Static Group object.
  *
- * All Game Objects created by this Group will automatically be given static Arcade Physics bodies.
+ * All Game Objects created by or added to this Group will automatically be given static Arcade Physics bodies, if they have no body.
  *
  * Its dynamic counterpart is {@link Phaser.Physics.Arcade.Group}.
  *
@@ -26,8 +27,8 @@ var IsPlainObject = require('../../utils/object/IsPlainObject');
  *
  * @param {Phaser.Physics.Arcade.World} world - The physics simulation.
  * @param {Phaser.Scene} scene - The scene this group belongs to.
- * @param {(Phaser.GameObjects.GameObject[]|GroupConfig|GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
- * @param {GroupConfig|GroupCreateConfig} [config] - Settings for this group.
+ * @param {(Phaser.GameObjects.GameObject[]|Phaser.Types.GameObjects.Group.GroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
+ * @param {Phaser.Types.GameObjects.Group.GroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig} [config] - Settings for this group.
  */
 var StaticPhysicsGroup = new Class({
 
@@ -40,8 +41,8 @@ var StaticPhysicsGroup = new Class({
         if (!children && !config)
         {
             config = {
-                createCallback: this.createCallbackHandler,
-                removeCallback: this.removeCallbackHandler,
+                internalCreateCallback: this.createCallbackHandler,
+                internalRemoveCallback: this.removeCallbackHandler,
                 createMultipleCallback: this.createMultipleCallbackHandler,
                 classType: ArcadeSprite
             };
@@ -52,10 +53,10 @@ var StaticPhysicsGroup = new Class({
             config = children;
             children = null;
 
-            config.createCallback = this.createCallbackHandler;
-            config.removeCallback = this.removeCallbackHandler;
+            config.internalCreateCallback = this.createCallbackHandler;
+            config.internalRemoveCallback = this.removeCallbackHandler;
             config.createMultipleCallback = this.createMultipleCallbackHandler;
-            config.classType = ArcadeSprite;
+            config.classType = GetFastValue(config, 'classType', ArcadeSprite);
         }
         else if (Array.isArray(children) && IsPlainObject(children[0]))
         {
@@ -65,11 +66,19 @@ var StaticPhysicsGroup = new Class({
 
             config.forEach(function (singleConfig)
             {
-                singleConfig.createCallback = this.createCallbackHandler;
-                singleConfig.removeCallback = this.removeCallbackHandler;
+                singleConfig.internalCreateCallback = this.createCallbackHandler;
+                singleConfig.internalRemoveCallback = this.removeCallbackHandler;
                 singleConfig.createMultipleCallback = this.createMultipleCallbackHandler;
-                singleConfig.classType = ArcadeSprite;
+                singleConfig.classType = GetFastValue(singleConfig, 'classType', ArcadeSprite);
             });
+        }
+        else
+        {
+            // config is not defined and children is not a plain object nor an array of plain objects
+            config = {
+                internalCreateCallback: this.createCallbackHandler,
+                internalRemoveCallback: this.removeCallbackHandler
+            };
         }
 
         /**
@@ -92,6 +101,17 @@ var StaticPhysicsGroup = new Class({
         this.physicsType = CONST.STATIC_BODY;
 
         Group.call(this, scene, children, config);
+
+        /**
+         * A textual representation of this Game Object.
+         * Used internally by Phaser but is available for your own custom classes to populate.
+         *
+         * @name Phaser.Physics.Arcade.StaticGroup#type
+         * @type {string}
+         * @default 'StaticPhysicsGroup'
+         * @since 3.21.0
+         */
+        this.type = 'StaticPhysicsGroup';
     },
 
     /**

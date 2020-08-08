@@ -1,18 +1,18 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
 var Contains = require('./Contains');
 var GetPoints = require('./GetPoints');
+var GEOM_CONST = require('../const');
 
 /**
  * @classdesc
  * A Polygon object
  *
-
  * The polygon is a closed shape consists of a series of connected straight lines defined by list of ordered points.
  * Several formats are supported to define the list of points, check the setTo method for details. 
  * This is a geometry object allowing you to define and inspect the shape.
@@ -37,6 +37,17 @@ var Polygon = new Class({
 
     function Polygon (points)
     {
+        /**
+         * The geometry constant type of this object: `GEOM_CONST.POLYGON`.
+         * Used for fast type comparisons.
+         *
+         * @name Phaser.Geom.Polygon#type
+         * @type {integer}
+         * @readonly
+         * @since 3.19.0
+         */
+        this.type = GEOM_CONST.POLYGON;
+
         /**
          * The area of this Polygon.
          *
@@ -96,7 +107,7 @@ var Polygon = new Class({
      *
      * @param {array} points - Points defining the perimeter of this polygon. Please check function description above for the different supported formats.
      *
-     * @return {Phaser.Geom.Polygon} This Polygon object.
+     * @return {this} This Polygon object.
      */
     setTo: function (points)
     {
@@ -199,11 +210,13 @@ var Polygon = new Class({
      * @method Phaser.Geom.Polygon#getPoints
      * @since 3.12.0
      *
+     * @generic {Phaser.Geom.Point[]} O - [output,$return]
+     *
      * @param {integer} quantity - The amount of points to return. If a falsey value the quantity will be derived from the `stepRate` instead.
      * @param {number} [stepRate] - Sets the quantity by getting the perimeter of the Polygon and dividing it by the stepRate.
-     * @param {array} [output] - An array to insert the points in to. If not provided a new array will be created.
+     * @param {(array|Phaser.Geom.Point[])} [output] - An array to insert the points in to. If not provided a new array will be created.
      *
-     * @return {Phaser.Geom.Point[]} An array of Point objects pertaining to the points around the perimeter of the Polygon.
+     * @return {(array|Phaser.Geom.Point[])} An array of Point objects pertaining to the points around the perimeter of the Polygon.
      */
     getPoints: function (quantity, step, output)
     {

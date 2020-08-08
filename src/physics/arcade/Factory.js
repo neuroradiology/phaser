@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var ArcadeImage = require('./ArcadeImage');
@@ -101,10 +101,12 @@ var Factory = new Class({
      * @method Phaser.Physics.Arcade.Factory#existing
      * @since 3.0.0
      *
+     * @generic {Phaser.GameObjects.GameObject} G - [gameObject,$return]
+     *
      * @param {Phaser.GameObjects.GameObject} gameObject - A Game Object.
      * @param {boolean} [isStatic=false] - Create a Static body (true) or Dynamic body (false).
      *
-     * @return {Phaser.GameObjects.GameObject} The Game Object.
+     * @return {Phaser.Types.Physics.Arcade.GameObjectWithBody} The Game Object.
      */
     existing: function (gameObject, isStatic)
     {
@@ -123,10 +125,10 @@ var Factory = new Class({
      *
      * @param {number} x - The horizontal position of this Game Object in the world.
      * @param {number} y - The vertical position of this Game Object in the world.
-     * @param {string} texture - The key of the Texture this Game Object will use to render with, as stored in the Texture Manager.
+     * @param {(string|Phaser.Textures.Texture)} texture - The key, or instance of the Texture this Game Object will use to render with, as stored in the Texture Manager.
      * @param {(string|integer)} [frame] - An optional frame from the Texture this Game Object is rendering with.
      *
-     * @return {Phaser.Physics.Arcade.Image} The Image object that was created.
+     * @return {Phaser.Types.Physics.Arcade.ImageWithStaticBody} The Image object that was created.
      */
     staticImage: function (x, y, key, frame)
     {
@@ -147,10 +149,10 @@ var Factory = new Class({
      *
      * @param {number} x - The horizontal position of this Game Object in the world.
      * @param {number} y - The vertical position of this Game Object in the world.
-     * @param {string} texture - The key of the Texture this Game Object will use to render with, as stored in the Texture Manager.
+     * @param {(string|Phaser.Textures.Texture)} texture - The key, or instance of the Texture this Game Object will use to render with, as stored in the Texture Manager.
      * @param {(string|integer)} [frame] - An optional frame from the Texture this Game Object is rendering with.
      *
-     * @return {Phaser.Physics.Arcade.Image} The Image object that was created.
+     * @return {Phaser.Types.Physics.Arcade.ImageWithDynamicBody} The Image object that was created.
      */
     image: function (x, y, key, frame)
     {
@@ -171,10 +173,10 @@ var Factory = new Class({
      *
      * @param {number} x - The horizontal position of this Game Object in the world.
      * @param {number} y - The vertical position of this Game Object in the world.
-     * @param {string} texture - The key of the Texture this Game Object will use to render with, as stored in the Texture Manager.
+     * @param {(string|Phaser.Textures.Texture)} texture - The key, or instance of the Texture this Game Object will use to render with, as stored in the Texture Manager.
      * @param {(string|integer)} [frame] - An optional frame from the Texture this Game Object is rendering with.
      *
-     * @return {Phaser.Physics.Arcade.Sprite} The Sprite object that was created.
+     * @return {Phaser.Types.Physics.Arcade.SpriteWithStaticBody} The Sprite object that was created.
      */
     staticSprite: function (x, y, key, frame)
     {
@@ -199,7 +201,7 @@ var Factory = new Class({
      * @param {string} key - The key of the Texture this Game Object will use to render with, as stored in the Texture Manager.
      * @param {(string|integer)} [frame] - An optional frame from the Texture this Game Object is rendering with.
      *
-     * @return {Phaser.Physics.Arcade.Sprite} The Sprite object that was created.
+     * @return {Phaser.Types.Physics.Arcade.SpriteWithDynamicBody} The Sprite object that was created.
      */
     sprite: function (x, y, key, frame)
     {
@@ -220,8 +222,8 @@ var Factory = new Class({
      * @method Phaser.Physics.Arcade.Factory#staticGroup
      * @since 3.0.0
      *
-     * @param {(Phaser.GameObjects.GameObject[]|GroupConfig|GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
-     * @param {GroupConfig|GroupCreateConfig} [config] - Settings for this group.
+     * @param {(Phaser.GameObjects.GameObject[]|Phaser.Types.GameObjects.Group.GroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
+     * @param {Phaser.Types.GameObjects.Group.GroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig} [config] - Settings for this group.
      *
      * @return {Phaser.Physics.Arcade.StaticGroup} The Static Group object that was created.
      */
@@ -237,8 +239,8 @@ var Factory = new Class({
      * @method Phaser.Physics.Arcade.Factory#group
      * @since 3.0.0
      *
-     * @param {(Phaser.GameObjects.GameObject[]|PhysicsGroupConfig|GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
-     * @param {PhysicsGroupConfig|GroupCreateConfig} [config] - Settings for this group.
+     * @param {(Phaser.GameObjects.GameObject[]|Phaser.Types.Physics.Arcade.PhysicsGroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
+     * @param {Phaser.Types.Physics.Arcade.PhysicsGroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig} [config] - Settings for this group.
      *
      * @return {Phaser.Physics.Arcade.Group} The Group object that was created.
      */

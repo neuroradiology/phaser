@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Line = require('./Line');
@@ -13,6 +13,7 @@ Line.Clone = require('./Clone');
 Line.CopyFrom = require('./CopyFrom');
 Line.Equals = require('./Equals');
 Line.Extend = require('./Extend');
+Line.GetEasedPoints = require('./GetEasedPoints');
 Line.GetMidPoint = require('./GetMidPoint');
 Line.GetNearestPoint = require('./GetNearestPoint');
 Line.GetNormal = require('./GetNormal');

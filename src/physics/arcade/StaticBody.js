@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var CircleContains = require('../../geom/circle/Contains');
@@ -15,7 +15,7 @@ var Vector2 = require('../../math/Vector2');
  * A Static Arcade Physics Body.
  *
  * A Static Body never moves, and isn't automatically synchronized with its parent Game Object.
- * That means if you make any change to the parent's origin, position, or scale after creating or adding the body, you'll need to update the Body manually.
+ * That means if you make any change to the parent's origin, position, or scale after creating or adding the body, you'll need to update the Static Body manually.
  *
  * A Static Body can collide with other Bodies, but is never moved by collisions.
  *
@@ -35,8 +35,8 @@ var StaticBody = new Class({
 
     function StaticBody (world, gameObject)
     {
-        var width = (gameObject.width) ? gameObject.width : 64;
-        var height = (gameObject.height) ? gameObject.height : 64;
+        var width = (gameObject.displayWidth) ? gameObject.displayWidth : 64;
+        var height = (gameObject.displayHeight) ? gameObject.displayHeight : 64;
 
         /**
          * The Arcade Physics simulation this Static Body belongs to.
@@ -95,8 +95,8 @@ var StaticBody = new Class({
         this.isCircle = false;
 
         /**
-         * If this Static Body is circular, this is the unscaled radius of the Static Body's boundary, as set by {@link #setCircle}, in source pixels.
-         * The true radius is equal to `halfWidth`.
+         * If this Static Body is circular, this is the radius of the boundary, as set by {@link Phaser.Physics.Arcade.StaticBody#setCircle}, in pixels.
+         * Equal to `halfWidth`.
          *
          * @name Phaser.Physics.Arcade.StaticBody#radius
          * @type {number}
@@ -106,12 +106,13 @@ var StaticBody = new Class({
         this.radius = 0;
 
         /**
-         * The offset of this Static Body's actual position from any updated position.
+         * The offset set by {@link Phaser.Physics.Arcade.StaticBody#setCircle} or {@link Phaser.Physics.Arcade.StaticBody#setSize}.
          *
-         * Unlike a dynamic Body, a Static Body does not follow its Game Object. As such, this offset is only applied when resizing the Static Body.
+         * This doesn't affect the Static Body's position, because a Static Body does not follow its Game Object.
          *
          * @name Phaser.Physics.Arcade.StaticBody#offset
          * @type {Phaser.Math.Vector2}
+         * @readonly
          * @since 3.0.0
          */
         this.offset = new Vector2();
@@ -123,7 +124,7 @@ var StaticBody = new Class({
          * @type {Phaser.Math.Vector2}
          * @since 3.0.0
          */
-        this.position = new Vector2(gameObject.x - gameObject.displayOriginX, gameObject.y - gameObject.displayOriginY);
+        this.position = new Vector2(gameObject.x - (width * gameObject.originX), gameObject.y - (height * gameObject.originY));
 
         /**
          * The width of the Static Body's boundary, in pixels.
@@ -173,7 +174,7 @@ var StaticBody = new Class({
          * @type {Phaser.Math.Vector2}
          * @since 3.0.0
          */
-        this.center = new Vector2(gameObject.x + this.halfWidth, gameObject.y + this.halfHeight);
+        this.center = new Vector2(this.position.x + this.halfWidth, this.position.y + this.halfHeight);
 
         /**
          * A constant zero velocity used by the Arcade Physics simulation for calculations.
@@ -346,7 +347,7 @@ var StaticBody = new Class({
          * Whether this StaticBody is checked for collisions and for which directions. You can set `checkCollision.none = false` to disable collision checks.
          *
          * @name Phaser.Physics.Arcade.StaticBody#checkCollision
-         * @type {ArcadeBodyCollision}
+         * @type {Phaser.Types.Physics.Arcade.ArcadeBodyCollision}
          * @since 3.0.0
          */
         this.checkCollision = { none: false, up: true, down: true, left: true, right: true };
@@ -355,7 +356,7 @@ var StaticBody = new Class({
          * Whether this StaticBody has ever collided with another body and in which direction.
          *
          * @name Phaser.Physics.Arcade.StaticBody#touching
-         * @type {ArcadeBodyCollision}
+         * @type {Phaser.Types.Physics.Arcade.ArcadeBodyCollision}
          * @since 3.0.0
          */
         this.touching = { none: true, up: false, down: false, left: false, right: false };
@@ -364,7 +365,7 @@ var StaticBody = new Class({
          * Whether this StaticBody was colliding with another body during the last step or any previous step, and in which direction.
          *
          * @name Phaser.Physics.Arcade.StaticBody#wasTouching
-         * @type {ArcadeBodyCollision}
+         * @type {Phaser.Types.Physics.Arcade.ArcadeBodyCollision}
          * @since 3.0.0
          */
         this.wasTouching = { none: true, up: false, down: false, left: false, right: false };
@@ -373,7 +374,7 @@ var StaticBody = new Class({
          * Whether this StaticBody has ever collided with a tile or the world boundary.
          *
          * @name Phaser.Physics.Arcade.StaticBody#blocked
-         * @type {ArcadeBodyCollision}
+         * @type {Phaser.Types.Physics.Arcade.ArcadeBodyCollision}
          * @since 3.0.0
          */
         this.blocked = { none: true, up: false, down: false, left: false, right: false };
@@ -389,7 +390,7 @@ var StaticBody = new Class({
         this.physicsType = CONST.STATIC_BODY;
 
         /**
-         * The calculated change in the Body's horizontal position during the current step.
+         * The calculated change in the Static Body's horizontal position during the current step.
          * For a static body this is always zero.
          *
          * @name Phaser.Physics.Arcade.StaticBody#_dx
@@ -401,7 +402,7 @@ var StaticBody = new Class({
         this._dx = 0;
 
         /**
-         * The calculated change in the Body's vertical position during the current step.
+         * The calculated change in the Static Body's vertical position during the current step.
          * For a static body this is always zero.
          *
          * @name Phaser.Physics.Arcade.StaticBody#_dy
@@ -450,8 +451,7 @@ var StaticBody = new Class({
     },
 
     /**
-     * Updates this Static Body so that its position and dimensions are updated
-     * based on the current Game Object it is bound to.
+     * Syncs the Static Body's position and size with its parent Game Object.
      *
      * @method Phaser.Physics.Arcade.StaticBody#updateFromGameObject
      * @since 3.1.0
@@ -480,13 +480,13 @@ var StaticBody = new Class({
     },
 
     /**
-     * Sets the offset of the body.
+     * Positions the Static Body at an offset from its Game Object.
      *
      * @method Phaser.Physics.Arcade.StaticBody#setOffset
      * @since 3.4.0
      *
-     * @param {number} x - The horizontal offset of the Body from the Game Object's center.
-     * @param {number} y - The vertical offset of the Body from the Game Object's center.
+     * @param {number} x - The horizontal offset of the Static Body from the Game Object's `x`.
+     * @param {number} y - The vertical offset of the Static Body from the Game Object's `y`.
      *
      * @return {Phaser.Physics.Arcade.StaticBody} This Static Body object.
      */
@@ -512,23 +512,22 @@ var StaticBody = new Class({
     },
 
     /**
-     * Sets the size of the body.
+     * Sets the size of the Static Body.
+     * When `center` is true, also repositions it.
      * Resets the width and height to match current frame, if no width and height provided and a frame is found.
      *
      * @method Phaser.Physics.Arcade.StaticBody#setSize
      * @since 3.0.0
      *
-     * @param {integer} [width] - The width of the Body in pixels. Cannot be zero. If not given, and the parent Game Object has a frame, it will use the frame width.
-     * @param {integer} [height] - The height of the Body in pixels. Cannot be zero. If not given, and the parent Game Object has a frame, it will use the frame height.
-     * @param {number} [offsetX] - The horizontal offset of the Body from the Game Object's center.
-     * @param {number} [offsetY] - The vertical offset of the Body from the Game Object's center.
+     * @param {integer} [width] - The width of the Static Body in pixels. Cannot be zero. If not given, and the parent Game Object has a frame, it will use the frame width.
+     * @param {integer} [height] - The height of the Static Body in pixels. Cannot be zero. If not given, and the parent Game Object has a frame, it will use the frame height.
+     * @param {boolean} [center=true] - Place the Static Body's center on its Game Object's center. Only works if the Game Object has the `getCenter` method.
      *
      * @return {Phaser.Physics.Arcade.StaticBody} This Static Body object.
      */
-    setSize: function (width, height, offsetX, offsetY)
+    setSize: function (width, height, center)
     {
-        if (offsetX === undefined) { offsetX = this.offset.x; }
-        if (offsetY === undefined) { offsetY = this.offset.y; }
+        if (center === undefined) { center = true; }
 
         var gameObject = this.gameObject;
 
@@ -550,7 +549,19 @@ var StaticBody = new Class({
         this.halfWidth = Math.floor(width / 2);
         this.halfHeight = Math.floor(height / 2);
 
-        this.offset.set(offsetX, offsetY);
+        if (center && gameObject.getCenter)
+        {
+            var ox = gameObject.displayWidth / 2;
+            var oy = gameObject.displayHeight / 2;
+
+            this.position.x -= this.offset.x;
+            this.position.y -= this.offset.y;
+
+            this.offset.set(ox - this.halfWidth, oy - this.halfHeight);
+
+            this.position.x += this.offset.x;
+            this.position.y += this.offset.y;
+        }
 
         this.updateCenter();
 
@@ -563,7 +574,7 @@ var StaticBody = new Class({
     },
 
     /**
-     * Sets this Static Body to have a circular body and sets its sizes and position.
+     * Sets this Static Body to have a circular body and sets its size and position.
      *
      * @method Phaser.Physics.Arcade.StaticBody#setCircle
      * @since 3.0.0
@@ -620,7 +631,6 @@ var StaticBody = new Class({
 
     /**
      * Resets this Body to the given coordinates. Also positions its parent Game Object to the same coordinates.
-     * Similar to `updateFromGameObject`, but doesn't modify the Body's dimensions.
      *
      * @method Phaser.Physics.Arcade.StaticBody#reset
      * @since 3.0.0
@@ -638,7 +648,7 @@ var StaticBody = new Class({
         this.world.staticTree.remove(this);
 
         gameObject.setPosition(x, y);
-        
+
         gameObject.getTopLeft(this.position);
 
         this.updateCenter();
@@ -665,9 +675,9 @@ var StaticBody = new Class({
      * @method Phaser.Physics.Arcade.StaticBody#getBounds
      * @since 3.0.0
      *
-     * @param {ArcadeBodyBounds} obj - The object which will hold the coordinates of the bounds.
+     * @param {Phaser.Types.Physics.Arcade.ArcadeBodyBounds} obj - The object which will hold the coordinates of the bounds.
      *
-     * @return {ArcadeBodyBounds} The same object that was passed with `x`, `y`, `right` and `bottom` values matching the respective values of the StaticBody.
+     * @return {Phaser.Types.Physics.Arcade.ArcadeBodyBounds} The same object that was passed with `x`, `y`, `right` and `bottom` values matching the respective values of the StaticBody.
      */
     getBounds: function (obj)
     {
@@ -800,7 +810,7 @@ var StaticBody = new Class({
 
         if (this.debugShowBody)
         {
-            graphic.lineStyle(1, this.debugBodyColor, 1);
+            graphic.lineStyle(graphic.defaultStrokeWidth, this.debugBodyColor, 1);
 
             if (this.isCircle)
             {

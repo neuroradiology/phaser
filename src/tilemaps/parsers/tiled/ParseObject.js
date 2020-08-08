@@ -1,10 +1,10 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
-var Pick = require('./Pick');
+var Pick = require('../../../utils/object/Pick');
 var ParseGID = require('./ParseGID');
 
 var copyPoints = function (p) { return { x: p.x, y: p.y }; };
@@ -53,21 +53,19 @@ var ParseObject = function (tiledObject, offsetX, offsetY)
     else if (tiledObject.ellipse)
     {
         parsedObject.ellipse = tiledObject.ellipse;
-        parsedObject.width = tiledObject.width;
-        parsedObject.height = tiledObject.height;
     }
     else if (tiledObject.text)
     {
-        parsedObject.width = tiledObject.width;
-        parsedObject.height = tiledObject.height;
         parsedObject.text = tiledObject.text;
+    }
+    else if (tiledObject.point)
+    {
+        parsedObject.point = true;
     }
     else
     {
         // Otherwise, assume it is a rectangle
         parsedObject.rectangle = true;
-        parsedObject.width = tiledObject.width;
-        parsedObject.height = tiledObject.height;
     }
 
     return parsedObject;

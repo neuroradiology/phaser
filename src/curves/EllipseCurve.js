@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 //  Based on the three.js Curve classes created by [zz85](http://www.lab4games.net/zz85/blog)
@@ -12,33 +12,6 @@ var DegToRad = require('../math/DegToRad');
 var GetValue = require('../utils/object/GetValue');
 var RadToDeg = require('../math/RadToDeg');
 var Vector2 = require('../math/Vector2');
-
-/**
- * @typedef {object} JSONEllipseCurve
- *
- * @property {string} type - The of the curve.
- * @property {number} x - The x coordinate of the ellipse.
- * @property {number} y - The y coordinate of the ellipse.
- * @property {number} xRadius - The horizontal radius of ellipse.
- * @property {number} yRadius - The vertical radius of ellipse.
- * @property {integer} startAngle - The start angle of the ellipse, in degrees.
- * @property {integer} endAngle - The end angle of the ellipse, in degrees.
- * @property {boolean} clockwise - Sets if the the ellipse rotation is clockwise (true) or anti-clockwise (false)
- * @property {integer} rotation - The rotation of ellipse, in degrees.
- */
-
-/**
- * @typedef {object} EllipseCurveConfig
- *
- * @property {number} [x=0] - The x coordinate of the ellipse.
- * @property {number} [y=0] - The y coordinate of the ellipse.
- * @property {number} [xRadius=0] - The horizontal radius of the ellipse.
- * @property {number} [yRadius=0] - The vertical radius of the ellipse.
- * @property {integer} [startAngle=0] - The start angle of the ellipse, in degrees.
- * @property {integer} [endAngle=360] - The end angle of the ellipse, in degrees.
- * @property {boolean} [clockwise=false] - Sets if the the ellipse rotation is clockwise (true) or anti-clockwise (false)
- * @property {integer} [rotation=0] - The rotation of the ellipse, in degrees.
-  */
 
 /**
  * @classdesc
@@ -52,13 +25,13 @@ var Vector2 = require('../math/Vector2');
  * @constructor
  * @since 3.0.0
  *
- * @param {(number|EllipseCurveConfig)} [x=0] - The x coordinate of the ellipse, or an Ellipse Curve configuration object.
+ * @param {(number|Phaser.Types.Curves.EllipseCurveConfig)} [x=0] - The x coordinate of the ellipse, or an Ellipse Curve configuration object.
  * @param {number} [y=0] - The y coordinate of the ellipse.
  * @param {number} [xRadius=0] - The horizontal radius of ellipse.
  * @param {number} [yRadius=0] - The vertical radius of ellipse.
  * @param {integer} [startAngle=0] - The start angle of the ellipse, in degrees.
  * @param {integer} [endAngle=360] - The end angle of the ellipse, in degrees.
- * @param {boolean} [clockwise=false] - Sets if the the ellipse rotation is clockwise (true) or anti-clockwise (false)
+ * @param {boolean} [clockwise=false] - Whether the ellipse angles are given as clockwise (`true`) or counter-clockwise (`false`).
  * @param {integer} [rotation=0] - The rotation of the ellipse, in degrees.
  */
 var EllipseCurve = new Class({
@@ -187,14 +160,14 @@ var EllipseCurve = new Class({
     },
 
     /**
-     * [description]
+     * Get the resolution of the curve.
      *
      * @method Phaser.Curves.Ellipse#getResolution
      * @since 3.0.0
      *
-     * @param {number} divisions - [description]
+     * @param {number} divisions - Optional divisions value.
      *
-     * @return {number} [description]
+     * @return {number} The curve resolution.
      */
     getResolution: function (divisions)
     {
@@ -285,7 +258,7 @@ var EllipseCurve = new Class({
      *
      * @param {number} value - The horizontal radius of this curve.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setXRadius: function (value)
     {
@@ -302,7 +275,7 @@ var EllipseCurve = new Class({
      *
      * @param {number} value - The vertical radius of this curve.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setYRadius: function (value)
     {
@@ -319,11 +292,11 @@ var EllipseCurve = new Class({
      *
      * @param {number} value - The width of this curve.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setWidth: function (value)
     {
-        this.xRadius = value * 2;
+        this.xRadius = value / 2;
 
         return this;
     },
@@ -336,11 +309,11 @@ var EllipseCurve = new Class({
      *
      * @param {number} value - The height of this curve.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setHeight: function (value)
     {
-        this.yRadius = value * 2;
+        this.yRadius = value / 2;
 
         return this;
     },
@@ -353,7 +326,7 @@ var EllipseCurve = new Class({
      *
      * @param {number} value - The start angle of this curve, in radians.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setStartAngle: function (value)
     {
@@ -370,7 +343,7 @@ var EllipseCurve = new Class({
      *
      * @param {number} value - The end angle of this curve, in radians.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setEndAngle: function (value)
     {
@@ -387,7 +360,7 @@ var EllipseCurve = new Class({
      *
      * @param {boolean} value - The clockwise state of this curve.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setClockwise: function (value)
     {
@@ -404,7 +377,7 @@ var EllipseCurve = new Class({
      *
      * @param {number} value - The rotation of this curve, in radians.
      *
-     * @return {Phaser.Curves.Ellipse} This curve object.
+     * @return {this} This curve object.
      */
     setRotation: function (value)
     {
@@ -608,7 +581,7 @@ var EllipseCurve = new Class({
      * @method Phaser.Curves.Ellipse#toJSON
      * @since 3.0.0
      *
-     * @return {JSONEllipseCurve} The JSON object containing this curve data.
+     * @return {Phaser.Types.Curves.JSONEllipseCurve} The JSON object containing this curve data.
      */
     toJSON: function ()
     {
@@ -633,7 +606,7 @@ var EllipseCurve = new Class({
  * @function Phaser.Curves.Ellipse.fromJSON
  * @since 3.0.0
  *
- * @param {JSONEllipseCurve} data - The JSON object containing this curve data.
+ * @param {Phaser.Types.Curves.JSONEllipseCurve} data - The JSON object containing this curve data.
  *
  * @return {Phaser.Curves.Ellipse} The ellipse curve constructed from the configuration object.
  */

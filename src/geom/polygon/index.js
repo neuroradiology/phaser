@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Polygon = require('./Polygon');
@@ -15,5 +15,6 @@ Polygon.GetPoints = require('./GetPoints');
 Polygon.Perimeter = require('./Perimeter');
 Polygon.Reverse = require('./Reverse');
 Polygon.Smooth = require('./Smooth');
+Polygon.Translate = require('./Translate');
 
 module.exports = Polygon;

@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -17,7 +17,7 @@
  * 
  * To find out what each mode does please see [Phaser.Scale.Orientation]{@link Phaser.Scale.Orientation}.
  * 
- * @typedef {(Phaser.Scale.Orientation.LANDSCAPE|Phaser.Scale.Orientation.PORTRAIT)} Phaser.Scale.OrientationType
+ * @typedef {Phaser.Scale.Orientation} Phaser.Scale.OrientationType
  * @memberof Phaser.Scale
  * @since 3.16.0
  */

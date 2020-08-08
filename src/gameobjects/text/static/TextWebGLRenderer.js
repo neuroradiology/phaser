@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Utils = require('../../../renderer/webgl/Utils');
@@ -23,7 +23,7 @@ var Utils = require('../../../renderer/webgl/Utils');
  */
 var TextWebGLRenderer = function (renderer, src, interpolationPercentage, camera, parentMatrix)
 {
-    if (src.text === '')
+    if (src.width === 0 || src.height === 0)
     {
         return;
     }
@@ -32,8 +32,13 @@ var TextWebGLRenderer = function (renderer, src, interpolationPercentage, camera
     var width = frame.width;
     var height = frame.height;
     var getTint = Utils.getTintAppendFloatAlpha;
+    var pipeline = this.pipeline;
 
-    this.pipeline.batchTexture(
+    renderer.setPipeline(pipeline, src);
+
+    var textureUnit = pipeline.setTexture2D(frame.glTexture, src);
+
+    pipeline.batchTexture(
         src,
         frame.glTexture,
         width, height,
@@ -52,7 +57,9 @@ var TextWebGLRenderer = function (renderer, src, interpolationPercentage, camera
         (src._isTinted && src.tintFill),
         0, 0,
         camera,
-        parentMatrix
+        parentMatrix,
+        false,
+        textureUnit
     );
 };
 

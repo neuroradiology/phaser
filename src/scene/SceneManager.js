@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../utils/Class');
@@ -312,9 +312,9 @@ var SceneManager = new Class({
      * @since 3.0.0
      *
      * @param {string} key - A unique key used to reference the Scene, i.e. `MainMenu` or `Level1`.
-     * @param {(Phaser.Scene|Phaser.Scenes.Settings.Config|function)} sceneConfig - The config for the Scene
+     * @param {(Phaser.Scene|Phaser.Types.Scenes.SettingsConfig|Phaser.Types.Scenes.CreateSceneFromObjectConfig|function)} sceneConfig - The config for the Scene
      * @param {boolean} [autoStart=false] - If `true` the Scene will be started immediately after being added.
-     * @param {object} [data] - Optional data object. This will be set as Scene.settings.data and passed to `Scene.init`.
+     * @param {object} [data] - Optional data object. This will be set as `Scene.settings.data` and passed to `Scene.init`, and `Scene.create`.
      *
      * @return {?Phaser.Scene} The added Scene, if it was added immediately, otherwise `null`.
      */
@@ -397,7 +397,7 @@ var SceneManager = new Class({
      * @method Phaser.Scenes.SceneManager#remove
      * @since 3.2.0
      *
-     * @param {(string|Phaser.Scene)} scene - The Scene to be removed.
+     * @param {string} key - A unique key used to reference the Scene, i.e. `MainMenu` or `Level1`.
      *
      * @return {Phaser.Scenes.SceneManager} This SceneManager.
      */
@@ -451,6 +451,8 @@ var SceneManager = new Class({
     {
         var sys = scene.sys;
         var settings = sys.settings;
+
+        sys.sceneUpdate = NOOP;
 
         if (scene.init)
         {
@@ -514,8 +516,9 @@ var SceneManager = new Class({
     {
         var scene = loader.scene;
 
-        // Try to unlock HTML5 sounds every time any loader completes
-        if (this.game.sound.onBlurPausedSounds)
+        //  TODO - Remove. This should *not* be handled here
+        //  Try to unlock HTML5 sounds every time any loader completes
+        if (this.game.sound && this.game.sound.onBlurPausedSounds)
         {
             this.game.sound.unlock();
         }
@@ -593,6 +596,7 @@ var SceneManager = new Class({
      *
      * @method Phaser.Scenes.SceneManager#create
      * @private
+     * @fires Phaser.Scenes.Events#CREATE
      * @fires Phaser.Scenes.Events#TRANSITION_INIT
      * @since 3.0.0
      *
@@ -608,6 +612,11 @@ var SceneManager = new Class({
             settings.status = CONST.CREATING;
 
             scene.create.call(scene, settings.data);
+
+            if (settings.status === CONST.DESTROYED)
+            {
+                return;
+            }
         }
 
         if (settings.isTransition)
@@ -622,6 +631,8 @@ var SceneManager = new Class({
         }
 
         settings.status = CONST.RUNNING;
+
+        sys.events.emit(Events.CREATE, scene);
     },
 
     /**
@@ -684,11 +695,7 @@ var SceneManager = new Class({
     {
         var configKey = newScene.sys.settings.key;
 
-        if (configKey !== '')
-        {
-            key = configKey;
-        }
-        else
+        if (configKey === '')
         {
             newScene.sys.settings.key = key;
         }
@@ -706,7 +713,7 @@ var SceneManager = new Class({
      * @since 3.0.0
      *
      * @param {string} key - The key of the Scene.
-     * @param {(string|Phaser.Scenes.Settings.Config)} sceneConfig - The Scene config.
+     * @param {(string|Phaser.Types.Scenes.SettingsConfig|Phaser.Types.Scenes.CreateSceneFromObjectConfig)} sceneConfig - The Scene config.
      *
      * @return {Phaser.Scene} The created Scene.
      */
@@ -759,6 +766,11 @@ var SceneManager = new Class({
         {
             for (var propertyKey in sceneConfig.extend)
             {
+                if (!sceneConfig.extend.hasOwnProperty(propertyKey))
+                {
+                    continue;
+                }
+
                 var value = sceneConfig.extend[propertyKey];
 
                 if (propertyKey === 'data' && newScene.hasOwnProperty('data') && typeof value === 'object')
@@ -784,7 +796,7 @@ var SceneManager = new Class({
      * @since 3.0.0
      *
      * @param {string} key - The key to check in the Scene config.
-     * @param {(Phaser.Scene|Phaser.Scenes.Settings.Config|function)} sceneConfig - The Scene config.
+     * @param {(Phaser.Scene|Phaser.Types.Scenes.SettingsConfig|function)} sceneConfig - The Scene config.
      *
      * @return {string} The Scene key.
      */
@@ -819,7 +831,7 @@ var SceneManager = new Class({
 
     /**
      * Returns an array of all the current Scenes being managed by this Scene Manager.
-     * 
+     *
      * You can filter the output by the active state of the Scene and choose to have
      * the array returned in normal or reversed order.
      *
@@ -886,14 +898,14 @@ var SceneManager = new Class({
     },
 
     /**
-     * Determines whether a Scene is active.
+     * Determines whether a Scene is running.
      *
      * @method Phaser.Scenes.SceneManager#isActive
      * @since 3.0.0
      *
      * @param {string} key - The Scene to check.
      *
-     * @return {boolean} Whether the Scene is active.
+     * @return {boolean} Whether the Scene is running.
      */
     isActive: function (key)
     {
@@ -902,6 +914,28 @@ var SceneManager = new Class({
         if (scene)
         {
             return scene.sys.isActive();
+        }
+
+        return null;
+    },
+
+    /**
+     * Determines whether a Scene is paused.
+     *
+     * @method Phaser.Scenes.SceneManager#isPaused
+     * @since 3.17.0
+     *
+     * @param {string} key - The Scene to check.
+     *
+     * @return {boolean} Whether the Scene is paused.
+     */
+    isPaused: function (key)
+    {
+        var scene = this.getScene(key);
+
+        if (scene)
+        {
+            return scene.sys.isPaused();
         }
 
         return null;
@@ -1044,7 +1078,7 @@ var SceneManager = new Class({
     },
 
     /**
-     * Runs the given Scene, but does not change the state of this Scene.
+     * Runs the given Scene.
      *
      * If the given Scene is paused, it will resume it. If sleeping, it will wake it.
      * If not running at all, it will be started.
@@ -1082,7 +1116,7 @@ var SceneManager = new Class({
             //  Sleeping?
             scene.sys.wake(data);
         }
-        else if (scene.sys.isBooted && !scene.sys.isActive())
+        else if (scene.sys.isPaused())
         {
             //  Paused?
             scene.sys.resume(data);
@@ -1101,7 +1135,7 @@ var SceneManager = new Class({
      * @since 3.0.0
      *
      * @param {string} key - The Scene to start.
-     * @param {object} [data] - Optional data object to pass to Scene.Settings and Scene.init.
+     * @param {object} [data] - Optional data object to pass to `Scene.Settings` and `Scene.init`, and `Scene.create`.
      *
      * @return {Phaser.Scenes.SceneManager} This SceneManager.
      */
@@ -1135,25 +1169,25 @@ var SceneManager = new Class({
                 scene.sys.start(data);
 
                 var loader;
-    
+
                 if (scene.sys.load)
                 {
                     loader = scene.sys.load;
                 }
-    
+
                 //  Files payload?
                 if (loader && scene.sys.settings.hasOwnProperty('pack'))
                 {
                     loader.reset();
-    
+
                     if (loader.addPack({ payload: scene.sys.settings.pack }))
                     {
                         scene.sys.settings.status = CONST.LOADING;
-    
+
                         loader.once(LoaderEvents.COMPLETE, this.payloadComplete, this);
-    
+
                         loader.start();
-    
+
                         return this;
                     }
                 }
@@ -1172,16 +1206,17 @@ var SceneManager = new Class({
      * @since 3.0.0
      *
      * @param {string} key - The Scene to stop.
+     * @param {object} [data] - Optional data object to pass to Scene.shutdown.
      *
      * @return {Phaser.Scenes.SceneManager} This SceneManager.
      */
-    stop: function (key)
+    stop: function (key, data)
     {
         var scene = this.getScene(key);
 
         if (scene && !scene.sys.isTransitioning())
         {
-            scene.sys.shutdown();
+            scene.sys.shutdown(data);
         }
 
         return this;
@@ -1492,7 +1527,7 @@ var SceneManager = new Class({
      *
      * @param {string} op - The operation to perform.
      * @param {(string|Phaser.Scene)} keyA - Scene A.
-     * @param {(string|Phaser.Scene)} [keyB] - Scene B.
+     * @param {(any|string|Phaser.Scene)} [keyB] - Scene B, or a data object.
      *
      * @return {Phaser.Scenes.SceneManager} This SceneManager.
      */

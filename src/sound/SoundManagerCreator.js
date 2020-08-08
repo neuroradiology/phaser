@@ -1,8 +1,8 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
  * @author       Pavle Goloskokovic <pgoloskokovic@gmail.com> (http://prunegames.com)
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var HTML5AudioSoundManager = require('./html5/HTML5AudioSoundManager');
@@ -18,6 +18,8 @@ var WebAudioSoundManager = require('./webaudio/WebAudioSoundManager');
  * @since 3.0.0
  *
  * @param {Phaser.Game} game - Reference to the current game instance.
+ * 
+ * @return {(Phaser.Sound.HTML5AudioSoundManager|Phaser.Sound.WebAudioSoundManager|Phaser.Sound.NoAudioSoundManager)} The Sound Manager instance that was created.
  */
 var SoundManagerCreator = {
 

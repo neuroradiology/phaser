@@ -1,12 +1,13 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
 var GetPoint = require('./GetPoint');
 var GetPoints = require('./GetPoints');
+var GEOM_CONST = require('../const');
 var Random = require('./Random');
 var Vector2 = require('../../math/Vector2');
 
@@ -34,6 +35,17 @@ var Line = new Class({
         if (y1 === undefined) { y1 = 0; }
         if (x2 === undefined) { x2 = 0; }
         if (y2 === undefined) { y2 = 0; }
+
+        /**
+         * The geometry constant type of this object: `GEOM_CONST.LINE`.
+         * Used for fast type comparisons.
+         *
+         * @name Phaser.Geom.Line#type
+         * @type {integer}
+         * @readonly
+         * @since 3.19.0
+         */
+        this.type = GEOM_CONST.LINE;
 
         /**
          * The x coordinate of the lines starting point.
@@ -101,7 +113,7 @@ var Line = new Class({
      * @method Phaser.Geom.Line#getPoints
      * @since 3.0.0
      *
-     * @generic {Phaser.Geom.Point} O - [output,$return]
+     * @generic {Phaser.Geom.Point[]} O - [output,$return]
      *
      * @param {integer} quantity - The number of points to place on the line. Set to `0` to use `stepRate` instead.
      * @param {integer} [stepRate] - The distance between each point on the line. When set, `quantity` is implied and should be set to `0`.
@@ -142,7 +154,7 @@ var Line = new Class({
      * @param {number} [x2=0] - The x coordinate of the lines ending point.
      * @param {number} [y2=0] - The y coordinate of the lines ending point.
      *
-     * @return {Phaser.Geom.Line} This Line object.
+     * @return {this} This Line object.
      */
     setTo: function (x1, y1, x2, y2)
     {

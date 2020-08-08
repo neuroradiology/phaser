@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -17,7 +17,7 @@
  * 
  * To find out what each mode does please see [Phaser.Scale.Center]{@link Phaser.Scale.Center}.
  * 
- * @typedef {(Phaser.Scale.Center.NO_CENTER|Phaser.Scale.Center.CENTER_BOTH|Phaser.Scale.Center.CENTER_HORIZONTALLY|Phaser.Scale.Center.CENTER_VERTICALLY)} Phaser.Scale.CenterType
+ * @typedef {Phaser.Scale.Center} Phaser.Scale.CenterType
  * @memberof Phaser.Scale
  * @since 3.16.0
  */

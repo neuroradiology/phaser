@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var ArcadeSprite = require('./ArcadeSprite');
@@ -12,65 +12,11 @@ var Group = require('../../gameobjects/group/Group');
 var IsPlainObject = require('../../utils/object/IsPlainObject');
 
 /**
- * @typedef {object} PhysicsGroupConfig
- * @extends GroupConfig
- *
- * @property {boolean} [collideWorldBounds=false] - Sets {@link Phaser.Physics.Arcade.Body#collideWorldBounds}.
- * @property {number} [accelerationX=0] - Sets {@link Phaser.Physics.Arcade.Body#acceleration acceleration.x}.
- * @property {number} [accelerationY=0] - Sets {@link Phaser.Physics.Arcade.Body#acceleration acceleration.y}.
- * @property {boolean} [allowDrag=true] - Sets {@link Phaser.Physics.Arcade.Body#allowDrag}.
- * @property {boolean} [allowGravity=true] - Sets {@link Phaser.Physics.Arcade.Body#allowGravity}.
- * @property {boolean} [allowRotation=true] - Sets {@link Phaser.Physics.Arcade.Body#allowRotation}.
- * @property {number} [bounceX=0] - Sets {@link Phaser.Physics.Arcade.Body#bounce bounce.x}.
- * @property {number} [bounceY=0] - Sets {@link Phaser.Physics.Arcade.Body#bounce bounce.y}.
- * @property {number} [dragX=0] - Sets {@link Phaser.Physics.Arcade.Body#drag drag.x}.
- * @property {number} [dragY=0] - Sets {@link Phaser.Physics.Arcade.Body#drag drag.y}.
- * @property {boolean} [enable=true] - Sets {@link Phaser.Physics.Arcade.Body#enable enable}.
- * @property {number} [gravityX=0] - Sets {@link Phaser.Physics.Arcade.Body#gravity gravity.x}.
- * @property {number} [gravityY=0] - Sets {@link Phaser.Physics.Arcade.Body#gravity gravity.y}.
- * @property {number} [frictionX=0] - Sets {@link Phaser.Physics.Arcade.Body#friction friction.x}.
- * @property {number} [frictionY=0] - Sets {@link Phaser.Physics.Arcade.Body#friction friction.y}.
- * @property {number} [velocityX=0] - Sets {@link Phaser.Physics.Arcade.Body#velocity velocity.x}.
- * @property {number} [velocityY=0] - Sets {@link Phaser.Physics.Arcade.Body#velocity velocity.y}.
- * @property {number} [angularVelocity=0] - Sets {@link Phaser.Physics.Arcade.Body#angularVelocity}.
- * @property {number} [angularAcceleration=0] - Sets {@link Phaser.Physics.Arcade.Body#angularAcceleration}.
- * @property {number} [angularDrag=0] - Sets {@link Phaser.Physics.Arcade.Body#angularDrag}.
- * @property {number} [mass=0] - Sets {@link Phaser.Physics.Arcade.Body#mass}.
- * @property {boolean} [immovable=false] - Sets {@link Phaser.Physics.Arcade.Body#immovable}.
- */
-
-/**
- * @typedef {object} PhysicsGroupDefaults
- *
- * @property {boolean} setCollideWorldBounds - As {@link Phaser.Physics.Arcade.Body#setCollideWorldBounds}.
- * @property {number} setAccelerationX - As {@link Phaser.Physics.Arcade.Body#setAccelerationX}.
- * @property {number} setAccelerationY - As {@link Phaser.Physics.Arcade.Body#setAccelerationY}.
- * @property {boolean} setAllowDrag - As {@link Phaser.Physics.Arcade.Body#setAllowDrag}.
- * @property {boolean} setAllowGravity - As {@link Phaser.Physics.Arcade.Body#setAllowGravity}.
- * @property {boolean} setAllowRotation - As {@link Phaser.Physics.Arcade.Body#setAllowRotation}.
- * @property {number} setBounceX - As {@link Phaser.Physics.Arcade.Body#setBounceX}.
- * @property {number} setBounceY - As {@link Phaser.Physics.Arcade.Body#setBounceY}.
- * @property {number} setDragX - As {@link Phaser.Physics.Arcade.Body#setDragX}.
- * @property {number} setDragY - As {@link Phaser.Physics.Arcade.Body#setDragY}.
- * @property {boolean} setEnable - As {@link Phaser.Physics.Arcade.Body#setEnable}.
- * @property {number} setGravityX - As {@link Phaser.Physics.Arcade.Body#setGravityX}.
- * @property {number} setGravityY - As {@link Phaser.Physics.Arcade.Body#setGravityY}.
- * @property {number} setFrictionX - As {@link Phaser.Physics.Arcade.Body#setFrictionX}.
- * @property {number} setFrictionY - As {@link Phaser.Physics.Arcade.Body#setFrictionY}.
- * @property {number} setVelocityX - As {@link Phaser.Physics.Arcade.Body#setVelocityX}.
- * @property {number} setVelocityY - As {@link Phaser.Physics.Arcade.Body#setVelocityY}.
- * @property {number} setAngularVelocity - As {@link Phaser.Physics.Arcade.Body#setAngularVelocity}.
- * @property {number} setAngularAcceleration - As {@link Phaser.Physics.Arcade.Body#setAngularAcceleration}.
- * @property {number} setAngularDrag - As {@link Phaser.Physics.Arcade.Body#setAngularDrag}.
- * @property {number} setMass - As {@link Phaser.Physics.Arcade.Body#setMass}.
- * @property {boolean} setImmovable - As {@link Phaser.Physics.Arcade.Body#setImmovable}.
- */
-
-/**
  * @classdesc
  * An Arcade Physics Group object.
  *
- * All Game Objects created by this Group will automatically be given dynamic Arcade Physics bodies.
+ * All Game Objects created by or added to this Group will automatically be given dynamic Arcade Physics bodies (if they have no body)
+ * and the bodies will receive the Group's {@link Phaser.Physics.Arcade.Group#defaults default values}.
  *
  * Its static counterpart is {@link Phaser.Physics.Arcade.StaticGroup}.
  *
@@ -82,8 +28,8 @@ var IsPlainObject = require('../../utils/object/IsPlainObject');
  *
  * @param {Phaser.Physics.Arcade.World} world - The physics simulation.
  * @param {Phaser.Scene} scene - The scene this group belongs to.
- * @param {(Phaser.GameObjects.GameObject[]|PhysicsGroupConfig|GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
- * @param {PhysicsGroupConfig|GroupCreateConfig} [config] - Settings for this group.
+ * @param {(Phaser.GameObjects.GameObject[]|Phaser.Types.Physics.Arcade.PhysicsGroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig)} [children] - Game Objects to add to this group; or the `config` argument.
+ * @param {Phaser.Types.Physics.Arcade.PhysicsGroupConfig|Phaser.Types.GameObjects.Group.GroupCreateConfig} [config] - Settings for this group.
  */
 var PhysicsGroup = new Class({
 
@@ -96,8 +42,8 @@ var PhysicsGroup = new Class({
         if (!children && !config)
         {
             config = {
-                createCallback: this.createCallbackHandler,
-                removeCallback: this.removeCallbackHandler
+                internalCreateCallback: this.createCallbackHandler,
+                internalRemoveCallback: this.removeCallbackHandler
             };
         }
         else if (IsPlainObject(children))
@@ -106,27 +52,30 @@ var PhysicsGroup = new Class({
             config = children;
             children = null;
 
-            config.createCallback = this.createCallbackHandler;
-            config.removeCallback = this.removeCallbackHandler;
+            config.internalCreateCallback = this.createCallbackHandler;
+            config.internalRemoveCallback = this.removeCallbackHandler;
         }
         else if (Array.isArray(children) && IsPlainObject(children[0]))
         {
-            //  children is an array of plain objects
-            config = children;
-            children = null;
+            //  children is an array of plain objects (i.e., configs)
+            config = children[0];
 
-            config.forEach(function (singleConfig)
+            var _this = this;
+
+            children.forEach(function (singleConfig)
             {
-                singleConfig.createCallback = this.createCallbackHandler;
-                singleConfig.removeCallback = this.removeCallbackHandler;
+                singleConfig.internalCreateCallback = _this.createCallbackHandler;
+                singleConfig.internalRemoveCallback = _this.removeCallbackHandler;
             });
+
+            children = null;
         }
         else
         {
             // config is not defined and children is not a plain object nor an array of plain objects
             config = {
-                createCallback: this.createCallbackHandler,
-                removeCallback: this.removeCallbackHandler
+                internalCreateCallback: this.createCallbackHandler,
+                internalRemoveCallback: this.removeCallbackHandler
             };
         }
 
@@ -141,11 +90,11 @@ var PhysicsGroup = new Class({
 
         /**
          * The class to create new Group members from.
-         * 
+         *
          * This should be either `Phaser.Physics.Arcade.Image`, `Phaser.Physics.Arcade.Sprite`, or a class extending one of those.
          *
          * @name Phaser.Physics.Arcade.Group#classType
-         * @type {GroupClassTypeConstructor}
+         * @type {Function}
          * @default ArcadeSprite
          * @since 3.0.0
          */
@@ -164,12 +113,15 @@ var PhysicsGroup = new Class({
         /**
          * Default physics properties applied to Game Objects added to the Group or created by the Group. Derived from the `config` argument.
          *
+         * You can remove the default values by setting this property to `{}`.
+         *
          * @name Phaser.Physics.Arcade.Group#defaults
-         * @type {PhysicsGroupDefaults}
+         * @type {Phaser.Types.Physics.Arcade.PhysicsGroupDefaults}
          * @since 3.0.0
          */
         this.defaults = {
             setCollideWorldBounds: GetFastValue(config, 'collideWorldBounds', false),
+            setBoundsRectangle: GetFastValue(config, 'customBoundsRectangle', null),
             setAccelerationX: GetFastValue(config, 'accelerationX', 0),
             setAccelerationY: GetFastValue(config, 'accelerationY', 0),
             setAllowDrag: GetFastValue(config, 'allowDrag', true),
@@ -194,6 +146,17 @@ var PhysicsGroup = new Class({
         };
 
         Group.call(this, scene, children, config);
+
+        /**
+         * A textual representation of this Game Object.
+         * Used internally by Phaser but is available for your own custom classes to populate.
+         *
+         * @name Phaser.Physics.Arcade.Group#type
+         * @type {string}
+         * @default 'PhysicsGroup'
+         * @since 3.21.0
+         */
+        this.type = 'PhysicsGroup';
     },
 
     /**

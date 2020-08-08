@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 //  Adapted from [gl-matrix](https://github.com/toji/gl-matrix) by toji
@@ -317,13 +317,13 @@ var Quaternion = new Class({
     },
 
     /**
-     * [description]
+     * Rotates this Quaternion based on the two given vectors.
      *
      * @method Phaser.Math.Quaternion#rotationTo
      * @since 3.0.0
      *
-     * @param {Phaser.Math.Vector3} a - [description]
-     * @param {Phaser.Math.Vector3} b - [description]
+     * @param {Phaser.Math.Vector3} a - The transform rotation vector.
+     * @param {Phaser.Math.Vector3} b - The target rotation vector.
      *
      * @return {Phaser.Math.Quaternion} This Quaternion.
      */

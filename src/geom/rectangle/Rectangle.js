@@ -1,13 +1,14 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
 var Contains = require('./Contains');
 var GetPoint = require('./GetPoint');
 var GetPoints = require('./GetPoints');
+var GEOM_CONST = require('../const');
 var Line = require('../line/Line');
 var Random = require('./Random');
 
@@ -35,6 +36,17 @@ var Rectangle = new Class({
         if (y === undefined) { y = 0; }
         if (width === undefined) { width = 0; }
         if (height === undefined) { height = 0; }
+
+        /**
+         * The geometry constant type of this object: `GEOM_CONST.RECTANGLE`.
+         * Used for fast type comparisons.
+         *
+         * @name Phaser.Geom.Rectangle#type
+         * @type {integer}
+         * @readonly
+         * @since 3.19.0
+         */
+        this.type = GEOM_CONST.RECTANGLE;
 
         /**
          * The X coordinate of the top left corner of the Rectangle.
@@ -162,7 +174,7 @@ var Rectangle = new Class({
      * @param {number} width - The width of the Rectangle.
      * @param {number} height - The height of the Rectangle.
      *
-     * @return {Phaser.Geom.Rectangle} This Rectangle object.
+     * @return {this} This Rectangle object.
      */
     setTo: function (x, y, width, height)
     {
@@ -180,7 +192,7 @@ var Rectangle = new Class({
      * @method Phaser.Geom.Rectangle#setEmpty
      * @since 3.0.0
      *
-     * @return {Phaser.Geom.Rectangle} This Rectangle object.
+     * @return {this} This Rectangle object.
      */
     setEmpty: function ()
     {
@@ -196,7 +208,7 @@ var Rectangle = new Class({
      * @param {number} x - The X coordinate of the top left corner of the Rectangle.
      * @param {number} [y=x] - The Y coordinate of the top left corner of the Rectangle.
      *
-     * @return {Phaser.Geom.Rectangle} This Rectangle object.
+     * @return {this} This Rectangle object.
      */
     setPosition: function (x, y)
     {
@@ -217,7 +229,7 @@ var Rectangle = new Class({
      * @param {number} width - The width to set the Rectangle to.
      * @param {number} [height=width] - The height to set the Rectangle to.
      *
-     * @return {Phaser.Geom.Rectangle} This Rectangle object.
+     * @return {this} This Rectangle object.
      */
     setSize: function (width, height)
     {

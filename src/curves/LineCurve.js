@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 //  Based on the three.js Curve classes created by [zz85](http://www.lab4games.net/zz85/blog)
@@ -61,6 +61,18 @@ var LineCurve = new Class({
          * @since 3.0.0
          */
         this.p1 = p1;
+
+        //  Override default Curve.arcLengthDivisions
+
+        /**
+         * The quantity of arc length divisions within the curve.
+         *
+         * @name Phaser.Curves.Line#arcLengthDivisions
+         * @type {integer}
+         * @default 1
+         * @since 3.0.0
+         */
+        this.arcLengthDivisions = 1;
     },
 
     /**
@@ -182,6 +194,40 @@ var LineCurve = new Class({
         return tangent.normalize();
     },
 
+    /**
+     * Given u ( 0 .. 1 ), get a t to find p. This gives you points which are equidistant.
+     *
+     * @method Phaser.Curves.Line#getUtoTmapping
+     * @since 3.0.0
+     *
+     * @param {number} u - A float between 0 and 1.
+     * @param {integer} distance - The distance, in pixels.
+     * @param {integer} [divisions] - Optional amount of divisions.
+     *
+     * @return {number} The equidistant value.
+     */
+    getUtoTmapping: function (u, distance, divisions)
+    {
+        var t;
+
+        if (distance)
+        {
+            var arcLengths = this.getLengths(divisions);
+            var lineLength = arcLengths[arcLengths.length - 1];
+
+            //  Cannot overshoot the curve
+            var targetLineLength = Math.min(distance, lineLength);
+
+            t = targetLineLength / lineLength;
+        }
+        else
+        {
+            t = u;
+        }
+
+        return t;
+    },
+
     //  Override default Curve.draw because this is better than calling getPoints on a line!
 
     /**
@@ -213,7 +259,7 @@ var LineCurve = new Class({
      * @method Phaser.Curves.Line#toJSON
      * @since 3.0.0
      *
-     * @return {JSONCurve} The JSON object containing this curve data.
+     * @return {Phaser.Types.Curves.JSONCurve} The JSON object containing this curve data.
      */
     toJSON: function ()
     {
@@ -234,7 +280,7 @@ var LineCurve = new Class({
  * @function Phaser.Curves.Line.fromJSON
  * @since 3.0.0
  *
- * @param {JSONCurve} data - The JSON object containing this curve data.
+ * @param {Phaser.Types.Curves.JSONCurve} data - The JSON object containing this curve data.
  *
  * @return {Phaser.Curves.Line} A new LineCurve object.
  */

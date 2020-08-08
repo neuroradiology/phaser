@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -13,31 +13,6 @@ var Rectangle = require('../../geom/rectangle/Rectangle');
 var TransformMatrix = require('../../gameobjects/components/TransformMatrix');
 var ValueToColor = require('../../display/color/ValueToColor');
 var Vector2 = require('../../math/Vector2');
-
-/**
- * @typedef {object} JSONCameraBounds
- * @property {number} x - The horizontal position of camera
- * @property {number} y - The vertical position of camera
- * @property {number} width - The width size of camera
- * @property {number} height - The height size of camera
- */
-
-/**
- * @typedef {object} JSONCamera
- *
- * @property {string} name - The name of the camera
- * @property {number} x - The horizontal position of camera
- * @property {number} y - The vertical position of camera
- * @property {number} width - The width size of camera
- * @property {number} height - The height size of camera
- * @property {number} zoom - The zoom of camera
- * @property {number} rotation - The rotation of camera
- * @property {boolean} roundPixels - The round pixels st status of camera
- * @property {number} scrollX - The horizontal scroll of camera
- * @property {number} scrollY - The vertical scroll of camera
- * @property {string} backgroundColor - The background color of camera
- * @property {(JSONCameraBounds|undefined)} [bounds] - The bounds of camera
- */
 
 /**
  * @classdesc
@@ -127,6 +102,15 @@ var BaseCamera = new Class({
          * @since 3.16.0
          */
         this.scaleManager;
+
+        /**
+         * A reference to the Scene's Camera Manager to which this Camera belongs.
+         *
+         * @name Phaser.Cameras.Scene2D.BaseCamera#cameraManager
+         * @type {Phaser.Cameras.Scene2D.CameraManager}
+         * @since 3.17.0
+         */
+        this.cameraManager;
 
         /**
          * The Camera ID. Assigned by the Camera Manager and used to handle camera exclusion.
@@ -516,6 +500,30 @@ var BaseCamera = new Class({
          * @since 3.12.0
          */
         this._customViewport = false;
+
+        /**
+         * The Mask this Camera is using during render.
+         * Set the mask using the `setMask` method. Remove the mask using the `clearMask` method.
+         *
+         * @name Phaser.Cameras.Scene2D.BaseCamera#mask
+         * @type {?(Phaser.Display.Masks.BitmapMask|Phaser.Display.Masks.GeometryMask)}
+         * @since 3.17.0
+         */
+        this.mask = null;
+
+        /**
+         * The Camera that this Camera uses for translation during masking.
+         * 
+         * If the mask is fixed in position this will be a reference to
+         * the CameraManager.default instance. Otherwise, it'll be a reference
+         * to itself.
+         *
+         * @name Phaser.Cameras.Scene2D.BaseCamera#_maskCamera
+         * @type {?Phaser.Cameras.Scene2D.BaseCamera}
+         * @private
+         * @since 3.17.0
+         */
+        this._maskCamera = null;
     },
 
     /**
@@ -569,7 +577,7 @@ var BaseCamera = new Class({
      *
      * @param {number} x - The horizontal coordinate to center on.
      * @param {number} y - The vertical coordinate to center on.
-     * @param {Phaser.Math.Vector2} [out] - A Vec2 to store the values in. If not given a new Vec2 is created.
+     * @param {Phaser.Math.Vector2} [out] - A Vector2 to store the values in. If not given a new Vector2 is created.
      *
      * @return {Phaser.Math.Vector2} The scroll coordinates stored in the `x` and `y` properties.
      */
@@ -601,7 +609,7 @@ var BaseCamera = new Class({
      *
      * @param {number} x - The horizontal coordinate to center on.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     centerOnX: function (x)
     {
@@ -628,7 +636,7 @@ var BaseCamera = new Class({
      *
      * @param {number} y - The vertical coordinate to center on.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     centerOnY: function (y)
     {
@@ -655,7 +663,7 @@ var BaseCamera = new Class({
      * @param {number} x - The horizontal coordinate to center on.
      * @param {number} y - The vertical coordinate to center on.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     centerOn: function (x, y)
     {
@@ -671,7 +679,7 @@ var BaseCamera = new Class({
      * @method Phaser.Cameras.Scene2D.BaseCamera#centerToBounds
      * @since 3.0.0
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     centerToBounds: function ()
     {
@@ -696,7 +704,7 @@ var BaseCamera = new Class({
      * @method Phaser.Cameras.Scene2D.BaseCamera#centerToSize
      * @since 3.0.0
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     centerToSize: function ()
     {
@@ -748,6 +756,10 @@ var BaseCamera = new Class({
         var scrollY = this.scrollY;
         var cameraW = this.width;
         var cameraH = this.height;
+        var cullTop = this.y;
+        var cullBottom = cullTop + cameraH;
+        var cullLeft = this.x;
+        var cullRight = cullLeft + cameraW;
         var culledObjects = this.culledObjects;
         var length = renderableObjects.length;
 
@@ -773,10 +785,6 @@ var BaseCamera = new Class({
             var ty = (objectX * mvb + objectY * mvd + mvf);
             var tw = ((objectX + objectW) * mva + (objectY + objectH) * mvc + mve);
             var th = ((objectX + objectW) * mvb + (objectY + objectH) * mvd + mvf);
-            var cullTop = this.y;
-            var cullBottom = cullTop + cameraH;
-            var cullLeft = this.x;
-            var cullRight = cullLeft + cameraW;
 
             if ((tw > cullLeft && tx < cullRight) && (th > cullTop && ty < cullBottom))
             {
@@ -864,7 +872,7 @@ var BaseCamera = new Class({
      *
      * @param {(Phaser.GameObjects.GameObject|Phaser.GameObjects.GameObject[]|Phaser.GameObjects.Group)} entries - The Game Object, or array of Game Objects, to be ignored by this Camera.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     ignore: function (entries)
     {
@@ -1034,7 +1042,7 @@ var BaseCamera = new Class({
      * @method Phaser.Cameras.Scene2D.BaseCamera#removeBounds
      * @since 3.0.0
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     removeBounds: function ()
     {
@@ -1057,7 +1065,7 @@ var BaseCamera = new Class({
      *
      * @param {number} [value=0] - The cameras angle of rotation, given in degrees.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setAngle: function (value)
     {
@@ -1079,9 +1087,9 @@ var BaseCamera = new Class({
      * @method Phaser.Cameras.Scene2D.BaseCamera#setBackgroundColor
      * @since 3.0.0
      *
-     * @param {(string|number|InputColorObject)} [color='rgba(0,0,0,0)'] - The color value. In CSS, hex or numeric color notation.
+     * @param {(string|number|Phaser.Types.Display.InputColorObject)} [color='rgba(0,0,0,0)'] - The color value. In CSS, hex or numeric color notation.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setBackgroundColor: function (color)
     {
@@ -1122,7 +1130,7 @@ var BaseCamera = new Class({
      * @param {integer} height - The height of the bounds, in pixels.
      * @param {boolean} [centerOn=false] - If `true` the Camera will automatically be centered on the new bounds.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setBounds: function (x, y, width, height, centerOn)
     {
@@ -1180,7 +1188,7 @@ var BaseCamera = new Class({
      *
      * @param {string} [value=''] - The name of the Camera.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setName: function (value)
     {
@@ -1202,7 +1210,7 @@ var BaseCamera = new Class({
      * @param {number} x - The top-left x coordinate of the Camera viewport.
      * @param {number} [y=x] - The top-left y coordinate of the Camera viewport.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setPosition: function (x, y)
     {
@@ -1224,7 +1232,7 @@ var BaseCamera = new Class({
      *
      * @param {number} [value=0] - The rotation of the Camera, in radians.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setRotation: function (value)
     {
@@ -1245,7 +1253,7 @@ var BaseCamera = new Class({
      *
      * @param {boolean} value - `true` to round Camera pixels, `false` to not.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setRoundPixels: function (value)
     {
@@ -1264,7 +1272,7 @@ var BaseCamera = new Class({
      *
      * @param {Phaser.Scene} scene - The Scene the camera is bound to.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setScene: function (scene)
     {
@@ -1275,8 +1283,11 @@ var BaseCamera = new Class({
 
         this.scene = scene;
 
-        this.sceneManager = scene.sys.game.scene;
-        this.scaleManager = scene.sys.scale;
+        var sys = scene.sys;
+
+        this.sceneManager = sys.game.scene;
+        this.scaleManager = sys.scale;
+        this.cameraManager = sys.cameras;
 
         var res = this.scaleManager.resolution;
 
@@ -1305,7 +1316,7 @@ var BaseCamera = new Class({
      * @param {number} x - The x coordinate of the Camera in the game world.
      * @param {number} [y=x] - The y coordinate of the Camera in the game world.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setScroll: function (x, y)
     {
@@ -1330,7 +1341,7 @@ var BaseCamera = new Class({
      * @param {integer} width - The width of the Camera viewport.
      * @param {integer} [height=width] - The height of the Camera viewport.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setSize: function (width, height)
     {
@@ -1361,7 +1372,7 @@ var BaseCamera = new Class({
      * @param {integer} width - The width of the Camera viewport.
      * @param {integer} [height=width] - The height of the Camera viewport.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setViewport: function (x, y, width, height)
     {
@@ -1388,7 +1399,7 @@ var BaseCamera = new Class({
      *
      * @param {number} [value=1] - The zoom value of the Camera. The minimum it can be is 0.001.
      *
-     * @return {Phaser.Cameras.Scene2D.BaseCamera} This Camera instance.
+     * @return {this} This Camera instance.
      */
     setZoom: function (value)
     {
@@ -1400,6 +1411,63 @@ var BaseCamera = new Class({
         }
 
         this.zoom = value;
+
+        return this;
+    },
+
+    /**
+     * Sets the mask to be applied to this Camera during rendering.
+     *
+     * The mask must have been previously created and can be either a GeometryMask or a BitmapMask.
+     * 
+     * Bitmap Masks only work on WebGL. Geometry Masks work on both WebGL and Canvas.
+     *
+     * If a mask is already set on this Camera it will be immediately replaced.
+     * 
+     * Masks have no impact on physics or input detection. They are purely a rendering component
+     * that allows you to limit what is visible during the render pass.
+     * 
+     * Note: You cannot mask a Camera that has `renderToTexture` set.
+     *
+     * @method Phaser.Cameras.Scene2D.BaseCamera#setMask
+     * @since 3.17.0
+     *
+     * @param {(Phaser.Display.Masks.BitmapMask|Phaser.Display.Masks.GeometryMask)} mask - The mask this Camera will use when rendering.
+     * @param {boolean} [fixedPosition=true] - Should the mask translate along with the Camera, or be fixed in place and not impacted by the Cameras transform?
+     *
+     * @return {this} This Camera instance.
+     */
+    setMask: function (mask, fixedPosition)
+    {
+        if (fixedPosition === undefined) { fixedPosition = true; }
+
+        this.mask = mask;
+
+        this._maskCamera = (fixedPosition) ? this.cameraManager.default : this;
+
+        return this;
+    },
+
+    /**
+     * Clears the mask that this Camera was using.
+     *
+     * @method Phaser.Cameras.Scene2D.BaseCamera#clearMask
+     * @since 3.17.0
+     *
+     * @param {boolean} [destroyMask=false] - Destroy the mask before clearing it?
+     *
+     * @return {this} This Camera instance.
+     */
+    clearMask: function (destroyMask)
+    {
+        if (destroyMask === undefined) { destroyMask = false; }
+
+        if (destroyMask && this.mask)
+        {
+            this.mask.destroy();
+        }
+
+        this.mask = null;
 
         return this;
     },
@@ -1423,7 +1491,7 @@ var BaseCamera = new Class({
      * @method Phaser.Cameras.Scene2D.BaseCamera#toJSON
      * @since 3.0.0
      *
-     * @return {JSONCamera} A well-formed object suitable for conversion to JSON.
+     * @return {Phaser.Types.Cameras.Scene2D.JSONCamera} A well-formed object suitable for conversion to JSON.
      */
     toJSON: function ()
     {
@@ -1536,6 +1604,7 @@ var BaseCamera = new Class({
         this.scene = null;
         this.scaleManager = null;
         this.sceneManager = null;
+        this.cameraManager = null;
     },
 
     /**

@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../utils/Class');
@@ -60,7 +60,7 @@ var BaseCache = new Class({
      * @param {string} key - The unique key by which the data added to the cache will be referenced.
      * @param {*} data - The data to be stored in the cache.
      *
-     * @return {Phaser.Cache.BaseCache} This BaseCache object.
+     * @return {this} This BaseCache object.
      */
     add: function (key, data)
     {
@@ -131,7 +131,7 @@ var BaseCache = new Class({
      *
      * @param {string} key - The unique key of the item to remove from the cache.
      *
-     * @return {Phaser.Cache.BaseCache} This BaseCache object.
+     * @return {this} This BaseCache object.
      */
     remove: function (key)
     {
@@ -145,6 +145,19 @@ var BaseCache = new Class({
         }
 
         return this;
+    },
+
+    /**
+     * Returns all keys in use in this cache.
+     *
+     * @method Phaser.Cache.BaseCache#getKeys
+     * @since 3.17.0
+     *
+     * @return {string[]} Array containing all the keys.
+     */
+    getKeys: function ()
+    {
+        return this.entries.keys();
     },
 
     /**

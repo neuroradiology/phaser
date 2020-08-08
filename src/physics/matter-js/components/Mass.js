@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Body = require('../lib/body/Body');
@@ -51,6 +51,10 @@ var Mass = {
 
     /**
      * The body's center of mass.
+     * 
+     * Calling this creates a new `Vector2 each time to avoid mutation.
+     * 
+     * If you only need to read the value and won't change it, you can get it from `GameObject.body.centerOfMass`.
      *
      * @name Phaser.Physics.Matter.Components.Mass#centerOfMass
      * @type {Phaser.Math.Vector2}
@@ -63,7 +67,7 @@ var Mass = {
 
         get: function ()
         {
-            return new Vector2(this.body.render.sprite.xOffset * this.width, this.body.render.sprite.yOffset * this.height);
+            return new Vector2(this.body.centerOfMass.x, this.body.centerOfMass.y);
         }
     }
 

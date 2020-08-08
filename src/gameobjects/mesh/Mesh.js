@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -23,10 +23,8 @@ var NOOP = require('../../utils/NOOP');
  *
  * @extends Phaser.GameObjects.Components.BlendMode
  * @extends Phaser.GameObjects.Components.Depth
- * @extends Phaser.GameObjects.Components.GetBounds
  * @extends Phaser.GameObjects.Components.Mask
  * @extends Phaser.GameObjects.Components.Pipeline
- * @extends Phaser.GameObjects.Components.ScaleMode
  * @extends Phaser.GameObjects.Components.Size
  * @extends Phaser.GameObjects.Components.Texture
  * @extends Phaser.GameObjects.Components.Transform
@@ -40,7 +38,7 @@ var NOOP = require('../../utils/NOOP');
  * @param {number[]} uv - An array containing the uv data for this Mesh.
  * @param {number[]} colors - An array containing the color data for this Mesh.
  * @param {number[]} alphas - An array containing the alpha data for this Mesh.
- * @param {string} texture - The key of the Texture this Game Object will use to render with, as stored in the Texture Manager.
+ * @param {(string|Phaser.Textures.Texture)} texture - The key, or instance of the Texture this Game Object will use to render with, as stored in the Texture Manager.
  * @param {(string|integer)} [frame] - An optional frame from the Texture this Game Object is rendering with.
  */
 var Mesh = new Class({
@@ -50,10 +48,8 @@ var Mesh = new Class({
     Mixins: [
         Components.BlendMode,
         Components.Depth,
-        Components.GetBounds,
         Components.Mask,
         Components.Pipeline,
-        Components.ScaleMode,
         Components.Size,
         Components.Texture,
         Components.Transform,
@@ -141,7 +137,7 @@ var Mesh = new Class({
 
         /**
          * Fill or additive mode used when blending the color values?
-         * 
+         *
          * @name Phaser.GameObjects.Mesh#tintFill
          * @type {boolean}
          * @default false
@@ -158,7 +154,7 @@ var Mesh = new Class({
     /**
      * This method is left intentionally empty and does not do anything.
      * It is retained to allow a Mesh or Quad to be added to a Container.
-     * 
+     *
      * @method Phaser.GameObjects.Mesh#setAlpha
      * @since 3.17.0
      */

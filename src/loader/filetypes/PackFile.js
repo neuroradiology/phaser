@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -10,21 +10,11 @@ var FileTypesManager = require('../FileTypesManager');
 var JSONFile = require('./JSONFile.js');
 
 /**
- * @typedef {object} Phaser.Loader.FileTypes.PackFileConfig
- *
- * @property {string} key - The key of the file. Must be unique within both the Loader and the JSON Cache.
- * @property {string|any} [url] - The absolute or relative URL to load the file from. Or can be a ready formed JSON object, in which case it will be directly processed.
- * @property {string} [extension='json'] - The default file extension to use if no url is provided.
- * @property {string} [dataKey] - If specified instead of the whole JSON file being parsed, only the section corresponding to this property key will be added. If the property you want to extract is nested, use periods to divide it.
- * @property {XHRSettingsObject} [xhrSettings] - Extra XHR Settings specifically for this file.
- */
-
-/**
  * @classdesc
  * A single JSON Pack File suitable for loading by the Loader.
  *
  * These are created when you use the Phaser.Loader.LoaderPlugin#pack method and are not typically created directly.
- * 
+ *
  * For documentation about what all the arguments and configuration options mean please see Phaser.Loader.LoaderPlugin#pack.
  *
  * @class PackFile
@@ -34,9 +24,9 @@ var JSONFile = require('./JSONFile.js');
  * @since 3.7.0
  *
  * @param {Phaser.Loader.LoaderPlugin} loader - A reference to the Loader that is responsible for this file.
- * @param {(string|Phaser.Loader.FileTypes.JSONFileConfig)} key - The key to use for this file, or a file configuration object.
+ * @param {(string|Phaser.Types.Loader.FileTypes.PackFileConfig)} key - The key to use for this file, or a file configuration object.
  * @param {string} [url] - The absolute or relative URL to load this file from. If undefined or `null` it will be set to `<key>.json`, i.e. if `key` was "alien" then the URL will be "alien.json".
- * @param {XHRSettingsObject} [xhrSettings] - Extra XHR Settings specifically for this file.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [xhrSettings] - Extra XHR Settings specifically for this file.
  * @param {string} [dataKey] - When the JSON file loads only this property will be stored in the Cache.
  */
 var PackFile = new Class({
@@ -83,7 +73,7 @@ var PackFile = new Class({
  * Adds a JSON File Pack, or array of packs, to the current load queue.
  *
  * You can call this method from within your Scene's `preload`, along with any other files you wish to load:
- * 
+ *
  * ```javascript
  * function preload ()
  * {
@@ -95,7 +85,7 @@ var PackFile = new Class({
  * Here is a small example:
  *
  * ```json
- * { 
+ * {
  *    "test1": {
  *        "files": [
  *            {
@@ -136,17 +126,17 @@ var PackFile = new Class({
  * The typical flow for a Phaser Scene is that you load assets in the Scene's `preload` method and then when the
  * Scene's `create` method is called you are guaranteed that all of those assets are ready for use and have been
  * loaded.
- * 
+ *
  * If you call this from outside of `preload` then you are responsible for starting the Loader afterwards and monitoring
  * its events to know when it's safe to use the asset. Please see the Phaser.Loader.LoaderPlugin class for more details.
- * 
+ *
  * The key must be a unique String. It is used to add the file to the global JSON Cache upon a successful load.
  * The key should be unique both in terms of files being loaded and files already present in the JSON Cache.
  * Loading a file using a key that is already taken will result in a warning. If you wish to replace an existing file
  * then remove it from the JSON Cache first, before loading a new one.
  *
  * Instead of passing arguments you can pass a configuration object, such as:
- * 
+ *
  * ```javascript
  * this.load.pack({
  *     key: 'level1',
@@ -154,7 +144,7 @@ var PackFile = new Class({
  * });
  * ```
  *
- * See the documentation for `Phaser.Loader.FileTypes.PackFileConfig` for more details.
+ * See the documentation for `Phaser.Types.Loader.FileTypes.PackFileConfig` for more details.
  *
  * If you have specified a prefix in the loader, via `Loader.setPrefix` then this value will be prepended to this files
  * key. For example, if the prefix was `LEVEL1.` and the key was `Waves` the final key will be `LEVEL1.Waves` and
@@ -168,7 +158,7 @@ var PackFile = new Class({
  *
  * You can also optionally provide a `dataKey` to use. This allows you to extract only a part of the JSON and store it in the Cache,
  * rather than the whole file. For example, if your JSON data had a structure like this:
- * 
+ *
  * ```json
  * {
  *     "level1": {
@@ -188,15 +178,15 @@ var PackFile = new Class({
  * It is available in the default build but can be excluded from custom builds.
  *
  * @method Phaser.Loader.LoaderPlugin#pack
- * @fires Phaser.Loader.LoaderPlugin#addFileEvent
+ * @fires Phaser.Loader.LoaderPlugin#ADD
  * @since 3.7.0
  *
- * @param {(string|Phaser.Loader.FileTypes.PackFileConfig|Phaser.Loader.FileTypes.PackFileConfig[])} key - The key to use for this file, or a file configuration object, or array of them.
+ * @param {(string|Phaser.Types.Loader.FileTypes.PackFileConfig|Phaser.Types.Loader.FileTypes.PackFileConfig[])} key - The key to use for this file, or a file configuration object, or array of them.
  * @param {string} [url] - The absolute or relative URL to load this file from. If undefined or `null` it will be set to `<key>.json`, i.e. if `key` was "alien" then the URL will be "alien.json".
  * @param {string} [dataKey] - When the JSON file loads only this property will be stored in the Cache.
- * @param {XHRSettingsObject} [xhrSettings] - An XHR Settings configuration object. Used in replacement of the Loaders default XHR Settings.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [xhrSettings] - An XHR Settings configuration object. Used in replacement of the Loaders default XHR Settings.
  *
- * @return {Phaser.Loader.LoaderPlugin} The Loader instance.
+ * @return {this} The Loader instance.
  */
 FileTypesManager.register('pack', function (key, url, packKey, xhrSettings)
 {

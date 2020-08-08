@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -10,15 +10,6 @@ var File = require('../File');
 var FileTypesManager = require('../FileTypesManager');
 var GetFastValue = require('../../utils/object/GetFastValue');
 var IsPlainObject = require('../../utils/object/IsPlainObject');
-
-/**
- * @typedef {object} Phaser.Loader.FileTypes.SceneFileConfig
- *
- * @property {string} key - The key of the file. Must be unique within both the Loader and the Text Cache.
- * @property {string} [url] - The absolute or relative URL to load the file from.
- * @property {string} [extension='txt'] - The default file extension to use if no url is provided.
- * @property {XHRSettingsObject} [xhrSettings] - Extra XHR Settings specifically for this file.
- */
 
 /**
  * @classdesc
@@ -35,9 +26,9 @@ var IsPlainObject = require('../../utils/object/IsPlainObject');
  * @since 3.16.0
  *
  * @param {Phaser.Loader.LoaderPlugin} loader - A reference to the Loader that is responsible for this file.
- * @param {(string|Phaser.Loader.FileTypes.SceneFileConfig)} key - The key to use for this file, or a file configuration object.
+ * @param {(string|Phaser.Types.Loader.FileTypes.SceneFileConfig)} key - The key to use for this file, or a file configuration object.
  * @param {string} [url] - The absolute or relative URL to load this file from. If undefined or `null` it will be set to `<key>.js`, i.e. if `key` was "alien" then the URL will be "alien.js".
- * @param {XHRSettingsObject} [xhrSettings] - Extra XHR Settings specifically for this file.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [xhrSettings] - Extra XHR Settings specifically for this file.
  */
 var SceneFile = new Class({
 
@@ -98,7 +89,10 @@ var SceneFile = new Class({
     {
         var code = this.data.concat('(function(){\n' + 'return new ' + this.key + '();\n' + '}).call(this);');
 
-        this.loader.sceneManager.add(this.key, eval(code));
+        //  Stops rollup from freaking out during build
+        var eval2 = eval;
+
+        this.loader.sceneManager.add(this.key, eval2(code));
 
         this.complete = true;
     }
@@ -126,34 +120,34 @@ var SceneFile = new Class({
  * loaded.
  *
  * The key must be a unique String. It is used to add the file to the global Scene Manager upon a successful load.
- * 
+ *
  * For a Scene File it's vitally important that the key matches the class name in the JavaScript file.
- * 
+ *
  * For example here is the source file:
- * 
+ *
  * ```javascript
  * class ExternalScene extends Phaser.Scene {
- * 
+ *
  *     constructor ()
  *     {
  *         super('myScene');
  *     }
- * 
+ *
  * }
  * ```
- * 
+ *
  * Because the class is called `ExternalScene` that is the exact same key you must use when loading it:
- * 
+ *
  * ```javascript
  * function preload ()
  * {
  *     this.load.sceneFile('ExternalScene', 'src/yourScene.js');
  * }
  * ```
- * 
+ *
  * The key that is used within the Scene Manager can either be set to the same, or you can override it in the Scene
  * constructor, as we've done in the example above, where the Scene key was changed to `myScene`.
- * 
+ *
  * The key should be unique both in terms of files being loaded and Scenes already present in the Scene Manager.
  * Loading a file using a key that is already taken will result in a warning. If you wish to replace an existing file
  * then remove it from the Scene Manager first, before loading a new one.
@@ -167,7 +161,7 @@ var SceneFile = new Class({
  * });
  * ```
  *
- * See the documentation for `Phaser.Loader.FileTypes.SceneFileConfig` for more details.
+ * See the documentation for `Phaser.Types.Loader.FileTypes.SceneFileConfig` for more details.
  *
  * Once the file has finished loading it will be added to the Scene Manager.
  *
@@ -191,14 +185,14 @@ var SceneFile = new Class({
  * It is available in the default build but can be excluded from custom builds.
  *
  * @method Phaser.Loader.LoaderPlugin#sceneFile
- * @fires Phaser.Loader.LoaderPlugin#addFileEvent
+ * @fires Phaser.Loader.LoaderPlugin#ADD
  * @since 3.16.0
  *
- * @param {(string|Phaser.Loader.FileTypes.SceneFileConfig|Phaser.Loader.FileTypes.SceneFileConfig[])} key - The key to use for this file, or a file configuration object, or array of them.
+ * @param {(string|Phaser.Types.Loader.FileTypes.SceneFileConfig|Phaser.Types.Loader.FileTypes.SceneFileConfig[])} key - The key to use for this file, or a file configuration object, or array of them.
  * @param {string} [url] - The absolute or relative URL to load this file from. If undefined or `null` it will be set to `<key>.js`, i.e. if `key` was "alien" then the URL will be "alien.js".
- * @param {XHRSettingsObject} [xhrSettings] - An XHR Settings configuration object. Used in replacement of the Loaders default XHR Settings.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [xhrSettings] - An XHR Settings configuration object. Used in replacement of the Loaders default XHR Settings.
  *
- * @return {Phaser.Loader.LoaderPlugin} The Loader instance.
+ * @return {this} The Loader instance.
  */
 FileTypesManager.register('sceneFile', function (key, url, xhrSettings)
 {

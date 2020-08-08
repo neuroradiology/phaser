@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -23,6 +23,7 @@ var Render = require('./ParticleManagerRender');
  * @since 3.0.0
  *
  * @extends Phaser.GameObjects.Components.Depth
+ * @extends Phaser.GameObjects.Components.Mask
  * @extends Phaser.GameObjects.Components.Pipeline
  * @extends Phaser.GameObjects.Components.Transform
  * @extends Phaser.GameObjects.Components.Visible
@@ -30,7 +31,7 @@ var Render = require('./ParticleManagerRender');
  * @param {Phaser.Scene} scene - The Scene to which this Emitter Manager belongs.
  * @param {string} texture - The key of the Texture this Emitter Manager will use to render particles, as stored in the Texture Manager.
  * @param {(string|integer)} [frame] - An optional frame from the Texture this Emitter Manager will use to render particles.
- * @param {ParticleEmitterConfig|ParticleEmitterConfig[]} [emitters] - Configuration settings for one or more emitters to create.
+ * @param {Phaser.Types.GameObjects.Particles.ParticleEmitterConfig|Phaser.Types.GameObjects.Particles.ParticleEmitterConfig[]} [emitters] - Configuration settings for one or more emitters to create.
  */
 var ParticleEmitterManager = new Class({
 
@@ -38,6 +39,7 @@ var ParticleEmitterManager = new Class({
 
     Mixins: [
         Components.Depth,
+        Components.Mask,
         Components.Pipeline,
         Components.Transform,
         Components.Visible,
@@ -158,7 +160,7 @@ var ParticleEmitterManager = new Class({
      * @param {string} key - The key of the texture to be used, as stored in the Texture Manager.
      * @param {(string|integer)} [frame] - The name or index of the frame within the Texture.
      *
-     * @return {Phaser.GameObjects.Particles.ParticleEmitterManager} This Emitter Manager.
+     * @return {this} This Emitter Manager.
      */
     setTexture: function (key, frame)
     {
@@ -179,7 +181,7 @@ var ParticleEmitterManager = new Class({
      *
      * @param {(string|integer)} [frame] - The name or index of the frame within the Texture.
      *
-     * @return {Phaser.GameObjects.Particles.ParticleEmitterManager} This Emitter Manager.
+     * @return {this} This Emitter Manager.
      */
     setFrame: function (frame)
     {
@@ -210,7 +212,7 @@ var ParticleEmitterManager = new Class({
      * @param {(Phaser.Textures.Frame|Phaser.Textures.Frame[])} frames - The texture frames.
      * @param {Phaser.GameObjects.Particles.ParticleEmitter} emitter - The particle emitter to modify.
      *
-     * @return {Phaser.GameObjects.Particles.ParticleEmitterManager} This Emitter Manager.
+     * @return {this} This Emitter Manager.
      */
     setEmitterFrames: function (frames, emitter)
     {
@@ -266,13 +268,28 @@ var ParticleEmitterManager = new Class({
      * @method Phaser.GameObjects.Particles.ParticleEmitterManager#createEmitter
      * @since 3.0.0
      *
-     * @param {ParticleEmitterConfig} config - Configuration settings for the Particle Emitter to create.
+     * @param {Phaser.Types.GameObjects.Particles.ParticleEmitterConfig} config - Configuration settings for the Particle Emitter to create.
      *
      * @return {Phaser.GameObjects.Particles.ParticleEmitter} The Particle Emitter that was created.
      */
     createEmitter: function (config)
     {
         return this.addEmitter(new ParticleEmitter(this, config));
+    },
+
+    /**
+     * Removes a Particle Emitter from this Emitter Manager, if the Emitter belongs to this Manager.
+     *
+     * @method Phaser.GameObjects.Particles.ParticleEmitterManager#removeEmitter
+     * @since 3.22.0
+     *
+     * @param {Phaser.GameObjects.Particles.ParticleEmitter} emitter
+     *
+     * @return {?Phaser.GameObjects.Particles.ParticleEmitter} The Particle Emitter if it was removed or null if it was not.
+     */
+    removeEmitter: function (emitter)
+    {
+        return this.emitters.remove(emitter, true);
     },
 
     /**
@@ -296,7 +313,7 @@ var ParticleEmitterManager = new Class({
      * @method Phaser.GameObjects.Particles.ParticleEmitterManager#createGravityWell
      * @since 3.0.0
      *
-     * @param {GravityWellConfig} config - Configuration settings for the Gravity Well to create.
+     * @param {Phaser.Types.GameObjects.Particles.GravityWellConfig} config - Configuration settings for the Gravity Well to create.
      *
      * @return {Phaser.GameObjects.Particles.GravityWell} The Gravity Well that was created.
      */
@@ -315,7 +332,7 @@ var ParticleEmitterManager = new Class({
      * @param {number} [x] - The x-coordinate to to emit particles from. The default is the x-coordinate of the emitter's current location.
      * @param {number} [y] - The y-coordinate to to emit particles from. The default is the y-coordinate of the emitter's current location.
      *
-     * @return {Phaser.GameObjects.Particles.ParticleEmitterManager} This Emitter Manager.
+     * @return {this} This Emitter Manager.
      */
     emitParticle: function (count, x, y)
     {
@@ -344,7 +361,7 @@ var ParticleEmitterManager = new Class({
      * @param {number} [y] - The y-coordinate to to emit particles from. The default is the y-coordinate of the emitter's current location.
      * @param {integer} [count] - The number of particles to release from each emitter. The default is the emitter's own {@link Phaser.GameObjects.Particles.ParticleEmitter#quantity}.
      *
-     * @return {Phaser.GameObjects.Particles.ParticleEmitterManager} This Emitter Manager.
+     * @return {this} This Emitter Manager.
      */
     emitParticleAt: function (x, y, count)
     {
@@ -361,7 +378,7 @@ var ParticleEmitterManager = new Class({
      * @method Phaser.GameObjects.Particles.ParticleEmitterManager#pause
      * @since 3.0.0
      *
-     * @return {Phaser.GameObjects.Particles.ParticleEmitterManager} This Emitter Manager.
+     * @return {this} This Emitter Manager.
      */
     pause: function ()
     {
@@ -376,7 +393,7 @@ var ParticleEmitterManager = new Class({
      * @method Phaser.GameObjects.Particles.ParticleEmitterManager#resume
      * @since 3.0.0
      *
-     * @return {Phaser.GameObjects.Particles.ParticleEmitterManager} This Emitter Manager.
+     * @return {this} This Emitter Manager.
      */
     resume: function ()
     {

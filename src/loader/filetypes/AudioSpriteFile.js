@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var AudioFile = require('./AudioFile.js');
@@ -13,22 +13,11 @@ var JSONFile = require('./JSONFile.js');
 var MultiFile = require('../MultiFile.js');
 
 /**
- * @typedef {object} Phaser.Loader.FileTypes.AudioSpriteFileConfig
- *
- * @property {string} key - The key of the file. Must be unique within both the Loader and the Audio Cache.
- * @property {string} jsonURL - The absolute or relative URL to load the json file from. Or a well formed JSON object to use instead.
- * @property {XHRSettingsObject} [jsonXhrSettings] - Extra XHR Settings specifically for the json file.
- * @property {{(string|string[])}} [audioURL] - The absolute or relative URL to load the audio file from.
- * @property {any} [audioConfig] - The audio configuration options.
- * @property {XHRSettingsObject} [audioXhrSettings] - Extra XHR Settings specifically for the audio file.
- */
-
-/**
  * @classdesc
  * An Audio Sprite File suitable for loading by the Loader.
  *
  * These are created when you use the Phaser.Loader.LoaderPlugin#audioSprite method and are not typically created directly.
- * 
+ *
  * For documentation about what all the arguments and configuration options mean please see Phaser.Loader.LoaderPlugin#audioSprite.
  *
  * @class AudioSpriteFile
@@ -38,12 +27,12 @@ var MultiFile = require('../MultiFile.js');
  * @since 3.7.0
  *
  * @param {Phaser.Loader.LoaderPlugin} loader - A reference to the Loader that is responsible for this file.
- * @param {(string|Phaser.Loader.FileTypes.AudioSpriteFileConfig)} key - The key to use for this file, or a file configuration object.
+ * @param {(string|Phaser.Types.Loader.FileTypes.AudioSpriteFileConfig)} key - The key to use for this file, or a file configuration object.
  * @param {string} jsonURL - The absolute or relative URL to load the json file from. Or a well formed JSON object to use instead.
  * @param {{(string|string[])}} [audioURL] - The absolute or relative URL to load the audio file from. If empty it will be obtained by parsing the JSON file.
  * @param {any} [audioConfig] - The audio configuration options.
- * @param {XHRSettingsObject} [audioXhrSettings] - An XHR Settings configuration object for the audio file. Used in replacement of the Loaders default XHR Settings.
- * @param {XHRSettingsObject} [jsonXhrSettings] - An XHR Settings configuration object for the json file. Used in replacement of the Loaders default XHR Settings.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [audioXhrSettings] - An XHR Settings configuration object for the audio file. Used in replacement of the Loaders default XHR Settings.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [jsonXhrSettings] - An XHR Settings configuration object for the json file. Used in replacement of the Loaders default XHR Settings.
  */
 var AudioSpriteFile = new Class({
 
@@ -71,7 +60,7 @@ var AudioSpriteFile = new Class({
         if (!audioURL)
         {
             data = new JSONFile(loader, key, jsonURL, jsonXhrSettings);
-            
+
             MultiFile.call(this, loader, 'audiosprite', key, [ data ]);
 
             this.config.resourceLoad = true;
@@ -155,7 +144,7 @@ var AudioSpriteFile = new Class({
  * Adds a JSON based Audio Sprite, or array of audio sprites, to the current load queue.
  *
  * You can call this method from within your Scene's `preload`, along with any other files you wish to load:
- * 
+ *
  * ```javascript
  * function preload ()
  * {
@@ -166,13 +155,13 @@ var AudioSpriteFile = new Class({
  *     ]);
  * }
  * ```
- * 
+ *
  * Audio Sprites are a combination of audio files and a JSON configuration.
  * The JSON follows the format of that created by https://github.com/tonistiigi/audiosprite
  *
  * If the JSON file includes a 'resource' object then you can let Phaser parse it and load the audio
  * files automatically based on its content. To do this exclude the audio URLs from the load:
- * 
+ *
  * ```javascript
  * function preload ()
  * {
@@ -187,7 +176,7 @@ var AudioSpriteFile = new Class({
  * The typical flow for a Phaser Scene is that you load assets in the Scene's `preload` method and then when the
  * Scene's `create` method is called you are guaranteed that all of those assets are ready for use and have been
  * loaded.
- * 
+ *
  * If you call this from outside of `preload` then you are responsible for starting the Loader afterwards and monitoring
  * its events to know when it's safe to use the asset. Please see the Phaser.Loader.LoaderPlugin class for more details.
  *
@@ -197,7 +186,7 @@ var AudioSpriteFile = new Class({
  * then remove it from the Audio Cache first, before loading a new one.
  *
  * Instead of passing arguments you can pass a configuration object, such as:
- * 
+ *
  * ```javascript
  * this.load.audioSprite({
  *     key: 'kyobi',
@@ -210,12 +199,12 @@ var AudioSpriteFile = new Class({
  * });
  * ```
  *
- * See the documentation for `Phaser.Loader.FileTypes.AudioSpriteFileConfig` for more details.
+ * See the documentation for `Phaser.Types.Loader.FileTypes.AudioSpriteFileConfig` for more details.
  *
  * Instead of passing a URL for the audio JSON data you can also pass in a well formed JSON object instead.
  *
  * Once the audio has finished loading you can use it create an Audio Sprite by referencing its key:
- * 
+ *
  * ```javascript
  * this.load.audioSprite('kyobi', 'kyobi.json');
  * // and later in your game ...
@@ -234,22 +223,22 @@ var AudioSpriteFile = new Class({
  * browser support.
  *
  * If audio has been disabled in your game, either via the game config, or lack of support from the device, then no audio will be loaded.
- * 
+ *
  * Note: The ability to load this type of file will only be available if the Audio Sprite File type has been built into Phaser.
  * It is available in the default build but can be excluded from custom builds.
  *
  * @method Phaser.Loader.LoaderPlugin#audioSprite
- * @fires Phaser.Loader.LoaderPlugin#addFileEvent
+ * @fires Phaser.Loader.LoaderPlugin#ADD
  * @since 3.0.0
  *
- * @param {(string|Phaser.Loader.FileTypes.AudioSpriteFileConfig|Phaser.Loader.FileTypes.AudioSpriteFileConfig[])} key - The key to use for this file, or a file configuration object, or an array of objects.
+ * @param {(string|Phaser.Types.Loader.FileTypes.AudioSpriteFileConfig|Phaser.Types.Loader.FileTypes.AudioSpriteFileConfig[])} key - The key to use for this file, or a file configuration object, or an array of objects.
  * @param {string} jsonURL - The absolute or relative URL to load the json file from. Or a well formed JSON object to use instead.
  * @param {(string|string[])} [audioURL] - The absolute or relative URL to load the audio file from. If empty it will be obtained by parsing the JSON file.
  * @param {any} [audioConfig] - The audio configuration options.
- * @param {XHRSettingsObject} [audioXhrSettings] - An XHR Settings configuration object for the audio file. Used in replacement of the Loaders default XHR Settings.
- * @param {XHRSettingsObject} [jsonXhrSettings] - An XHR Settings configuration object for the json file. Used in replacement of the Loaders default XHR Settings.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [audioXhrSettings] - An XHR Settings configuration object for the audio file. Used in replacement of the Loaders default XHR Settings.
+ * @param {Phaser.Types.Loader.XHRSettingsObject} [jsonXhrSettings] - An XHR Settings configuration object for the json file. Used in replacement of the Loaders default XHR Settings.
  *
- * @return {Phaser.Loader.LoaderPlugin} The Loader.
+ * @return {this} The Loader.
  */
 FileTypesManager.register('audioSprite', function (key, jsonURL, audioURL, audioConfig, audioXhrSettings, jsonXhrSettings)
 {

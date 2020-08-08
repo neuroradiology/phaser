@@ -1,20 +1,14 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 //  Adapted from [gl-matrix](https://github.com/toji/gl-matrix) by toji
 //  and [vecmath](https://github.com/mattdesl/vecmath) by mattdesl
 
 var Class = require('../utils/Class');
-
-/**
- * @typedef {object} Vector2Like
- *
- * @property {number} x - The x component.
- * @property {number} y - The y component.
- */
+var FuzzyEqual = require('../math/fuzzy/Equal');
 
 /**
  * @classdesc
@@ -27,7 +21,7 @@ var Class = require('../utils/Class');
  * @constructor
  * @since 3.0.0
  *
- * @param {number|Vector2Like} [x] - The x component, or an object with `x` and `y` properties.
+ * @param {number|Phaser.Types.Math.Vector2Like} [x] - The x component, or an object with `x` and `y` properties.
  * @param {number} [y] - The y component.
  */
 var Vector2 = new Class({
@@ -107,7 +101,7 @@ var Vector2 = new Class({
      * @method Phaser.Math.Vector2#setFromObject
      * @since 3.0.0
      *
-     * @param {Vector2Like} obj - The object containing the component values to set for this Vector.
+     * @param {Phaser.Types.Math.Vector2Like} obj - The object containing the component values to set for this Vector.
      *
      * @return {Phaser.Math.Vector2} This Vector2.
      */
@@ -195,6 +189,22 @@ var Vector2 = new Class({
     },
 
     /**
+     * Check whether this Vector is approximately equal to a given Vector.
+     *
+     * @method Phaser.Math.Vector2#fuzzyEquals
+     * @since 3.23.0
+     *
+     * @param {Phaser.Math.Vector2} v - The vector to compare with this Vector.
+     * @param {number} [epsilon=0.0001] - The tolerance value.
+     *
+     * @return {boolean} Whether both absolute differences of the x and y components are smaller than `epsilon`.
+     */
+    fuzzyEquals: function (v, epsilon)
+    {
+        return (FuzzyEqual(this.x, v.x, epsilon) && FuzzyEqual(this.y, v.y, epsilon));
+    },
+
+    /**
      * Calculate the angle between this Vector and the positive x-axis, in radians.
      *
      * @method Phaser.Math.Vector2#angle
@@ -214,6 +224,21 @@ var Vector2 = new Class({
         }
 
         return angle;
+    },
+
+    /**
+     * Set the angle of this Vector.
+     *
+     * @method Phaser.Math.Vector2#setAngle
+     * @since 3.23.0
+     *
+     * @param {number} angle - The angle, in radians.
+     *
+     * @return {Phaser.Math.Vector2} This Vector2.
+     */
+    setAngle: function (angle)
+    {
+        return this.setToPolar(angle, this.length());
     },
 
     /**
@@ -387,6 +412,21 @@ var Vector2 = new Class({
     },
 
     /**
+     * Set the length (or magnitude) of this Vector.
+     *
+     * @method Phaser.Math.Vector2#setLength
+     * @since 3.23.0
+     *
+     * @param {number} length
+     *
+     * @return {Phaser.Math.Vector2} This Vector2.
+     */
+    setLength: function (length)
+    {
+        return this.normalize().scale(length);
+    },
+
+    /**
      * Calculate the length of this Vector squared.
      *
      * @method Phaser.Math.Vector2#lengthSq
@@ -430,7 +470,7 @@ var Vector2 = new Class({
     },
 
     /**
-     * Right-hand normalize (make unit length) this Vector.
+     * Rotate this Vector to its perpendicular, in the positive direction.
      *
      * @method Phaser.Math.Vector2#normalizeRightHand
      * @since 3.0.0
@@ -443,6 +483,24 @@ var Vector2 = new Class({
 
         this.x = this.y * -1;
         this.y = x;
+
+        return this;
+    },
+
+    /**
+     * Rotate this Vector to its perpendicular, in the negative direction.
+     *
+     * @method Phaser.Math.Vector2#normalizeLeftHand
+     * @since 3.23.0
+     *
+     * @return {Phaser.Math.Vector2} This Vector2.
+     */
+    normalizeLeftHand: function ()
+    {
+        var x = this.x;
+
+        this.x = this.y;
+        this.y = x * -1;
 
         return this;
     },
@@ -561,13 +619,85 @@ var Vector2 = new Class({
         this.y = 0;
 
         return this;
+    },
+
+    /**
+     * Limit the length (or magnitude) of this Vector.
+     *
+     * @method Phaser.Math.Vector2#limit
+     * @since 3.23.0
+     *
+     * @param {number} max - The maximum length.
+     *
+     * @return {Phaser.Math.Vector2} This Vector2.
+     */
+    limit: function (max)
+    {
+        var len = this.length();
+
+        if (len && len > max)
+        {
+            this.scale(max / len);
+        }
+
+        return this;
+    },
+
+    /**
+     * Reflect this Vector off a line defined by a normal.
+     *
+     * @method Phaser.Math.Vector2#reflect
+     * @since 3.23.0
+     *
+     * @param {Phaser.Math.Vector2} normal - A vector perpendicular to the line.
+     *
+     * @return {Phaser.Math.Vector2} This Vector2.
+     */
+    reflect: function (normal)
+    {
+        normal = normal.clone().normalize();
+
+        return this.subtract(normal.scale(2 * this.dot(normal)));
+    },
+
+    /**
+     * Reflect this Vector across another.
+     *
+     * @method Phaser.Math.Vector2#mirror
+     * @since 3.23.0
+     *
+     * @param {Phaser.Math.Vector2} axis - A vector to reflect across.
+     *
+     * @return {Phaser.Math.Vector2} This Vector2.
+     */
+    mirror: function (axis)
+    {
+        return this.reflect(axis).negate();
+    },
+
+    /**
+     * Rotate this Vector by an angle amount.
+     *
+     * @method Phaser.Math.Vector2#rotate
+     * @since 3.23.0
+     *
+     * @param {number} delta - The angle to rotate by, in radians.
+     *
+     * @return {Phaser.Math.Vector2} This Vector2.
+     */
+    rotate: function (delta)
+    {
+        var cos = Math.cos(delta);
+        var sin = Math.sin(delta);
+
+        return this.set(cos * this.x - sin * this.y, sin * this.x + cos * this.y);
     }
 
 });
 
 /**
  * A static zero Vector2 for use by reference.
- * 
+ *
  * This constant is meant for comparison operations and should not be modified directly.
  *
  * @constant
@@ -579,7 +709,7 @@ Vector2.ZERO = new Vector2();
 
 /**
  * A static right Vector2 for use by reference.
- * 
+ *
  * This constant is meant for comparison operations and should not be modified directly.
  *
  * @constant
@@ -591,7 +721,7 @@ Vector2.RIGHT = new Vector2(1, 0);
 
 /**
  * A static left Vector2 for use by reference.
- * 
+ *
  * This constant is meant for comparison operations and should not be modified directly.
  *
  * @constant
@@ -603,7 +733,7 @@ Vector2.LEFT = new Vector2(-1, 0);
 
 /**
  * A static up Vector2 for use by reference.
- * 
+ *
  * This constant is meant for comparison operations and should not be modified directly.
  *
  * @constant
@@ -615,7 +745,7 @@ Vector2.UP = new Vector2(0, -1);
 
 /**
  * A static down Vector2 for use by reference.
- * 
+ *
  * This constant is meant for comparison operations and should not be modified directly.
  *
  * @constant
@@ -627,7 +757,7 @@ Vector2.DOWN = new Vector2(0, 1);
 
 /**
  * A static one Vector2 for use by reference.
- * 
+ *
  * This constant is meant for comparison operations and should not be modified directly.
  *
  * @constant

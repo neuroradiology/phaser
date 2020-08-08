@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var GetAspectRatio = require('./GetAspectRatio');
@@ -19,7 +19,7 @@ var GetAspectRatio = require('./GetAspectRatio');
  * @generic {Phaser.Geom.Rectangle} O - [target,$return]
  *
  * @param {Phaser.Geom.Rectangle} target - The target rectangle to adjust.
- * @param {Phaser.Geom.Rectangle} source - The source rectangle to envlope the target in.
+ * @param {Phaser.Geom.Rectangle} source - The source rectangle to envelop the target in.
  *
  * @return {Phaser.Geom.Rectangle} The modified target rectangle instance.
  */

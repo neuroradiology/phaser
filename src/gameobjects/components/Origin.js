@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -186,8 +186,8 @@ var Origin = {
      */
     updateDisplayOrigin: function ()
     {
-        this._displayOriginX = Math.round(this.originX * this.width);
-        this._displayOriginY = Math.round(this.originY * this.height);
+        this._displayOriginX = this.originX * this.width;
+        this._displayOriginY = this.originY * this.height;
 
         return this;
     }

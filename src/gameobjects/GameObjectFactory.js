@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../utils/Class');
@@ -62,7 +62,7 @@ var GameObjectFactory = new Class({
         /**
          * A reference to the Scene Update List.
          *
-         * @name Phaser.GameObjects.GameObjectFactory#updateList;
+         * @name Phaser.GameObjects.GameObjectFactory#updateList
          * @type {Phaser.GameObjects.UpdateList}
          * @protected
          * @since 3.0.0
@@ -105,14 +105,16 @@ var GameObjectFactory = new Class({
 
     /**
      * Adds an existing Game Object to this Scene.
-     * 
+     *
      * If the Game Object renders, it will be added to the Display List.
      * If it has a `preUpdate` method, it will be added to the Update List.
      *
      * @method Phaser.GameObjects.GameObjectFactory#existing
      * @since 3.0.0
      *
-     * @param {Phaser.GameObjects.GameObject} child - The child to be added to this Scene.
+     * @generic {Phaser.GameObjects.GameObject} G - [child,$return]
+     *
+     * @param {(Phaser.GameObjects.GameObject|Phaser.GameObjects.Group)} child - The child to be added to this Scene.
      *
      * @return {Phaser.GameObjects.GameObject} The Game Object that was added.
      */
@@ -167,13 +169,43 @@ var GameObjectFactory = new Class({
 
 });
 
-//  Static method called directly by the Game Object factory functions
-
+/**
+ * Static method called directly by the Game Object factory functions.
+ * With this method you can register a custom GameObject factory in the GameObjectFactory,
+ * providing a name (`factoryType`) and the constructor (`factoryFunction`) in order
+ * to be called when you call to Phaser.Scene.add[ factoryType ] method.
+ *
+ * @method Phaser.GameObjects.GameObjectFactory.register
+ * @static
+ * @since 3.0.0
+ *
+ * @param {string} factoryType - The key of the factory that you will use to call to Phaser.Scene.add[ factoryType ] method.
+ * @param {function} factoryFunction - The constructor function to be called when you invoke to the Phaser.Scene.add method.
+ */
 GameObjectFactory.register = function (factoryType, factoryFunction)
 {
     if (!GameObjectFactory.prototype.hasOwnProperty(factoryType))
     {
         GameObjectFactory.prototype[factoryType] = factoryFunction;
+    }
+};
+
+/**
+ * Static method called directly by the Game Object factory functions.
+ * With this method you can remove a custom GameObject factory registered in the GameObjectFactory,
+ * providing a its `factoryType`.
+ *
+ * @method Phaser.GameObjects.GameObjectFactory.remove
+ * @static
+ * @since 3.0.0
+ *
+ * @param {string} factoryType - The key of the factory that you want to remove from the GameObjectFactory.
+ */
+GameObjectFactory.remove = function (factoryType)
+{
+    if (GameObjectFactory.prototype.hasOwnProperty(factoryType))
+    {
+        delete GameObjectFactory.prototype[factoryType];
     }
 };
 

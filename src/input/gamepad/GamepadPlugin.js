@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -11,13 +11,6 @@ var Gamepad = require('./Gamepad');
 var GetValue = require('../../utils/object/GetValue');
 var InputPluginCache = require('../InputPluginCache');
 var InputEvents = require('../events');
-
-/**
- * @typedef {object} Pad
- *
- * @property {string} id - The ID of the Gamepad.
- * @property {integer} index - The index of the Gamepad.
- */
 
 /**
  * @classdesc
@@ -85,7 +78,7 @@ var GamepadPlugin = new Class({
          * A reference to the Scene Systems Settings.
          *
          * @name Phaser.Input.Gamepad.GamepadPlugin#settings
-         * @type {Phaser.Scenes.Settings.Object}
+         * @type {Phaser.Types.Scenes.SettingsObject}
          * @since 3.10.0
          */
         this.settings = this.scene.sys.settings;
@@ -261,8 +254,6 @@ var GamepadPlugin = new Class({
 
         var handler = function (event)
         {
-            // console.log(event);
-
             if (event.defaultPrevented || !_this.isActive())
             {
                 // Do nothing if event already handled

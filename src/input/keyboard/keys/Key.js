@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../../utils/Class');
@@ -19,6 +19,7 @@ var Events = require('../events');
  * @constructor
  * @since 3.0.0
  *
+ * @param {Phaser.Input.Keyboard.KeyboardPlugin} plugin - The Keyboard Plugin instance that owns this Key object.
  * @param {integer} keyCode - The keycode of this key.
  */
 var Key = new Class({
@@ -27,9 +28,18 @@ var Key = new Class({
 
     initialize:
 
-    function Key (keyCode)
+    function Key (plugin, keyCode)
     {
         EventEmitter.call(this);
+
+        /**
+         * The Keyboard Plugin instance that owns this Key object.
+         *
+         * @name Phaser.Input.Keyboard.Key#plugin
+         * @type {Phaser.Input.Keyboard.KeyboardPlugin}
+         * @since 3.17.0
+         */
+        this.plugin = plugin;
 
         /**
          * The keycode of this key.
@@ -142,6 +152,8 @@ var Key = new Class({
 
         /**
          * The number of milliseconds this key was held down for in the previous down - up sequence.
+         * This value isn't updated every game step, only when the Key changes state.
+         * To get the current duration use the `getDuration` method.
          *
          * @name Phaser.Input.Keyboard.Key#duration
          * @type {number}
@@ -225,7 +237,7 @@ var Key = new Class({
      * 
      * @param {boolean} value - Emit `down` events on repeated key down actions, or just once?
      * 
-     * @return {Phaser.Input.Keyboard.Key} This Key instance.
+     * @return {this} This Key instance.
      */
     setEmitOnRepeat: function (value)
     {
@@ -316,7 +328,7 @@ var Key = new Class({
      * @method Phaser.Input.Keyboard.Key#reset
      * @since 3.6.0
      * 
-     * @return {Phaser.Input.Keyboard.Key} This Key instance.
+     * @return {this} This Key instance.
      */
     reset: function ()
     {
@@ -340,6 +352,31 @@ var Key = new Class({
     },
 
     /**
+     * Returns the duration, in ms, that the Key has been held down for.
+     * 
+     * If the key is not currently down it will return zero.
+     * 
+     * The get the duration the Key was held down for in the previous up-down cycle,
+     * use the `Key.duration` property value instead.
+     *
+     * @method Phaser.Input.Keyboard.Key#getDuration
+     * @since 3.17.0
+     * 
+     * @return {number} The duration, in ms, that the Key has been held down for if currently down.
+     */
+    getDuration: function ()
+    {
+        if (this.isDown)
+        {
+            return (this.plugin.game.loop.time - this.timeDown);
+        }
+        else
+        {
+            return 0;
+        }
+    },
+
+    /**
      * Removes any bound event handlers and removes local references.
      *
      * @method Phaser.Input.Keyboard.Key#destroy
@@ -350,6 +387,8 @@ var Key = new Class({
         this.removeAllListeners();
 
         this.originalEvent = null;
+
+        this.plugin = null;
     }
 
 });

@@ -1,13 +1,15 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var MATH_CONST = require('../../math/const');
 var TransformMatrix = require('./TransformMatrix');
+var TransformXY = require('../../math/TransformXY');
 var WrapAngle = require('../../math/angle/Wrap');
 var WrapAngleDegrees = require('../../math/angle/WrapDegrees');
+var Vector2 = require('../../math/Vector2');
 
 //  global bitmask flag for GameObject.renderMask (used by Scale)
 var _FLAG = 4; // 0100
@@ -23,7 +25,7 @@ var Transform = {
 
     /**
      * Private internal value. Holds the horizontal scale value.
-     * 
+     *
      * @name Phaser.GameObjects.Components.Transform#_scaleX
      * @type {number}
      * @private
@@ -34,7 +36,7 @@ var Transform = {
 
     /**
      * Private internal value. Holds the vertical scale value.
-     * 
+     *
      * @name Phaser.GameObjects.Components.Transform#_scaleY
      * @type {number}
      * @private
@@ -45,7 +47,7 @@ var Transform = {
 
     /**
      * Private internal value. Holds the rotation value in radians.
-     * 
+     *
      * @name Phaser.GameObjects.Components.Transform#_rotation
      * @type {number}
      * @private
@@ -76,7 +78,9 @@ var Transform = {
 
     /**
      * The z position of this Game Object.
-     * Note: Do not use this value to set the z-index, instead see the `depth` property.
+     *
+     * Note: The z position does not control the rendering order of 2D Game Objects. Use
+     * {@link Phaser.GameObjects.Components.Depth#depth} instead.
      *
      * @name Phaser.GameObjects.Components.Transform#z
      * @type {number}
@@ -94,6 +98,42 @@ var Transform = {
      * @since 3.0.0
      */
     w: 0,
+
+    /**
+     * This is a special setter that allows you to set both the horizontal and vertical scale of this Game Object
+     * to the same value, at the same time. When reading this value the result returned is `(scaleX + scaleY) / 2`.
+     *
+     * Use of this property implies you wish the horizontal and vertical scales to be equal to each other. If this
+     * isn't the case, use the `scaleX` or `scaleY` properties instead.
+     *
+     * @name Phaser.GameObjects.Components.Transform#scale
+     * @type {number}
+     * @default 1
+     * @since 3.18.0
+     */
+    scale: {
+
+        get: function ()
+        {
+            return (this._scaleX + this._scaleY) / 2;
+        },
+
+        set: function (value)
+        {
+            this._scaleX = value;
+            this._scaleY = value;
+
+            if (value === 0)
+            {
+                this.renderFlags &= ~_FLAG;
+            }
+            else
+            {
+                this.renderFlags |= _FLAG;
+            }
+        }
+
+    },
 
     /**
      * The horizontal scale of this Game Object.
@@ -114,7 +154,7 @@ var Transform = {
         {
             this._scaleX = value;
 
-            if (this._scaleX === 0)
+            if (value === 0)
             {
                 this.renderFlags &= ~_FLAG;
             }
@@ -145,7 +185,7 @@ var Transform = {
         {
             this._scaleY = value;
 
-            if (this._scaleY === 0)
+            if (value === 0)
             {
                 this.renderFlags &= ~_FLAG;
             }
@@ -160,7 +200,8 @@ var Transform = {
     /**
      * The angle of this Game Object as expressed in degrees.
      *
-     * Where 0 is to the right, 90 is down, 180 is left.
+     * Phaser uses a right-hand clockwise rotation system, where 0 is right, 90 is down, 180/-180 is left
+     * and -90 is up.
      *
      * If you prefer to work in radians, see the `rotation` property instead.
      *
@@ -185,6 +226,9 @@ var Transform = {
 
     /**
      * The angle of this Game Object in radians.
+     *
+     * Phaser uses a right-hand clockwise rotation system, where 0 is right, PI/2 is down, +-PI is left
+     * and -PI/2 is up.
      *
      * If you prefer to work in degrees, see the `angle` property instead.
      *
@@ -238,7 +282,7 @@ var Transform = {
     /**
      * Sets the position of this Game Object to be a random position within the confines of
      * the given area.
-     * 
+     *
      * If no area is specified a random position between 0 x 0 and the game width x height is used instead.
      *
      * The position does not factor in the size of this Game Object, meaning that only the origin is
@@ -368,6 +412,9 @@ var Transform = {
     /**
      * Sets the z position of this Game Object.
      *
+     * Note: The z position does not control the rendering order of 2D Game Objects. Use
+     * {@link Phaser.GameObjects.Components.Depth#setDepth} instead.
+     *
      * @method Phaser.GameObjects.Components.Transform#setZ
      * @since 3.0.0
      *
@@ -455,6 +502,82 @@ var Transform = {
         }
 
         return tempMatrix;
+    },
+
+    /**
+     * Takes the given `x` and `y` coordinates and converts them into local space for this
+     * Game Object, taking into account parent and local transforms, and the Display Origin.
+     *
+     * The returned Vector2 contains the translated point in its properties.
+     *
+     * A Camera needs to be provided in order to handle modified scroll factors. If no
+     * camera is specified, it will use the `main` camera from the Scene to which this
+     * Game Object belongs.
+     *
+     * @method Phaser.GameObjects.Components.Transform#getLocalPoint
+     * @since 3.50.0
+     *
+     * @param {number} x - The x position to translate.
+     * @param {number} y - The y position to translate.
+     * @param {Phaser.Math.Vector2} [point] - A Vector2, or point-like object, to store the results in.
+     * @param {Phaser.Cameras.Scene2D.Camera} [camera] - The Camera which is being tested against. If not given will use the Scene default camera.
+     *
+     * @return {Phaser.Math.Vector2} The translated point.
+     */
+    getLocalPoint: function (x, y, point, camera)
+    {
+        if (!point) { point = new Vector2(); }
+        if (!camera) { camera = this.scene.sys.cameras.main; }
+
+        var csx = camera.scrollX;
+        var csy = camera.scrollY;
+
+        var px = x + (csx * this.scrollFactorX) - csx;
+        var py = y + (csy * this.scrollFactorY) - csy;
+
+        if (this.parentContainer)
+        {
+            this.getWorldTransformMatrix().applyInverse(px, py, point);
+        }
+        else
+        {
+            TransformXY(px, py, this.x, this.y, this.rotation, this.scaleX, this.scaleY, point);
+        }
+
+        //  Normalize origin
+        if (this._originComponent)
+        {
+            point.x += this._displayOriginX;
+            point.y += this._displayOriginY;
+        }
+
+        return point;
+    },
+
+    /**
+     * Gets the sum total rotation of all of this Game Objects parent Containers.
+     *
+     * The returned value is in radians and will be zero if this Game Object has no parent container.
+     *
+     * @method Phaser.GameObjects.Components.Transform#getParentRotation
+     * @since 3.18.0
+     *
+     * @return {number} The sum total rotation, in radians, of all parent containers of this Game Object.
+     */
+    getParentRotation: function ()
+    {
+        var rotation = 0;
+
+        var parent = this.parentContainer;
+
+        while (parent)
+        {
+            rotation += parent.rotation;
+
+            parent = parent.parentContainer;
+        }
+
+        return rotation;
     }
 
 };

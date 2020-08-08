@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 //  bitmask flag for GameObject.renderMask
@@ -52,7 +52,7 @@ var Texture = {
      * @method Phaser.GameObjects.Components.Texture#setTexture
      * @since 3.0.0
      *
-     * @param {string} key - The key of the texture to be used, as stored in the Texture Manager.
+     * @param {(string|Phaser.Textures.Texture)} key - The key of the texture to be used, as stored in the Texture Manager, or a Texture instance.
      * @param {(string|integer)} [frame] - The name or index of the frame within the Texture.
      *
      * @return {this} This Game Object instance.

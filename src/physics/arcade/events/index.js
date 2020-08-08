@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -16,6 +16,7 @@ module.exports = {
     RESUME: require('./RESUME_EVENT'),
     TILE_COLLIDE: require('./TILE_COLLIDE_EVENT'),
     TILE_OVERLAP: require('./TILE_OVERLAP_EVENT'),
-    WORLD_BOUNDS: require('./WORLD_BOUNDS_EVENT')
+    WORLD_BOUNDS: require('./WORLD_BOUNDS_EVENT'),
+    WORLD_STEP: require('./WORLD_STEP_EVENT')
 
 };

@@ -1,10 +1,11 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
+var Frame = require('../../textures/Frame');
 
 /**
  * @classdesc
@@ -88,6 +89,16 @@ var Bob = new Class({
         this.data = {};
 
         /**
+         * The tint value of this Bob.
+         *
+         * @name Phaser.GameObjects.Bob#tint
+         * @type {number}
+         * @default 0xffffff
+         * @since 3.20.0
+         */
+        this.tint = 0xffffff;
+
+        /**
          * The visible state of this Bob.
          *
          * @name Phaser.GameObjects.Bob#_visible
@@ -141,13 +152,17 @@ var Bob = new Class({
      *
      * @param {(string|integer|Phaser.Textures.Frame)} [frame] - The frame to be used during rendering.
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     setFrame: function (frame)
     {
         if (frame === undefined)
         {
             this.frame = this.parent.frame;
+        }
+        else if (frame instanceof Frame && frame.texture === this.parent.texture)
+        {
+            this.frame = frame;
         }
         else
         {
@@ -163,7 +178,7 @@ var Bob = new Class({
      * @method Phaser.GameObjects.Bob#resetFlip
      * @since 3.0.0
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     resetFlip: function ()
     {
@@ -187,7 +202,7 @@ var Bob = new Class({
      * @param {number} y - The y position of the Bob. Bob coordinate are relative to the position of the Blitter object.
      * @param {(string|integer|Phaser.Textures.Frame)} [frame] - The Frame the Bob will use. It _must_ be part of the Texture the parent Blitter object is using.
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     reset: function (x, y, frame)
     {
@@ -211,6 +226,25 @@ var Bob = new Class({
     },
 
     /**
+     * Changes the position of this Bob to the values given.
+     *
+     * @method Phaser.GameObjects.Bob#setPosition
+     * @since 3.20.0
+     *
+     * @param {number} x - The x position of the Bob. Bob coordinate are relative to the position of the Blitter object.
+     * @param {number} y - The y position of the Bob. Bob coordinate are relative to the position of the Blitter object.
+     *
+     * @return {this} This Bob Game Object.
+     */
+    setPosition: function (x, y)
+    {
+        this.x = x;
+        this.y = y;
+
+        return this;
+    },
+
+    /**
      * Sets the horizontal flipped state of this Bob.
      *
      * @method Phaser.GameObjects.Bob#setFlipX
@@ -218,7 +252,7 @@ var Bob = new Class({
      *
      * @param {boolean} value - The flipped state. `false` for no flip, or `true` to be flipped.
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     setFlipX: function (value)
     {
@@ -235,7 +269,7 @@ var Bob = new Class({
      *
      * @param {boolean} value - The flipped state. `false` for no flip, or `true` to be flipped.
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     setFlipY: function (value)
     {
@@ -253,7 +287,7 @@ var Bob = new Class({
      * @param {boolean} x - The horizontal flipped state. `false` for no flip, or `true` to be flipped.
      * @param {boolean} y - The horizontal flipped state. `false` for no flip, or `true` to be flipped.
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     setFlip: function (x, y)
     {
@@ -273,7 +307,7 @@ var Bob = new Class({
      *
      * @param {boolean} value - The visible state of the Game Object.
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     setVisible: function (value)
     {
@@ -293,11 +327,28 @@ var Bob = new Class({
      *
      * @param {number} value - The alpha value used for this Bob. Between 0 and 1.
      *
-     * @return {Phaser.GameObjects.Bob} This Bob Game Object.
+     * @return {this} This Bob Game Object.
      */
     setAlpha: function (value)
     {
         this.alpha = value;
+
+        return this;
+    },
+
+    /**
+     * Sets the tint of this Bob.
+     *
+     * @method Phaser.GameObjects.Bob#setTint
+     * @since 3.20.0
+     *
+     * @param {number} value - The tint value used for this Bob. Between 0 and 0xffffff.
+     *
+     * @return {this} This Bob Game Object.
+     */
+    setTint: function (value)
+    {
+        this.tint = value;
 
         return this;
     },
@@ -338,8 +389,8 @@ var Bob = new Class({
 
         set: function (value)
         {
+            this.parent.dirty |= (this._visible !== value);
             this._visible = value;
-            this.parent.dirty = true;
         }
 
     },
@@ -362,8 +413,8 @@ var Bob = new Class({
 
         set: function (value)
         {
+            this.parent.dirty |= ((this._alpha > 0) !== (value > 0));
             this._alpha = value;
-            this.parent.dirty = true;
         }
 
     }

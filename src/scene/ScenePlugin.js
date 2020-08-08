@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Clamp = require('../math/Clamp');
@@ -49,7 +49,7 @@ var ScenePlugin = new Class({
          * The settings of the Scene this ScenePlugin belongs to.
          *
          * @name Phaser.Scenes.ScenePlugin#settings
-         * @type {Phaser.Scenes.Settings.Object}
+         * @type {Phaser.Types.Scenes.SettingsObject}
          * @since 3.0.0
          */
         this.settings = scene.sys.settings;
@@ -188,6 +188,8 @@ var ScenePlugin = new Class({
     /**
      * Shutdown this Scene and run the given one.
      *
+     * This will happen at the next Scene Manager update, not immediately.
+     *
      * @method Phaser.Scenes.ScenePlugin#start
      * @since 3.0.0
      *
@@ -209,6 +211,8 @@ var ScenePlugin = new Class({
     /**
      * Restarts this Scene.
      *
+     * This will happen at the next Scene Manager update, not immediately.
+     *
      * @method Phaser.Scenes.ScenePlugin#restart
      * @since 3.4.0
      *
@@ -225,20 +229,6 @@ var ScenePlugin = new Class({
 
         return this;
     },
-
-    /**
-     * @typedef {object} SceneTransitionConfig
-     *
-     * @property {string} target - The Scene key to transition to.
-     * @property {integer} [duration=1000] - The duration, in ms, for the transition to last.
-     * @property {boolean} [sleep=false] - Will the Scene responsible for the transition be sent to sleep on completion (`true`), or stopped? (`false`)
-     * @property {boolean} [allowInput=false] - Will the Scenes Input system be able to process events while it is transitioning in or out?
-     * @property {boolean} [moveAbove] - Move the target Scene to be above this one before the transition starts.
-     * @property {boolean} [moveBelow] - Move the target Scene to be below this one before the transition starts.
-     * @property {function} [onUpdate] - This callback is invoked every frame for the duration of the transition.
-     * @property {any} [onUpdateScope] - The context in which the callback is invoked.
-     * @property {any} [data] - An object containing any data you wish to be passed to the target Scenes init / create methods.
-     */
 
     /**
      * This will start a transition from the current Scene to the target Scene given.
@@ -274,7 +264,7 @@ var ScenePlugin = new Class({
      * @fires Phaser.Scenes.Events#TRANSITION_OUT
      * @since 3.5.0
      *
-     * @param {SceneTransitionConfig} config - The transition configuration object.
+     * @param {Phaser.Types.Scenes.SceneTransitionConfig} config - The transition configuration object.
      *
      * @return {boolean} `true` is the transition was started, otherwise `false`.
      */
@@ -329,7 +319,7 @@ var ScenePlugin = new Class({
 
         if (target.sys.isSleeping())
         {
-            target.sys.wake();
+            target.sys.wake(GetFastValue(config, 'data'));
         }
         else
         {
@@ -444,21 +434,21 @@ var ScenePlugin = new Class({
      * @since 3.0.0
      *
      * @param {string} key - The Scene key.
-     * @param {(Phaser.Scene|Phaser.Scenes.Settings.Config|function)} sceneConfig - The config for the Scene.
+     * @param {(Phaser.Scene|Phaser.Types.Scenes.SettingsConfig|Phaser.Types.Scenes.CreateSceneFromObjectConfig|function)} sceneConfig - The config for the Scene.
      * @param {boolean} autoStart - Whether to start the Scene after it's added.
      * @param {object} [data] - Optional data object. This will be set as Scene.settings.data and passed to `Scene.init`.
      *
-     * @return {Phaser.Scenes.ScenePlugin} This ScenePlugin object.
+     * @return {Phaser.Scene} An instance of the Scene that was added to the Scene Manager.
      */
     add: function (key, sceneConfig, autoStart, data)
     {
-        this.manager.add(key, sceneConfig, autoStart, data);
-
-        return this;
+        return this.manager.add(key, sceneConfig, autoStart, data);
     },
 
     /**
      * Launch the given Scene and run it in parallel with this one.
+     *
+     * This will happen at the next Scene Manager update, not immediately.
      *
      * @method Phaser.Scenes.ScenePlugin#launch
      * @since 3.0.0
@@ -480,6 +470,8 @@ var ScenePlugin = new Class({
 
     /**
      * Runs the given Scene, but does not change the state of this Scene.
+     *
+     * This will happen at the next Scene Manager update, not immediately.
      *
      * If the given Scene is paused, it will resume it. If sleeping, it will wake it.
      * If not running at all, it will be started.
@@ -508,6 +500,8 @@ var ScenePlugin = new Class({
     /**
      * Pause the Scene - this stops the update step from happening but it still renders.
      *
+     * This will happen at the next Scene Manager update, not immediately.
+     *
      * @method Phaser.Scenes.ScenePlugin#pause
      * @since 3.0.0
      *
@@ -527,6 +521,8 @@ var ScenePlugin = new Class({
 
     /**
      * Resume the Scene - starts the update loop again.
+     *
+     * This will happen at the next Scene Manager update, not immediately.
      *
      * @method Phaser.Scenes.ScenePlugin#resume
      * @since 3.0.0
@@ -548,6 +544,8 @@ var ScenePlugin = new Class({
     /**
      * Makes the Scene sleep (no update, no render) but doesn't shutdown.
      *
+     * This will happen at the next Scene Manager update, not immediately.
+     *
      * @method Phaser.Scenes.ScenePlugin#sleep
      * @since 3.0.0
      *
@@ -567,6 +565,8 @@ var ScenePlugin = new Class({
 
     /**
      * Makes the Scene wake-up (starts update and render)
+     *
+     * This will happen at the next Scene Manager update, not immediately.
      *
      * @method Phaser.Scenes.ScenePlugin#wake
      * @since 3.0.0
@@ -588,6 +588,8 @@ var ScenePlugin = new Class({
     /**
      * Makes this Scene sleep then starts the Scene given.
      *
+     * This will happen at the next Scene Manager update, not immediately.
+     *
      * @method Phaser.Scenes.ScenePlugin#switch
      * @since 3.0.0
      *
@@ -608,18 +610,21 @@ var ScenePlugin = new Class({
     /**
      * Shutdown the Scene, clearing display list, timers, etc.
      *
+     * This happens at the next Scene Manager update, not immediately.
+     *
      * @method Phaser.Scenes.ScenePlugin#stop
      * @since 3.0.0
      *
      * @param {string} [key] - The Scene to stop.
+     * @param {any} [data] - Optional data object to pass to Scene.Systems.shutdown.
      *
      * @return {Phaser.Scenes.ScenePlugin} This ScenePlugin object.
      */
-    stop: function (key)
+    stop: function (key, data)
     {
         if (key === undefined) { key = this.key; }
 
-        this.manager.queueOp('stop', key);
+        this.manager.queueOp('stop', key, data);
 
         return this;
     },
@@ -693,20 +698,37 @@ var ScenePlugin = new Class({
     },
 
     /**
-     * Checks if the given Scene is active or not?
+     * Checks if the given Scene is running or not?
      *
      * @method Phaser.Scenes.ScenePlugin#isActive
      * @since 3.0.0
      *
      * @param {string} [key] - The Scene to check.
      *
-     * @return {boolean} Whether the Scene is active.
+     * @return {boolean} Whether the Scene is running.
      */
     isActive: function (key)
     {
         if (key === undefined) { key = this.key; }
 
         return this.manager.isActive(key);
+    },
+
+    /**
+     * Checks if the given Scene is paused or not?
+     *
+     * @method Phaser.Scenes.ScenePlugin#isPaused
+     * @since 3.17.0
+     *
+     * @param {string} [key] - The Scene to check.
+     *
+     * @return {boolean} Whether the Scene is paused.
+     */
+    isPaused: function (key)
+    {
+        if (key === undefined) { key = this.key; }
+
+        return this.manager.isPaused(key);
     },
 
     /**
@@ -807,7 +829,7 @@ var ScenePlugin = new Class({
      * The Scene is removed from the local scenes array, it's key is cleared from the keys
      * cache and Scene.Systems.destroy is then called on it.
      *
-     * If the SceneManager is processing the Scenes when this method is called it wil
+     * If the SceneManager is processing the Scenes when this method is called it will
      * queue the operation for the next update sequence.
      *
      * @method Phaser.Scenes.ScenePlugin#remove

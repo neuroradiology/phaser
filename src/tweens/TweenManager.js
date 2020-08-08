@@ -1,13 +1,15 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
+var ArrayRemove = require('../utils/array/Remove');
 var Class = require('../utils/Class');
 var NumberTweenBuilder = require('./builders/NumberTweenBuilder');
 var PluginCache = require('../plugins/PluginCache');
 var SceneEvents = require('../scene/events');
+var StaggerBuilder = require('./builders/StaggerBuilder');
 var TimelineBuilder = require('./builders/TimelineBuilder');
 var TWEEN_CONST = require('./tween/const');
 var TweenBuilder = require('./builders/TweenBuilder');
@@ -153,7 +155,7 @@ var TweenManager = new Class({
      * @method Phaser.Tweens.TweenManager#createTimeline
      * @since 3.0.0
      *
-     * @param {object} config - The configuration object for the Timeline and its Tweens.
+     * @param {Phaser.Types.Tweens.TimelineBuilderConfig} [config] - The configuration object for the Timeline and its Tweens.
      *
      * @return {Phaser.Tweens.Timeline} The created Timeline object.
      */
@@ -163,12 +165,12 @@ var TweenManager = new Class({
     },
 
     /**
-     * Create a Tween Timeline and add it to the active Tween list/
+     * Create a Tween Timeline and add it to the active Tween list.
      *
      * @method Phaser.Tweens.TweenManager#timeline
      * @since 3.0.0
      *
-     * @param {object} config - The configuration object for the Timeline and its Tweens.
+     * @param {Phaser.Types.Tweens.TimelineBuilderConfig} [config] - The configuration object for the Timeline and its Tweens.
      *
      * @return {Phaser.Tweens.Timeline} The created Timeline object.
      */
@@ -192,7 +194,7 @@ var TweenManager = new Class({
      * @method Phaser.Tweens.TweenManager#create
      * @since 3.0.0
      *
-     * @param {object} config - The configuration object for the Tween as per {@link Phaser.Tweens.Builders.TweenBuilder}.
+     * @param {Phaser.Types.Tweens.TweenBuilderConfig|object} config - The configuration object for the Tween.
      *
      * @return {Phaser.Tweens.Tween} The created Tween object.
      */
@@ -207,7 +209,7 @@ var TweenManager = new Class({
      * @method Phaser.Tweens.TweenManager#add
      * @since 3.0.0
      *
-     * @param {object} config - The configuration object for the Tween as per the {@link Phaser.Tweens.Builders.TweenBuilder}.
+     * @param {Phaser.Types.Tweens.TweenBuilderConfig|object} config - The configuration object for the Tween.
      *
      * @return {Phaser.Tweens.Tween} The created Tween.
      */
@@ -242,12 +244,12 @@ var TweenManager = new Class({
     },
 
     /**
-     * Create a Tween and add it to the active Tween list.
+     * Create a Number Tween and add it to the active Tween list.
      *
      * @method Phaser.Tweens.TweenManager#addCounter
      * @since 3.0.0
      *
-     * @param {object} config - The configuration object for the Number Tween as per the {@link Phaser.Tweens.Builders.NumberTweenBuilder}.
+     * @param {Phaser.Types.Tweens.NumberTweenBuilderConfig} config - The configuration object for the Number Tween.
      *
      * @return {Phaser.Tweens.Tween} The created Number Tween.
      */
@@ -260,6 +262,52 @@ var TweenManager = new Class({
         this._toProcess++;
 
         return tween;
+    },
+
+    /**
+     * Creates a Stagger function to be used by a Tween property.
+     * 
+     * The stagger function will allow you to stagger changes to the value of the property across all targets of the tween.
+     * 
+     * This is only worth using if the tween has multiple targets.
+     * 
+     * The following will stagger the delay by 100ms across all targets of the tween, causing them to scale down to 0.2
+     * over the duration specified:
+     * 
+     * ```javascript
+     * this.tweens.add({
+     *     targets: [ ... ],
+     *     scale: 0.2,
+     *     ease: 'linear',
+     *     duration: 1000,
+     *     delay: this.tweens.stagger(100)
+     * });
+     * ```
+     * 
+     * The following will stagger the delay by 500ms across all targets of the tween using a 10 x 6 grid, staggering
+     * from the center out, using a cubic ease.
+     * 
+     * ```javascript
+     * this.tweens.add({
+     *     targets: [ ... ],
+     *     scale: 0.2,
+     *     ease: 'linear',
+     *     duration: 1000,
+     *     delay: this.tweens.stagger(500, { grid: [ 10, 6 ], from: 'center', ease: 'cubic.out' })
+     * });
+     * ```
+     *
+     * @method Phaser.Tweens.TweenManager#stagger
+     * @since 3.19.0
+     *
+     * @param {(number|number[])} value - The amount to stagger by, or an array containing two elements representing the min and max values to stagger between.
+     * @param {Phaser.Types.Tweens.StaggerConfig} config - The configuration object for the Stagger function.
+     *
+     * @return {function} The stagger function.
+     */
+    stagger: function (value, options)
+    {
+        return StaggerBuilder(value, options);
     },
 
     /**
@@ -375,6 +423,28 @@ var TweenManager = new Class({
     },
 
     /**
+     * Removes the given tween from the Tween Manager, regardless of its state (pending or active).
+     *
+     * @method Phaser.Tweens.TweenManager#remove
+     * @since 3.17.0
+     *
+     * @param {Phaser.Tweens.Tween} tween - The Tween to be removed.
+     *
+     * @return {Phaser.Tweens.TweenManager} This Tween Manager object.
+     */
+    remove: function (tween)
+    {
+        ArrayRemove(this._add, tween);
+        ArrayRemove(this._pending, tween);
+        ArrayRemove(this._active, tween);
+        ArrayRemove(this._destroy, tween);
+
+        tween.state = TWEEN_CONST.REMOVED;
+
+        return this;
+    },
+
+    /**
      * Checks if a Tween or Timeline is active and adds it to the Tween Manager at the start of the frame if it isn't.
      *
      * @method Phaser.Tweens.TweenManager#makeActive
@@ -388,7 +458,7 @@ var TweenManager = new Class({
     {
         if (this._add.indexOf(tween) !== -1 || this._active.indexOf(tween) !== -1)
         {
-            return;
+            return this;
         }
 
         var idx = this._pending.indexOf(tween);

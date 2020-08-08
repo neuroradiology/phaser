@@ -22,6 +22,20 @@ Before contributing, please read the [code of conduct](https://github.com/photon
 
 We have a very active [Phaser Support Forum][4]. If you need general support, or are struggling to understand how to do something or need your code checked over, then we would urge you to post it to our forum. There are a lot of friendly devs in there who can help, as well as the core Phaser team, so it's a great place to get support. You're welcome to report bugs directly on GitHub, but for general support we'd always recommend using the forum first.
 
+## Contribute with online one-click setup
+
+You can use Gitpod (a free online VS Code-like IDE) for contributing. With a single click, it will launch a workspace and automatically:
+
+- clone the `phaser` repo.
+- install the dependencies.
+- run `npm run build`.
+- run `npm run watch`.
+- clone `phaser-3-examples` and afterwards install dependencies and run `npm start` in there. 
+
+So that anyone interested in contributing can start straight away.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/photonstorm/phaser)
+
 ## Making Changes
 
 I'm assuming you already have a recent version of [Node](https://nodejs.org) installed locally and can run `npm`. This guide is tested and works on both Windows 10 and OS X.
@@ -56,7 +70,7 @@ If your PR is doing little more than changing the Phaser source code into a form
 
 ## I don't really like git / node.js, but I can fix this bug
 
-That is fine too. While Pull Requests are the best thing in the world for us, they are not the only way to help. You're welcome to post fixes to our forum or even just email them to us. All we ask is that you still adhere to the guidelines presented here re: JSHint, etc.
+That is fine too. While Pull Requests are the best thing in the world for us, they are not the only way to help. You're welcome to post fixes to our forum or even just email them to us. All we ask is that you still adhere to the guidelines presented here re: ESLint, etc.
 
 ## Code Style Guide
 

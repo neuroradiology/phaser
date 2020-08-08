@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 //  RESERVED properties that a Tween config object uses
@@ -15,7 +15,7 @@
 //  flipY: flip Y the GameObject on tween end//  hold: The time the tween will pause before running a yoyo
 //  hold: The time the tween will pause before running a yoyo
 //  loop: The time the tween will pause before starting either a yoyo or returning to the start for a repeat
-//  loopDelay: 
+//  loopDelay:
 //  offset: Used when the Tween is part of a Timeline
 //  paused: Does the tween start in a paused state, or playing?
 //  props: The properties being tweened by the tween
@@ -38,6 +38,9 @@ module.exports = [
     'loop',
     'loopDelay',
     'offset',
+    'onActive',
+    'onActiveParams',
+    'onActiveScope',
     'onComplete',
     'onCompleteParams',
     'onCompleteScope',
@@ -50,6 +53,9 @@ module.exports = [
     'onStart',
     'onStartParams',
     'onStartScope',
+    'onStop',
+    'onStopParams',
+    'onStopScope',
     'onUpdate',
     'onUpdateParams',
     'onUpdateScope',

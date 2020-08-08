@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var CanvasPool = require('../display/canvas/CanvasPool');
@@ -213,11 +213,29 @@ var TextureManager = new Class({
         //  By this point key should be a Texture, if not, the following fails anyway
         if (this.list.hasOwnProperty(key.key))
         {
-            delete this.list[key.key];
-
             key.destroy();
 
             this.emit(Events.REMOVE, key.key);
+        }
+
+        return this;
+    },
+
+    /**
+     * Removes a key from the Texture Manager but does not destroy the Texture that was using the key.
+     *
+     * @method Phaser.Textures.TextureManager#removeKey
+     * @since 3.17.0
+     *
+     * @param {string} key - The key to remove from the texture list.
+     *
+     * @return {Phaser.Textures.TextureManager} The Texture Manager.
+     */
+    removeKey: function (key)
+    {
+        if (this.list.hasOwnProperty(key))
+        {
+            delete this.list[key];
         }
 
         return this;
@@ -271,14 +289,18 @@ var TextureManager = new Class({
      * Gets an existing texture frame and converts it into a base64 encoded image and returns the base64 data.
      * 
      * You can also provide the image type and encoder options.
+     * 
+     * This will only work with bitmap based texture frames, such as those created from Texture Atlases.
+     * It will not work with GL Texture objects, such as Shaders, or Render Textures. For those please
+     * see the WebGL Snapshot function instead.
      *
      * @method Phaser.Textures.TextureManager#getBase64
      * @since 3.12.0
      *
      * @param {string} key - The unique string-based key of the Texture.
      * @param {(string|integer)} [frame] - The string-based name, or integer based index, of the Frame to get from the Texture.
-     * @param {string} [type='image/png'] - [description]
-     * @param {number} [encoderOptions=0.92] - [description]
+     * @param {string} [type='image/png'] - A DOMString indicating the image format. The default format type is image/png.
+     * @param {number} [encoderOptions=0.92] - A Number between 0 and 1 indicating the image quality to use for image formats that use lossy compression such as image/jpeg and image/webp. If this argument is anything else, the default value for image quality is used. The default value is 0.92. Other arguments are ignored.
      * 
      * @return {string} The base64 encoded data, or an empty string if the texture frame could not be found.
      */
@@ -291,7 +313,11 @@ var TextureManager = new Class({
 
         var textureFrame = this.getFrame(key, frame);
 
-        if (textureFrame)
+        if (textureFrame && (textureFrame.source.isRenderTexture || textureFrame.source.isGLTexture))
+        {
+            console.warn('Cannot getBase64 from WebGL Texture');
+        }
+        else if (textureFrame)
         {
             var cd = textureFrame.canvasData;
 
@@ -353,6 +379,40 @@ var TextureManager = new Class({
     },
 
     /**
+     * Takes a WebGL Texture and creates a Phaser Texture from it, which is added to the Texture Manager using the given key.
+     * 
+     * This allows you to then use the Texture as a normal texture for texture based Game Objects like Sprites.
+     * 
+     * This is a WebGL only feature.
+     *
+     * @method Phaser.Textures.TextureManager#addGLTexture
+     * @fires Phaser.Textures.Events#ADD
+     * @since 3.19.0
+     *
+     * @param {string} key - The unique string-based key of the Texture.
+     * @param {WebGLTexture} glTexture - The source Render Texture.
+     * @param {number} width - The new width of the Texture.
+     * @param {number} height - The new height of the Texture.
+     *
+     * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
+     */
+    addGLTexture: function (key, glTexture, width, height)
+    {
+        var texture = null;
+
+        if (this.checkKey(key))
+        {
+            texture = this.create(key, glTexture, width, height);
+
+            texture.add('__BASE', 0, 0, 0, width, height);
+
+            this.emit(Events.ADD, key, texture);
+        }
+        
+        return texture;
+    },
+
+    /**
      * Adds a Render Texture to the Texture Manager using the given key.
      * This allows you to then use the Render Texture as a normal texture for texture based Game Objects like Sprites.
      *
@@ -383,14 +443,44 @@ var TextureManager = new Class({
 
     /**
      * Creates a new Texture using the given config values.
+     * 
      * Generated textures consist of a Canvas element to which the texture data is drawn.
-     * See the Phaser.Create function for the more direct way to create textures.
+     * 
+     * Generates a texture based on the given Create configuration object.
+     * 
+     * The texture is drawn using a fixed-size indexed palette of 16 colors, where the hex value in the
+     * data cells map to a single color. For example, if the texture config looked like this:
+     *
+     * ```javascript
+     * var star = [
+     *   '.....828.....',
+     *   '....72227....',
+     *   '....82228....',
+     *   '...7222227...',
+     *   '2222222222222',
+     *   '8222222222228',
+     *   '.72222222227.',
+     *   '..787777787..',
+     *   '..877777778..',
+     *   '.78778887787.',
+     *   '.27887.78872.',
+     *   '.787.....787.'
+     * ];
+     * 
+     * this.textures.generate('star', { data: star, pixelWidth: 4 });
+     * ```
+     * 
+     * Then it would generate a texture that is 52 x 48 pixels in size, because each cell of the data array
+     * represents 1 pixel multiplied by the `pixelWidth` value. The cell values, such as `8`, maps to color
+     * number 8 in the palette. If a cell contains a period character `.` then it is transparent.
+     * 
+     * The default palette is Arne16, but you can specify your own using the `palette` property.
      *
      * @method Phaser.Textures.TextureManager#generate
      * @since 3.0.0
      *
      * @param {string} key - The unique string-based key of the Texture.
-     * @param {object} config - The configuration object needed to generate the texture.
+     * @param {Phaser.Types.Create.GenerateTextureConfig} config - The configuration object needed to generate the texture.
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
@@ -678,17 +768,6 @@ var TextureManager = new Class({
     },
 
     /**
-     * @typedef {object} SpriteSheetConfig
-     * 
-     * @property {integer} frameWidth - The fixed width of each frame.
-     * @property {integer} [frameHeight] - The fixed height of each frame. If not set it will use the frameWidth as the height.
-     * @property {integer} [startFrame=0] - Skip a number of frames. Useful when there are multiple sprite sheets in one Texture.
-     * @property {integer} [endFrame=-1] - The total number of frames to extract from the Sprite Sheet. The default value of -1 means "extract all frames".
-     * @property {integer} [margin=0] - If the frames have been drawn with a margin, specify the amount here.
-     * @property {integer} [spacing=0] - If the frames have been drawn with spacing between them, specify the amount here.
-     */
-
-    /**
      * Adds a Sprite Sheet to this Texture Manager.
      *
      * In Phaser terminology a Sprite Sheet is a texture containing different frames, but each frame is the exact
@@ -700,7 +779,7 @@ var TextureManager = new Class({
      *
      * @param {string} key - The unique string-based key of the Texture.
      * @param {HTMLImageElement} source - The source Image element.
-     * @param {SpriteSheetConfig} config - The configuration object for this Sprite Sheet.
+     * @param {Phaser.Types.Textures.SpriteSheetConfig} config - The configuration object for this Sprite Sheet.
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
@@ -724,19 +803,6 @@ var TextureManager = new Class({
     },
 
     /**
-     * @typedef {object} SpriteSheetFromAtlasConfig
-     * 
-     * @property {string} atlas - The key of the Texture Atlas in which this Sprite Sheet can be found.
-     * @property {string} frame - The key of the Texture Atlas Frame in which this Sprite Sheet can be found.
-     * @property {integer} frameWidth - The fixed width of each frame.
-     * @property {integer} [frameHeight] - The fixed height of each frame. If not set it will use the frameWidth as the height.
-     * @property {integer} [startFrame=0] - Skip a number of frames. Useful when there are multiple sprite sheets in one Texture.
-     * @property {integer} [endFrame=-1] - The total number of frames to extract from the Sprite Sheet. The default value of -1 means "extract all frames".
-     * @property {integer} [margin=0] - If the frames have been drawn with a margin, specify the amount here.
-     * @property {integer} [spacing=0] - If the frames have been drawn with spacing between them, specify the amount here.
-     */
-
-    /**
      * Adds a Sprite Sheet to this Texture Manager, where the Sprite Sheet exists as a Frame within a Texture Atlas.
      *
      * In Phaser terminology a Sprite Sheet is a texture containing different frames, but each frame is the exact
@@ -747,7 +813,7 @@ var TextureManager = new Class({
      * @since 3.0.0
      *
      * @param {string} key - The unique string-based key of the Texture.
-     * @param {SpriteSheetFromAtlasConfig} config - The configuration object for this Sprite Sheet.
+     * @param {Phaser.Types.Textures.SpriteSheetFromAtlasConfig} config - The configuration object for this Sprite Sheet.
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
@@ -833,13 +899,17 @@ var TextureManager = new Class({
 
     /**
      * Returns a Texture from the Texture Manager that matches the given key.
-     * If the key is undefined it will return the `__DEFAULT` Texture.
-     * If the key is given, but not found, it will return the `__MISSING` Texture.
+     * 
+     * If the key is `undefined` it will return the `__DEFAULT` Texture.
+     * 
+     * If the key is an instance of a Texture, it will return the key directly.
+     * 
+     * Finally. if the key is given, but not found and not a Texture instance, it will return the `__MISSING` Texture.
      *
      * @method Phaser.Textures.TextureManager#get
      * @since 3.0.0
      *
-     * @param {string} key - The unique string-based key of the Texture.
+     * @param {(string|Phaser.Textures.Texture)} key - The unique string-based key of the Texture, or a Texture instance.
      *
      * @return {Phaser.Textures.Texture} The Texture that was created.
      */
@@ -850,6 +920,10 @@ var TextureManager = new Class({
         if (this.list[key])
         {
             return this.list[key];
+        }
+        else if (key instanceof Texture)
+        {
+            return key;
         }
         else
         {

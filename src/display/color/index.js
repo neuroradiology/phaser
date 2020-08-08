@@ -1,25 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
- */
-
-/**
- * @typedef {object} InputColorObject
- *
- * @property {number} [r] - The red color value in the range 0 to 255.
- * @property {number} [g] - The green color value in the range 0 to 255.
- * @property {number} [b] - The blue color value in the range 0 to 255.
- * @property {number} [a] - The alpha color value in the range 0 to 255.
- */
-
-/**
- * @typedef {object} ColorObject
- * 
- * @property {number} r - The red color value in the range 0 to 255.
- * @property {number} g - The green color value in the range 0 to 255.
- * @property {number} b - The blue color value in the range 0 to 255.
- * @property {number} a - The alpha color value in the range 0 to 255.
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Color = require('./Color');
@@ -28,6 +10,7 @@ Color.ColorToRGBA = require('./ColorToRGBA');
 Color.ComponentToHex = require('./ComponentToHex');
 Color.GetColor = require('./GetColor');
 Color.GetColor32 = require('./GetColor32');
+Color.GetColorFromValue = require('./GetColorFromValue');
 Color.HexStringToColor = require('./HexStringToColor');
 Color.HSLToColor = require('./HSLToColor');
 Color.HSVColorWheel = require('./HSVColorWheel');

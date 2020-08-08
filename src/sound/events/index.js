@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -11,6 +11,8 @@
 module.exports = {
 
     COMPLETE: require('./COMPLETE_EVENT'),
+    DECODED: require('./DECODED_EVENT'),
+    DECODED_ALL: require('./DECODED_ALL_EVENT'),
     DESTROY: require('./DESTROY_EVENT'),
     DETUNE: require('./DETUNE_EVENT'),
     GLOBAL_DETUNE: require('./GLOBAL_DETUNE_EVENT'),

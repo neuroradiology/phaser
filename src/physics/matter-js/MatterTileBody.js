@@ -1,24 +1,17 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Bodies = require('./lib/factory/Bodies');
 var Body = require('./lib/body/Body');
 var Class = require('../../utils/Class');
 var Components = require('./components');
+var EventEmitter = require('eventemitter3');
 var GetFastValue = require('../../utils/object/GetFastValue');
 var HasValue = require('../../utils/object/HasValue');
 var Vertices = require('./lib/geometry/Vertices');
-
-/**
- * @typedef {object} MatterTileOptions
- * 
- * @property {MatterJS.Body} [body=null] - An existing Matter body to be used instead of creating a new one.
- * @property {boolean} [isStatic=true] - Whether or not the newly created body should be made static. This defaults to true since typically tiles should not be moved.
- * @property {boolean} [addToWorld=true] - Whether or not to add the newly created body (or existing body if options.body is used) to the Matter world.
- */
 
 /**
  * @classdesc
@@ -35,6 +28,7 @@ var Vertices = require('./lib/geometry/Vertices');
  *
  * @class TileBody
  * @memberof Phaser.Physics.Matter
+ * @extends Phaser.Events.EventEmitter
  * @constructor
  * @since 3.0.0
  *
@@ -47,11 +41,13 @@ var Vertices = require('./lib/geometry/Vertices');
  * @extends Phaser.Physics.Matter.Components.Sleep
  * @extends Phaser.Physics.Matter.Components.Static
  *
- * @param {Phaser.Physics.Matter.World} world - [description]
+ * @param {Phaser.Physics.Matter.World} world - The Matter world instance this body belongs to.
  * @param {Phaser.Tilemaps.Tile} tile - The target tile that should have a Matter body.
- * @param {MatterTileOptions} [options] - Options to be used when creating the Matter body.
+ * @param {Phaser.Types.Physics.Matter.MatterTileOptions} [options] - Options to be used when creating the Matter body.
  */
 var MatterTileBody = new Class({
+
+    Extends: EventEmitter,
 
     Mixins: [
         Components.Bounce,
@@ -68,6 +64,8 @@ var MatterTileBody = new Class({
 
     function MatterTileBody (world, tile, options)
     {
+        EventEmitter.call(this);
+
         /**
          * The tile object the body is associated with.
          *
@@ -122,19 +120,12 @@ var MatterTileBody = new Class({
     },
 
     /**
-     * @typedef {object} MatterBodyTileOptions
-     * 
-     * @property {boolean} [isStatic=true] - Whether or not the newly created body should be made static. This defaults to true since typically tiles should not be moved.
-     * @property {boolean} [addToWorld=true] - Whether or not to add the newly created body (or existing body if options.body is used) to the Matter world.
-     */
-
-    /**
      * Sets the current body to a rectangle that matches the bounds of the tile.
      *
      * @method Phaser.Physics.Matter.TileBody#setFromTileRectangle
      * @since 3.0.0
      *
-     * @param {MatterBodyTileOptions} [options] - Options to be used when creating the Matter body. See MatterJS.Body for a list of what Matter accepts.
+     * @param {Phaser.Types.Physics.Matter.MatterBodyTileOptions} [options] - Options to be used when creating the Matter body. See MatterJS.Body for a list of what Matter accepts.
      * 
      * @return {Phaser.Physics.Matter.TileBody} This TileBody object.
      */
@@ -168,7 +159,7 @@ var MatterTileBody = new Class({
      * @method Phaser.Physics.Matter.TileBody#setFromTileCollision
      * @since 3.0.0
      *
-     * @param {MatterBodyTileOptions} [options] - Options to be used when creating the Matter body. See MatterJS.Body for a list of what Matter accepts.
+     * @param {Phaser.Types.Physics.Matter.MatterBodyTileOptions} [options] - Options to be used when creating the Matter body. See MatterJS.Body for a list of what Matter accepts.
      * 
      * @return {Phaser.Physics.Matter.TileBody} This TileBody object.
      */
@@ -258,7 +249,7 @@ var MatterTileBody = new Class({
      * @method Phaser.Physics.Matter.TileBody#setBody
      * @since 3.0.0
      *
-     * @param {MatterJS.Body} body - The new Matter body to use.
+     * @param {MatterJS.BodyType} body - The new Matter body to use.
      * @param {boolean} [addToWorld=true] - Whether or not to add the body to the Matter world.
      * 
      * @return {Phaser.Physics.Matter.TileBody} This TileBody object.
@@ -315,6 +306,7 @@ var MatterTileBody = new Class({
     {
         this.removeBody();
         this.tile.physics.matterBody = undefined;
+        this.removeAllListeners();
     }
 
 });

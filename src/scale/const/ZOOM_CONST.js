@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 /**
@@ -17,7 +17,7 @@
  * 
  * To find out what each mode does please see [Phaser.Scale.Zoom]{@link Phaser.Scale.Zoom}.
  * 
- * @typedef {(Phaser.Scale.Zoom.NO_ZOOM|Phaser.Scale.Zoom.ZOOM_2X|Phaser.Scale.Zoom.ZOOM_4X|Phaser.Scale.Zoom.MAX_ZOOM)} Phaser.Scale.ZoomType
+ * @typedef {Phaser.Scale.Zoom} Phaser.Scale.ZoomType
  * @memberof Phaser.Scale
  * @since 3.16.0
  */

@@ -1,7 +1,7 @@
 /**
  * @author       Richard Davey <rich@photonstorm.com>
- * @copyright    2019 Photon Storm Ltd.
- * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
+ * @copyright    2020 Photon Storm Ltd.
+ * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
 var Class = require('../../utils/Class');
@@ -20,7 +20,7 @@ var Line = require('../../geom/line/Line');
  * @constructor
  * @since 3.13.0
  *
- * @extends Phaser.GameObjects.Components.Alpha
+ * @extends Phaser.GameObjects.Components.AlphaSingle
  * @extends Phaser.GameObjects.Components.BlendMode
  * @extends Phaser.GameObjects.Components.ComputedSize
  * @extends Phaser.GameObjects.Components.Depth
@@ -28,7 +28,6 @@ var Line = require('../../geom/line/Line');
  * @extends Phaser.GameObjects.Components.Mask
  * @extends Phaser.GameObjects.Components.Origin
  * @extends Phaser.GameObjects.Components.Pipeline
- * @extends Phaser.GameObjects.Components.ScaleMode
  * @extends Phaser.GameObjects.Components.ScrollFactor
  * @extends Phaser.GameObjects.Components.Transform
  * @extends Phaser.GameObjects.Components.Visible
@@ -42,7 +41,7 @@ var Shape = new Class({
     Extends: GameObject,
 
     Mixins: [
-        Components.Alpha,
+        Components.AlphaSingle,
         Components.BlendMode,
         Components.ComputedSize,
         Components.Depth,
@@ -50,7 +49,6 @@ var Shape = new Class({
         Components.Mask,
         Components.Origin,
         Components.Pipeline,
-        Components.ScaleMode,
         Components.ScrollFactor,
         Components.Transform,
         Components.Visible
@@ -68,7 +66,7 @@ var Shape = new Class({
          * The source Shape data. Typically a geometry object.
          * You should not manipulate this directly.
          *
-         * @name Phaser.GameObjects.Shape#data
+         * @name Phaser.GameObjects.Shape#geom
          * @type {any}
          * @readonly
          * @since 3.13.0
